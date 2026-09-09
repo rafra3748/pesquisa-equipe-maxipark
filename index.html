@@ -41,6 +41,7 @@
   .muted{color:var(--muted)}
   .small{font-size:15px}
   .notice{background:var(--teal-soft);border-radius:12px;padding:14px 16px;font-size:16px;margin:12px 0}
+  .good{background:#E6F4EA;border:1px solid #9CCFA9;border-radius:12px;padding:12px 14px;margin:10px 0 14px;font-size:16px;color:#1B3D26}
   details{margin:8px 0 14px}
   summary{cursor:pointer;color:var(--teal-dark);font-weight:600;font-size:16px;padding:8px 0}
   .dim{display:inline-block;background:var(--teal-soft);color:var(--teal-dark);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600;margin-bottom:8px}
@@ -204,7 +205,7 @@ let thanksTimer = null, idleTimer = null, deferredInstall = null, busy = false, 
 function novaResposta(){ return { id: uid(), versao: VERSAO, escala: ESCALA, unidade: settings.unidade, mes: settings.mes, r: Array(ITENS.length).fill(null), enps: null, ces: null, a1: '', a2: '', sent: false }; }
 function homeScreen(){ return configured() ? 'welcome' : 'setup'; }
 function go(screen, extra){
-  state.screen = screen; Object.assign(state, extra || {});
+  state.screen = screen; state.fin = false; Object.assign(state, extra || {});   // fin: chegou aqui por "Finalizar pesquisa"
   // fora das telas de resposta, a pesquisa em andamento só sobrevive na tela de erro de gravação, de PIN e de confirmação
   if (!SURVEY_SCREENS.includes(screen) && screen !== 'saveerror' && screen !== 'pin' && screen !== 'confirm') current = null;
   armIdle(); render(); window.scrollTo(0, 0);
@@ -244,8 +245,15 @@ function unitField(idPrefix, ret){
 
 function viewSetup(){
   const pinOk = !!settings.pin;
+  let fim = '';
+  if (state.fin) {   // veio de "Finalizar pesquisa" na tela Obrigado!
+    const n = currentResponses().length, rec = refusals();
+    fim = `<div class="good"><b>Pesquisa finalizada · ${esc(settings.unidade)} · ${mesLabel(settings.mes)}</b><br>${n} resposta${n === 1 ? '' : 's'} gravada${n === 1 ? '' : 's'}${rec ? ` · ${rec} preferi${rec === 1 ? 'u' : 'ram'} não responder` : ''}. Exporte as contagens antes de preparar outra unidade.
+      <div class="row" style="margin-top:10px"><button class="btn block" data-action="admin">Ver contagens e exportar</button></div></div>`;
+  }
   return header('Avaliador · configuração', 0) + `<div class="wrap"><div class="card">
     <h1>Preparar a coleta</h1>
+    ${fim}
     <p class="muted">Preencha antes de entregar o tablet à equipe. Com as respostas ficam gravados só o código da unidade e o mês — nenhum nome, cargo ou horário.</p>
     ${pinOk ? '' : '<div class="warn">Primeiro uso: defina o <b>PIN do avaliador</b>. Ele protege as contagens e as configurações.</div>'}
     ${unitField('f', 'setup')}
@@ -384,7 +392,7 @@ function viewThanks(){
     <p>Pronto — você já terminou. Pode entregar o tablet ao avaliador.</p>
     <p class="muted">Em até 15 dias vem o retorno — da sua unidade ou, se a equipe é pequena, da região: o que ouvimos, o que vamos fazer e quando.</p>
     <div class="row"><button class="btn block" data-action="nextperson">Próximo colaborador</button></div>
-    <div class="row"><button class="btn ghost block" data-action="pin" data-target="admin">Finalizar pesquisa — só o avaliador (pede o PIN)</button></div>
+    <div class="row"><button class="btn ghost block" data-action="pin" data-target="setup" data-fin="1">Finalizar pesquisa — só o avaliador (pede o PIN)</button></div>
   </div></div>`;
 }
 
@@ -504,6 +512,7 @@ function viewAdmin(){
       + `<p class="legend">Ordem embaralhada. Na ficha, registre só os temas — nunca copie frases.${t.poucasDetalhe ? ` Com menos de ${N_DIVULGA_DETALHE} respostas, os comentários não se divulgam por unidade.` : ''}</p>`;
   return header('Área do avaliador', 0) + `<div class="wrap"><div class="card" style="max-width:980px">
     <h1>Contagens · ${esc(settings.unidade || '—')} · ${mesLabel(settings.mes) || '—'}</h1>
+    <div class="row"><button class="btn ghost" data-action="tosetup">← Tela inicial (Preparar a coleta)</button><button class="btn ghost" data-action="tocollect">Voltar à coleta com a equipe</button></div>
     ${state.notice ? `<div class="warn">${esc(state.notice)}</div>` : ''}
     ${t.legado ? `<div class="warn"><b>${t.legado} resposta(s) de versão anterior do app</b> (escala de 1 a 5) estão guardadas para esta unidade e mês. Elas não entram nas contagens abaixo; saem no arquivo de respostas com a coluna <i>escala</i> = B5. Exporte e apague antes de continuar.</div>` : ''}
     ${aviso}
@@ -754,14 +763,14 @@ function handle(action, el){
     case 'back': back(); break;
     case 'nextperson': clearTimeout(thanksTimer); go('welcome'); break;
     case 'retrysave': submitCurrent(); break;
-    case 'pin': state.pin = ''; state.pinTarget = el.getAttribute('data-target') || 'admin'; go('pin'); break;
+    case 'pin': state.pin = ''; state.pinTarget = el.getAttribute('data-target') || 'admin'; state.pinFin = el.getAttribute('data-fin') === '1'; go('pin'); break;
     case 'cancelpin': current = null; go(homeScreen()); break;
     case 'pinkey': {
       if (Date.now() < (settings.lockUntil || 0)) return;
       const k = el.getAttribute('data-k');
       if (k === '←') state.pin = state.pin.slice(0, -1);
       else if (k === 'OK') {
-        if (state.pin === settings.pin) { state.pin = ''; settings.pinFails = 0; saveSettings(); const had = !!current; current = null; go(state.pinTarget, { notice: had ? 'Uma pesquisa em andamento foi descartada sem gravar.' : '' }); }
+        if (state.pin === settings.pin) { state.pin = ''; settings.pinFails = 0; saveSettings(); const had = !!current; current = null; go(state.pinTarget, { fin: state.pinFin, notice: had ? 'Uma pesquisa em andamento foi descartada sem gravar.' : '' }); }
         else {
           state.pin = ''; settings.pinFails = (settings.pinFails || 0) + 1;
           if (settings.pinFails >= PIN_MAX_FAILS) { settings.lockUntil = Date.now() + PIN_LOCK_MS; settings.pinFails = 0; }
