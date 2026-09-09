@@ -30,7 +30,7 @@
   .top .step{font-size:15px;opacity:.92;text-align:right}
   .progress{height:6px;background:rgba(255,255,255,.25)}
   .progress > div{height:100%;background:var(--sel);transition:width .25s}
-  .wrap{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px 16px calc(28px + env(safe-area-inset-bottom,0px))}
+  .wrap{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px 16px calc(70px + env(safe-area-inset-bottom,0px))}
   .card{width:100%;max-width:820px;background:var(--card);border-radius:var(--radius);padding:22px 22px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
   h1{font-size:28px;line-height:1.2;margin:0 0 10px;color:var(--teal-dark)}
   h2{font-size:23px;line-height:1.25;margin:0 0 12px}
@@ -44,13 +44,13 @@
   details{margin:8px 0 14px}
   summary{cursor:pointer;color:var(--teal-dark);font-weight:600;font-size:16px;padding:8px 0}
   .dim{display:inline-block;background:var(--teal-soft);color:var(--teal-dark);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600;margin-bottom:8px}
-  .statement{font-size:25px;font-weight:600;line-height:1.3;margin:4px 0 16px}
-  .opts{display:flex;flex-direction:column;gap:9px}
-  .opt{display:flex;align-items:center;gap:16px;width:100%;min-height:58px;padding:8px 16px;border:2px solid var(--line);border-radius:14px;background:#fff;font-size:19px;text-align:left;cursor:pointer;color:var(--text)}
-  .opt .num{flex:0 0 44px;height:44px;border-radius:50%;background:var(--teal-soft);color:var(--teal-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px}
+  .statement{font-size:26px;font-weight:600;line-height:1.3;margin:4px 0 18px}
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opt{display:flex;align-items:center;gap:16px;width:100%;min-height:68px;padding:10px 18px;border:2px solid var(--line);border-radius:14px;background:#fff;font-size:21px;font-weight:600;text-align:left;cursor:pointer;color:var(--text)}
+  .opt .num{flex:0 0 46px;height:46px;border-radius:50%;background:var(--teal-soft);color:var(--teal-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px}
   .opt.sel{background:var(--sel);border-color:#E0B400;color:var(--sel-text)}
-  .opt.sel .num{background:#fff}
-  .opt.alt{border-style:dashed;color:var(--muted);font-size:17px;min-height:50px}
+  .opt.sel .num{background:#fff;font-size:30px;line-height:1}
+  .opt.alt{border-style:dashed;color:var(--muted);font-size:17px;font-weight:500;min-height:52px}
   .scale{display:grid;grid-template-columns:repeat(11,1fr);gap:8px;margin:8px 0 6px}
   .scale button{min-height:62px;border:2px solid var(--line);border-radius:12px;background:#fff;font-size:22px;font-weight:700;cursor:pointer;color:var(--text)}
   .scale button.sel{background:var(--sel);border-color:#E0B400;color:var(--sel-text)}
@@ -66,8 +66,15 @@
   .row > .btn{flex:1 1 200px}
   .spread{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:18px;flex-wrap:wrap}
   label{display:block;font-weight:600;margin:14px 0 6px}
-  input[type=text],input[type=month],input[type=password],input[type=url],textarea,select{width:100%;font:inherit;font-size:19px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--text)}
+  input[type=text],input[type=month],input[type=password],input[type=url],input[type=search],textarea,select{width:100%;font:inherit;font-size:19px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--text)}
   textarea{min-height:140px;resize:vertical}
+  .unitfield{display:flex;gap:10px;align-items:stretch}
+  .unitfield input{flex:1}
+  .unitfield .btn{flex:0 0 auto;min-height:0;padding:8px 16px;font-size:16px}
+  .ulist{display:flex;flex-direction:column;gap:8px;margin-top:12px;max-height:60vh;overflow:auto}
+  .uitem{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;text-align:left;cursor:pointer;color:var(--text)}
+  .uitem b{font-size:18px;color:var(--teal-dark)}
+  .uitem span{font-size:14px;color:var(--muted)}
   table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
   th,td{border:1px solid var(--line);padding:6px 6px;text-align:center}
   th{background:var(--teal-soft);color:var(--teal-dark)}
@@ -89,10 +96,10 @@
   .bad{background:#FBE3E3;border-left:5px solid var(--danger);padding:10px 14px;border-radius:8px;font-size:15px;margin:10px 0}
   pre{white-space:pre-wrap;font-size:13px;background:#F7F9F9;border:1px solid var(--line);border-radius:10px;padding:10px;max-height:260px;overflow:auto}
   .legend{font-size:13px;color:var(--muted);margin:6px 0 0}
-  @media (max-width:560px){ .statement{font-size:22px} .scale{grid-template-columns:repeat(6,1fr)} h1{font-size:25px} .opt{font-size:17px} }
+  @media (max-width:560px){ .statement{font-size:23px} .scale{grid-template-columns:repeat(6,1fr)} h1{font-size:25px} .opt{font-size:19px} }
   @media (max-height:820px) and (orientation:landscape){
-    .wrap{padding:10px 16px 16px} .card{padding:14px 18px} .statement{font-size:21px;margin:2px 0 10px}
-    .opts{gap:6px} .opt{min-height:46px;padding:4px 14px;font-size:17px} .opt .num{flex-basis:36px;height:36px;font-size:17px}
+    .wrap{padding:10px 16px 60px} .card{padding:14px 18px} .statement{font-size:22px;margin:2px 0 10px}
+    .opts{gap:8px} .opt{min-height:54px;padding:6px 14px;font-size:19px} .opt .num{flex-basis:38px;height:38px;font-size:17px}
     .spread{margin-top:10px} .dim{margin-bottom:4px} .scale button{min-height:50px} .top{padding-top:8px;padding-bottom:8px}
   }
 </style>
@@ -100,40 +107,69 @@
 <body>
 <div id="app"></div>
 <div id="toast" class="toast"></div>
+<input type="file" id="file-unidades" accept=".csv,.txt,.xlsx,.xls" style="display:none">
 <script>
 'use strict';
 /* =====================================================================
    Pesquisa com a equipe Maxipark — app de tablet (offline, sem nome)
    Parte B da ficha de Experiência do Cliente Interno.
+   Escala de 3 respostas por frase (Sim / resposta do meio / Não) + "Não se aplica" onde faz sentido.
+   Valores gravados: 3 = Sim, 2 = resposta do meio, 1 = Não, 'NA' = não se aplica.
    ===================================================================== */
-const VERSAO = '1.2';
-const ESCALA = ['Discordo totalmente','Discordo','Nem sim nem não','Concordo','Concordo totalmente'];
+const VERSAO = '1.3';
 const ITENS = [
-  {n:1, dim:'Condições no posto', t:'Os equipamentos que uso no posto (cancela, máquina de cartão, sistema, rádio) funcionam bem.'},
-  {n:2, dim:'Condições no posto', t:'Consigo parar para comer durante o meu turno.'},
-  {n:3, dim:'Condições no posto', t:'No meu turno tem gente suficiente para atender bem.'},
-  {n:4, dim:'Escala, pagamento e apoio do escritório', t:'Minhas folgas são respeitadas como estão na escala.'},
-  {n:5, dim:'Escala, pagamento e apoio do escritório', t:'Meu pagamento (salário, vales, horas extras) vem sem erro.'},
-  {n:6, dim:'Escala, pagamento e apoio do escritório', t:'Quando peço algo ao escritório da Maxipark (holerite, uniforme, ponto), resolvem em poucos dias.', na:true},
-  {n:7, dim:'Escala, pagamento e apoio do escritório', t:'Recebi treinamento suficiente para fazer meu trabalho neste posto.'},
-  {n:8, dim:'Escala, pagamento e apoio do escritório', t:'Fico sabendo, com antecedência, das mudanças que afetam meu trabalho (posto, horário, regras).'},
-  {n:9, dim:'Chefia e reconhecimento', t:'Meu chefe direto me trata com respeito.'},
-  {n:10, dim:'Chefia e reconhecimento', t:'Meu chefe direto é justo com todos da equipe.'},
-  {n:11, dim:'Chefia e reconhecimento', t:'Meu chefe direto me ouve quando aviso um problema ou dou uma ideia.'},
-  {n:12, dim:'Chefia e reconhecimento', t:'Nos últimos 30 dias, meu chefe direto ou o supervisor elogiou meu trabalho.'},
-  {n:13, dim:'Segurança e apoio', t:'Me sinto seguro(a) no meu posto (risco de atropelamento, assalto, escuro à noite).'},
-  {n:14, dim:'Segurança e apoio', t:'Se um motorista ou alguém do local me trata mal, a Maxipark me apoia.', na:true},
-  {n:15, dim:'Futuro', t:'Vejo chance de crescer na Maxipark.'},
+  {n:1,  dim:'Condições no posto', t:'Os equipamentos que uso no posto (cancela, máquina de cartão, sistema, rádio) funcionam bem.', opts:['Sim','Às vezes','Não']},
+  {n:2,  dim:'Condições no posto', t:'Consigo parar para comer durante o meu turno.', opts:['Sim','Às vezes','Não']},
+  {n:3,  dim:'Condições no posto', t:'No meu turno tem gente suficiente para atender bem.', opts:['Sim','Às vezes','Não']},
+  {n:4,  dim:'Escala, pagamento e apoio do escritório', t:'Minhas folgas são respeitadas como estão na escala.', opts:['Sim','Às vezes','Não']},
+  {n:5,  dim:'Escala, pagamento e apoio do escritório', t:'Meu pagamento (salário, vales, horas extras) vem certo.', opts:['Sim','Às vezes tem erro','Não']},
+  {n:6,  dim:'Escala, pagamento e apoio do escritório', t:'Quando peço algo ao escritório da Maxipark (holerite, uniforme, ponto), resolvem em poucos dias.', opts:['Sim','Às vezes','Não'], na:'Não se aplica — nunca precisei pedir'},
+  {n:7,  dim:'Escala, pagamento e apoio do escritório', t:'Recebi treinamento suficiente para fazer meu trabalho neste posto.', opts:['Sim','Em parte','Não']},
+  {n:8,  dim:'Escala, pagamento e apoio do escritório', t:'Fico sabendo, com antecedência, das mudanças que afetam meu trabalho (posto, horário, regras).', opts:['Sim','Às vezes','Não']},
+  {n:9,  dim:'Chefia e reconhecimento', t:'Meu chefe direto me trata com respeito.', opts:['Sim','Às vezes','Não']},
+  {n:10, dim:'Chefia e reconhecimento', t:'Meu chefe direto é justo com todos da equipe.', opts:['Sim','Em parte','Não']},
+  {n:11, dim:'Chefia e reconhecimento', t:'Meu chefe direto me ouve quando aviso um problema ou dou uma ideia.', opts:['Sim','Às vezes','Não']},
+  {n:12, dim:'Chefia e reconhecimento', t:'Nos últimos 30 dias, meu chefe direto ou o supervisor elogiou meu trabalho.', opts:['Sim','Não lembro','Não']},
+  {n:13, dim:'Segurança e apoio', t:'Me sinto seguro(a) no meu posto (risco de atropelamento, assalto, escuro à noite).', opts:['Sim','Em parte','Não']},
+  {n:14, dim:'Segurança e apoio', t:'Se um motorista ou alguém do local me trata mal, a Maxipark me apoia.', opts:['Sim','Em parte','Não'], na:'Não se aplica — não aconteceu comigo'},
+  {n:15, dim:'Futuro', t:'Vejo chance de crescer na Maxipark.', opts:['Sim','Talvez','Não']},
 ];
+const VALOR = [3, 2, 1];   // opts[0] = Sim → 3, opts[1] = meio → 2, opts[2] = Não → 1
+const ESCALA = 'B3';       // carimbo gravado em cada resposta e no CSV: 3 respostas por frase (v1.3+). Respostas sem carimbo são da escala 1-5 (v1.2)
 const ENPS_Q = 'De 0 a 10, quanto você recomendaria a Maxipark a um amigo como um bom lugar para trabalhar?';
 const CES_Q = 'Pense na última vez que você precisou resolver algo seu com o escritório da Maxipark (holerite, ponto, uniforme, sistema). Foi fácil resolver?';
+const CES_OPTS = ['Sim, foi fácil', 'Mais ou menos', 'Não, foi difícil'];
 const ABERTAS = ['O que mais atrapalha seu dia de trabalho nesta unidade hoje?', 'Se você pudesse mudar uma coisa na Maxipark, o que seria?'];
-const AVISO = 'Esta pesquisa é <b>sem nome</b> e ninguém é obrigado a responder. As respostas ficam guardadas neste tablet sem nome e são levadas pela área de Experiência do Cliente da Maxipark. O encarregado não vê as respostas nem a nota de cada frase — ele só recebe um resumo do supervisor, junto com outras unidades quando a equipe é pequena. Os comentários nunca são copiados palavra por palavra. Caso grave (assédio, ameaça, acidente), use o canal de denúncia, que consegue voltar a falar com você; esta pesquisa não consegue.';
+const AVISO = 'Esta pesquisa é <b>sem nome</b> e ninguém é obrigado a responder. As respostas ficam guardadas neste tablet sem nome e são levadas pela área de Experiência do Cliente da Maxipark. O encarregado não vê suas respostas — nem o que você marcou em cada frase, nem a nota de 0 a 10, nem o que você escreveu. Ele só recebe um resumo do supervisor, junto com outras unidades quando a equipe é pequena. Os comentários nunca são copiados palavra por palavra. Caso grave (assédio, ameaça, acidente), use o canal de denúncia, que consegue voltar a falar com você; esta pesquisa não consegue.';
 const GLOSSARIO = '<b>Chefe direto</b> = o encarregado da sua unidade (se não tem encarregado, é o supervisor regional). <b>Maxipark / empresa</b> = a Maxipark inteira: seu chefe direto, o supervisor e o escritório. <b>Escritório da Maxipark</b> = o pessoal de RH, pagamento, uniforme e sistemas, que fica fora do posto.';
 const N_MIN_TABELA = 3;      // abaixo disso a tela do avaliador não mostra nada por frase
 const N_MIN_DETALHE = 5;     // eNPS, CES e comentários
 const IDLE_MS = 120000;      // pesquisa abandonada: descarta e volta ao início
 const PIN_MAX_FAILS = 5, PIN_LOCK_MS = 60000;
+
+/* Lista padrão de unidades (Grande São Paulo — do roteiro da ficha externa). Pode ser substituída pela importação do Excel/CSV. */
+const UNIDADES_PADRAO = [
+  ['GAZETA','Av. Paulista 900','Bela Vista','Centro / Paulista / Bela Vista'],['FIESP','Av. Paulista 1313','Jardins','Centro / Paulista / Bela Vista'],['FL.PARA','Rua Cincinato Braga 306','Bela Vista','Centro / Paulista / Bela Vista'],['BP','Rua Maestro Cardim 637','Bela Vista','Centro / Paulista / Bela Vista'],
+  ['HABITAT','Av. Angélica 1529','Santa Cecília','Angélica / Higienópolis / Sta. Cecília'],['LAV.ANGEL','Av. Angélica 1832','Consolação','Angélica / Higienópolis / Sta. Cecília'],['LAV.ANGEL II','Av. Angélica 2229','Santa Cecília','Angélica / Higienópolis / Sta. Cecília'],['ALTA.HIGIE','Rua Maranhão 983','Higienópolis','Angélica / Higienópolis / Sta. Cecília'],
+  ['NSB','Praça N. S. do Brasil 1','Jardim América','Jardins / Cerqueira César'],['ALTA.JARD','Av. Brasil 1802','Jardins','Jardins / Cerqueira César'],['GARDEN','Rua Dr. Melo Alves 53','Cerqueira César','Jardins / Cerqueira César'],['INCOR','Av. Dr. Enéas C. de Aguiar 44','Cerqueira César','Jardins / Cerqueira César'],
+  ['ACCAST','Rua Castro Alves 131','Aclimação','Liberdade / Aclimação / Paraíso'],['ACPRUDE','Rua Prof. Antônio Prudente 211','Liberdade','Liberdade / Aclimação / Paraíso'],['AC.PIRES','Rua Pires da Mota 1167','Liberdade','Liberdade / Aclimação / Paraíso'],['FL.JUND','Av. Jundiaí 1000','Paraíso','Liberdade / Aclimação / Paraíso'],
+  ['SAL.PARAI','Rua Correia Dias 48','Paraíso','Paraíso / Vila Mariana / V. Clementino'],['SAL.VMARIA','Rua Dr. Diogo de Faria 772','Vila Clementino','Paraíso / Vila Mariana / V. Clementino'],['DEL.MAIO','Rua Dr. Diogo de Faria 1379','Vila Clementino','Paraíso / Vila Mariana / V. Clementino'],['DEL.RICAJAF','Av. Dr. Ricardo Jafet 1550','Vila Mariana','Paraíso / Vila Mariana / V. Clementino'],
+  ['PAINEIRA','Rua Fiação da Saúde 145','Vila da Saúde','Saúde / Ipiranga / Mooca'],['LAV.LABAL','Rua Labatut 523','Ipiranga','Saúde / Ipiranga / Mooca'],['A+MOOCA','Av. Paes de Barros 1610','Cambuci','Saúde / Ipiranga / Mooca'],['DEL.MOOCA','Av. Paes de Barros 663','Mooca','Saúde / Ipiranga / Mooca'],
+  ['A+MOEMA','Av. Indianópolis 922','Indianópolis','Moema / Indianópolis'],['LAV.MOE','Al. dos Jurupis 1761','Indianópolis','Moema / Indianópolis'],['SAL.MOE','Rua Araguari 552','Moema','Moema / Indianópolis'],['MONTREAL','Av. Rouxinol 1041','Moema','Moema / Indianópolis'],
+  ['FL.IBIRA','Av. República do Líbano 635','Ibirapuera','Ibirapuera / Planalto Paulista'],['ALTA.IBIRA','Av. República do Líbano 725','Vila Mariana','Ibirapuera / Planalto Paulista'],['VITA.REP','Av. República do Líbano 1008','Moema','Ibirapuera / Planalto Paulista'],['SAL.IBIRA','Av. Divino Salvador 876','Planalto Paulista','Ibirapuera / Planalto Paulista'],
+  ['ALTA.CBEL','Av. Ver. José Diniz 3560','Campo Belo','Campo Belo / Santo Amaro / Brooklin'],['DEL.BROK','Av. Ver. José Diniz 3687','Santo Amaro','Campo Belo / Santo Amaro / Brooklin'],['PET.CBEL','Rua Vieira de Moraes 1862','Campo Belo','Campo Belo / Santo Amaro / Brooklin'],['GLOBO.SP','Av. Dr. Chucri Zaidan 46','Vila Cordeiro','Campo Belo / Santo Amaro / Brooklin'],
+  ['LAV.BORGAT','Av. Santo Amaro 5662','Santo Amaro','Santo Amaro / Marajoara / Vila Andrade'],['A+FLORA','Av. Washington Luís 2480','Jd. Marajoara','Santo Amaro / Marajoara / Vila Andrade'],['DEL.WASLUIS','Av. Washington Luís 2530','Jd. Marajoara','Santo Amaro / Marajoara / Vila Andrade'],['ALTA.PAN','Rua Dep. João Sussumu Hirata 690','Vila Andrade','Santo Amaro / Marajoara / Vila Andrade'],['DEL.JSUL','Rua Jandiatuba 566','Vila Andrade','Santo Amaro / Marajoara / Vila Andrade'],['SAL.PORTAL','Rua Prof. Hilário Veiga de Carvalho 312','Vila Suzana','Santo Amaro / Marajoara / Vila Andrade'],
+  ['FL.ITAIM','Av. Pres. JK 1117','Vila Olímpia','Itaim Bibi / Vila Olímpia'],['DEL.ITAIM','Rua João Cachoeira 743','Itaim Bibi','Itaim Bibi / Vila Olímpia'],['AC.ITAIM','Av. Brig. Luís Antônio 5013','Jardim Paulista','Itaim Bibi / Vila Olímpia'],
+  ['QUITANDA','Rua Mateus Grou 159','Pinheiros','Pinheiros / V. Madalena / Alto de Pinheiros'],['DEL.PIN','Rua Capepuxis 429','Vila Madalena','Pinheiros / V. Madalena / Alto de Pinheiros'],['ALTA.PIN','Praça São Marcos 20','Vila Ida','Pinheiros / V. Madalena / Alto de Pinheiros'],['FL.VILLA','Rua Castro Delgado 188','Alto de Pinheiros','Pinheiros / V. Madalena / Alto de Pinheiros'],
+  ['FL.SUMA','Av. Sumaré 1334','Perdizes','Perdizes / Pompeia'],['CARL','Rua Henrique Valgas 144','Perdizes / Sumaré','Perdizes / Pompeia'],['DEL.POM','Av. Pompéia 1007','Pompeia','Perdizes / Pompeia'],
+  ['CVLOP','Av. Queiroz Filho 1700','Vila Romana','Vila Romana / Alto da Lapa'],['SAL.LAPA','Rua Cerro Corá 1044','Alto da Lapa','Vila Romana / Alto da Lapa'],['A+LAPA','Rua Barão de Jundiaí 284','Lapa','Vila Romana / Alto da Lapa'],
+  ['LAV.LAPA','Rua Tomé de Souza 220','Lapa','Lapa / Osasco'],['BR.LAPA','Rua Domingos Rodrigues 645','Lapa','Lapa / Osasco'],['DEL.LAPA','Rua Brig. Gavião Peixoto 360','Lapa','Lapa / Osasco'],['DEL.OSASCO','Rua General Bittencourt 255','Centro / Osasco','Lapa / Osasco'],['SAL.OSASCO','Av. dos Autonomistas 2632','Vila Yara / Osasco','Lapa / Osasco'],
+  ['A+ALPHA','Av. Copacabana 574','Alphaville / Barueri','Alphaville / Barueri'],['RESERVA','Av. Copacabana 574','Alphaville / Barueri','Alphaville / Barueri'],['ARAGUAI','Al. Araguaia 750','Alphaville / Barueri','Alphaville / Barueri'],['DEL.ALPHA','Av. Juruá 434','Alphaville / Barueri','Alphaville / Barueri'],
+  ['SAL.TATUA','Praça Sílvio Romero 193','Vila Gomes Cardim','Zona Leste (Tatuapé / Carrão / Penha)'],['DEL.TATU','Rua Serra de Bragança 1130','Tatuapé','Zona Leste (Tatuapé / Carrão / Penha)'],['FL.AFRA','Rua Antônio de Barros 2203','Vila Carrão','Zona Leste (Tatuapé / Carrão / Penha)'],['ALTA.AFRAN','Rua Apucarana 1638','Jd. Anália Franco','Zona Leste (Tatuapé / Carrão / Penha)'],['LAV.AMARBUE','Av. Amador Bueno da Veiga 1793','Penha de França','Zona Leste (Tatuapé / Carrão / Penha)'],
+  ['LAV.DARZAN','Rua Darzan 208','Santana','Zona Norte (Santana / Jd. São Paulo)'],['SAL.SANTA','Av. Leôncio de Magalhães 1133','Jd. São Paulo','Zona Norte (Santana / Jd. São Paulo)'],['DEL.DUMVIL','Av. Luiz Dumont Villares 514','Jd. São Paulo','Zona Norte (Santana / Jd. São Paulo)'],
+  ['LAV.TUCUR','Av. Mazzei 264','Tucuruvi','Tucuruvi + Guarulhos'],['DEL.GUARU','Av. Paulo Faccini 291','Macedo / Guarulhos','Tucuruvi + Guarulhos'],['A+GUARU','Av. Paulo Faccini 1315','Centro / Guarulhos','Tucuruvi + Guarulhos'],
+  ['A+SAND','Av. Dom Pedro II 293','Santo André','ABC (Santo André + S. Bernardo)'],['DEL.SAND II','Av. Dom Pedro II 781','Santo André','ABC (Santo André + S. Bernardo)'],['DEL.SAND I','Av. Portugal 1136','Centro / Santo André','ABC (Santo André + S. Bernardo)'],['DEL.SBC','Av. Lucas Nogueira Garcez 755','Centro / S.B. Campo','ABC (Santo André + S. Bernardo)'],['FL.SBC','Av. Lucas Nogueira Garcez 666','Centro / S.B. Campo','ABC (Santo André + S. Bernardo)'],
+].map(a => ({ codigo:a[0], nome:'', endereco:a[1], bairro:a[2], regiao:a[3] }));
 
 /* ---------------- armazenamento local (só neste tablet) ---------------- */
 const LS = {
@@ -153,51 +189,57 @@ function addRefusal(){ const m = LS.get('mp_recusas', {}); m[key()] = (m[key()] 
 function uid(){ return Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6); }
 function shuffle(a){ const x = a.slice(); for (let i = x.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [x[i], x[j]] = [x[j], x[i]]; } return x; }
 function configured(){ return !!(settings.pin && settings.unidade && settings.mes); }
+/* lista de unidades: importada (localStorage) ou padrão */
+function unidades(){ const u = LS.get('mp_unidades', null); return (u && u.origem && Array.isArray(u.lista) && u.lista.length) ? u.lista : UNIDADES_PADRAO; }
+function unidadesInfo(){ const u = LS.get('mp_unidades', null); return (u && u.origem) ? `${u.lista.length} unidades importadas (${u.origem})` : `${UNIDADES_PADRAO.length} unidades da lista padrão (Grande SP)`; }
+function unidadePorCodigo(c){ return unidades().find(u => u.codigo === c) || null; }
 
 /* ---------------- estado da tela ---------------- */
 const SURVEY_SCREENS = ['q','enps','ces','open'];
-let state = { screen: 'setup', q: 0, pin: '', pinTarget: 'admin', showText: '', newPin: '', notice: '' };
+let state = { screen: 'setup', q: 0, pin: '', pinTarget: 'admin', showText: '', newPin: '', newPinStage: 0, newPinFirst: '', notice: '', pickReturn: 'setup', filtro: '' };
 let current = null;      // resposta em andamento: só existe na memória até o fim
-let thanksTimer = null, idleTimer = null, deferredInstall = null, busy = false, sending = false;
+let thanksTimer = null, idleTimer = null, deferredInstall = null, busy = false, sending = false, answerToken = 0, pendingConfirm = null;
 
-function novaResposta(){ return { id: uid(), unidade: settings.unidade, mes: settings.mes, r: Array(ITENS.length).fill(null), enps: null, ces: null, a1: '', a2: '', sent: false }; }
+function novaResposta(){ return { id: uid(), versao: VERSAO, escala: ESCALA, unidade: settings.unidade, mes: settings.mes, r: Array(ITENS.length).fill(null), enps: null, ces: null, a1: '', a2: '', sent: false }; }
 function homeScreen(){ return configured() ? 'welcome' : 'setup'; }
 function go(screen, extra){
   state.screen = screen; Object.assign(state, extra || {});
-  // fora das telas de resposta, a pesquisa em andamento só sobrevive na tela de erro de gravação e na tela de PIN (até o PIN ser confirmado)
+  // fora das telas de resposta, a pesquisa em andamento só sobrevive na tela de erro de gravação, de PIN e de confirmação
   if (!SURVEY_SCREENS.includes(screen) && screen !== 'saveerror' && screen !== 'pin' && screen !== 'confirm') current = null;
   armIdle(); render(); window.scrollTo(0, 0);
 }
-let pendingConfirm = null;
 function askConfirm(msg, onYes){ pendingConfirm = { msg, onYes, from: state.screen, q: state.q }; state.screen = 'confirm'; armIdle(); render(); window.scrollTo(0, 0); }
-function viewConfirm(){
-  return header('Confirmar', 0) + `<div class="wrap"><div class="card" style="max-width:560px">
-    <h2>${esc(pendingConfirm ? pendingConfirm.msg : '')}</h2>
-    <div class="row"><button class="btn danger" data-action="confirmyes">Sim</button><button class="btn ghost" data-action="confirmno">Não, voltar</button></div>
-  </div></div>`;
-}
-function discardAndHome(){ current = null; busy = false; go(homeScreen()); }
+function discardAndHome(){ current = null; busy = false; pendingConfirm = null; go(homeScreen()); }
 function armIdle(){
   clearTimeout(idleTimer);
   const inSurvey = () => SURVEY_SCREENS.includes(state.screen) || (state.screen === 'confirm' && pendingConfirm && SURVEY_SCREENS.includes(pendingConfirm.from));
-  if (inSurvey()) idleTimer = setTimeout(() => { if (inSurvey()) { pendingConfirm = null; discardAndHome(); } }, IDLE_MS);
+  if (inSurvey()) idleTimer = setTimeout(() => { if (inSurvey()) discardAndHome(); }, IDLE_MS);
 }
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function toast(msg){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600); }
+function toast(msg){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2800); }
 function mesLabel(m){ if(!m) return ''; const [y, mo] = m.split('-'); return mo + '/' + y; }
 function validMes(m){ return /^\d{4}-(0[1-9]|1[0-2])$/.test(m || ''); }
+function startThanks(){ go('thanks'); clearTimeout(thanksTimer); thanksTimer = setTimeout(() => { if (state.screen === 'thanks') go('welcome'); }, 20000); }
 
 /* ---------------- telas ---------------- */
 function render(){
-  const s = state.screen;
-  const views = { setup:viewSetup, setpin:viewSetPin, welcome:viewWelcome, q:viewQuestion, enps:viewEnps, ces:viewCes, open:viewOpen, thanks:viewThanks, pin:viewPin, admin:viewAdmin, settings:viewSettings, text:viewText, saveerror:viewSaveError, confirm:viewConfirm };
-  document.getElementById('app').innerHTML = (views[s] || viewSetup)();
+  const views = { setup:viewSetup, setpin:viewSetPin, welcome:viewWelcome, q:viewQuestion, enps:viewEnps, ces:viewCes, open:viewOpen, thanks:viewThanks, pin:viewPin, admin:viewAdmin, settings:viewSettings, text:viewText, saveerror:viewSaveError, confirm:viewConfirm, unidades:viewUnidades, colar:viewColar };
+  document.getElementById('app').innerHTML = (views[state.screen] || viewSetup)();
 }
 function header(step, pct){
   return `<div class="top"><div class="brand">Pesquisa com a equipe Maxipark</div><div class="step">${esc(step || '')}</div></div>
           <div class="progress"><div style="width:${pct || 0}%"></div></div>`;
 }
 function cornerBtn(){ return `<button class="corner" data-action="pin" data-target="admin" aria-label="Área do avaliador (com PIN)">⚙ Avaliador</button>`; }
+function unidadeLabel(c){ const u = unidadePorCodigo(c); if (!u) return c || ''; return u.codigo + (u.nome ? ' · ' + u.nome : '') + (u.bairro ? ' · ' + u.bairro : ''); }
+function unitField(idPrefix, ret){
+  return `<label>Unidade</label>
+    <div class="unitfield">
+      <input type="text" id="${idPrefix}-unidade" value="${esc(settings.unidade)}" placeholder="toque em Escolher" autocapitalize="characters" autocomplete="off">
+      <button class="btn light" data-action="pickunit" data-ret="${ret}">Escolher na lista</button>
+    </div>
+    ${settings.unidade ? `<p class="small muted" style="margin:6px 0 0">${esc(unidadeLabel(settings.unidade))}</p>` : `<p class="small muted" style="margin:6px 0 0">${esc(unidadesInfo())}</p>`}`;
+}
 
 function viewSetup(){
   const pinOk = !!settings.pin;
@@ -205,8 +247,7 @@ function viewSetup(){
     <h1>Preparar a coleta</h1>
     <p class="muted">Preencha antes de entregar o tablet à equipe. Com as respostas ficam gravados só o código da unidade e o mês — nenhum nome, cargo ou horário.</p>
     ${pinOk ? '' : '<div class="warn">Primeiro uso: defina o <b>PIN do avaliador</b>. Ele protege as contagens e as configurações.</div>'}
-    <label>Código da unidade</label>
-    <input type="text" id="f-unidade" value="${esc(settings.unidade)}" placeholder="ex.: GAZETA" autocapitalize="characters" autocomplete="off">
+    ${unitField('f', 'setup')}
     <label>Mês da rodada</label>
     <input type="month" id="f-mes" value="${esc(settings.mes)}" placeholder="AAAA-MM">
     <label>Avaliador(a) — só para o seu controle, não é gravado nas respostas</label>
@@ -219,6 +260,29 @@ function viewSetup(){
       ${deferredInstall ? '<button class="btn light" data-action="install">Instalar como app no tablet</button>' : ''}
     </div>
     <p class="small muted" style="margin-top:18px">Versão ${VERSAO} · funciona sem internet · <b>exporte e apague as respostas no fim de cada visita</b>.</p>
+  </div></div>`;
+}
+
+function viewUnidades(){
+  const f = (state.filtro || '').trim().toLowerCase();
+  const lista = unidades();
+  const hits = lista.filter(u => !f || [u.codigo, u.nome, u.endereco, u.bairro, u.regiao].join(' ').toLowerCase().includes(f));
+  const shown = hits.slice(0, 80);
+  return header('Escolher unidade', 0) + `<div class="wrap"><div class="card">
+    <h2>Qual é a unidade?</h2>
+    <input type="search" id="u-filtro" value="${esc(state.filtro)}" placeholder="Digite parte do código, bairro, endereço ou região" autocomplete="off" autofocus>
+    <p class="small muted" style="margin:8px 0 0">${hits.length} de ${lista.length} unidades${hits.length > shown.length ? ' (mostrando as primeiras ' + shown.length + ' — refine a busca)' : ''} · ${esc(unidadesInfo())}</p>
+    <div class="ulist">${shown.map(u => `<button class="uitem" data-action="chooseunit" data-c="${esc(u.codigo)}"><b>${esc(u.codigo)}${u.nome ? ' · ' + esc(u.nome) : ''}</b><span>${esc([u.endereco, u.bairro, u.regiao].filter(Boolean).join(' · '))}</span></button>`).join('') || '<p class="muted">Nenhuma unidade com esse texto. Você pode digitar o código direto no campo Unidade.</p>'}</div>
+    <div class="row"><button class="btn ghost block" data-action="cancelpick">Voltar</button></div>
+  </div></div>`;
+}
+
+function viewColar(){
+  return header('Colar lista de unidades', 0) + `<div class="wrap"><div class="card">
+    <h2>Cole a lista</h2>
+    <p class="small muted">Uma unidade por linha. Colunas separadas por ponto e vírgula, vírgula ou tabulação (copiar do Excel funciona): <b>Código; Nome/Cliente; Endereço; Bairro/Cidade; Região</b>. A primeira linha pode ser o cabeçalho.</p>
+    <textarea id="c-lista" placeholder="GAZETA;Edifício Gazeta;Av. Paulista 900;Bela Vista;Centro"></textarea>
+    <div class="row"><button class="btn" data-action="importpaste">Importar</button><button class="btn ghost" data-action="settings">Cancelar</button></div>
   </div></div>`;
 }
 
@@ -242,7 +306,7 @@ function viewWelcome(){
       <li><b>Sem nome.</b> Ninguém sabe o que você marcou.</li>
       <li><b>Ninguém é obrigado</b> a responder.</li>
       <li>O encarregado <b>não vê</b> suas respostas.</li>
-      <li>15 frases, duas notas e duas perguntas. Uns 5 minutos.</li>
+      <li>15 frases para marcar <b>Sim</b>, <b>Não</b> ou uma resposta do meio, uma nota de 0 a 10, uma pergunta sobre o escritório e duas perguntas para escrever se quiser. Uns 4 minutos.</li>
     </ul>
     <details><summary>Ler o aviso completo e o que significam as palavras</summary>
       <div class="notice">${AVISO}</div>
@@ -266,12 +330,11 @@ function surveyFooter(canBack, canNext, nextLabel){
 function viewQuestion(){
   const i = state.q, it = ITENS[i], val = current.r[i];
   const pct = Math.round((i / (ITENS.length + 4)) * 100);
-  const opts = ESCALA.map((lbl, k) => `<button class="opt ${val === k+1 ? 'sel' : ''}" data-action="answer" data-val="${k+1}"><span class="num">${k+1}</span><span>${lbl}</span></button>`).join('');
-  const na = it.na ? `<button class="opt alt ${val === 'NA' ? 'sel' : ''}" data-action="answer" data-val="NA"><span class="num">—</span><span>Não aconteceu comigo</span></button>` : '';
+  const opts = it.opts.map((lbl, k) => `<button class="opt ${val === VALOR[k] ? 'sel' : ''}" data-action="answer" data-val="${VALOR[k]}"><span class="num">${val === VALOR[k] ? '●' : ''}</span><span>${esc(lbl)}</span></button>`).join('');
+  const na = it.na ? `<button class="opt alt ${val === 'NA' ? 'sel' : ''}" data-action="answer" data-val="NA"><span class="num">—</span><span>${esc(it.na)}</span></button>` : '';
   return header(`Frase ${i+1} de ${ITENS.length}`, pct) + `<div class="wrap"><div class="card">
     <span class="dim">${esc(it.dim)}</span>
     <div class="statement">${esc(it.t)}</div>
-    <p class="small muted" style="margin-bottom:8px">O quanto você concorda? Toque em uma opção.</p>
     <div class="opts">${opts}${na}</div>
     ${surveyFooter(i > 0, val != null)}
   </div></div>` + cornerBtn();
@@ -293,11 +356,10 @@ function viewEnps(){
 }
 function viewCes(){
   const pct = Math.round(((ITENS.length + 1) / (ITENS.length + 4)) * 100);
-  return header('Nota de 0 a 10', pct) + `<div class="wrap"><div class="card">
+  const opts = CES_OPTS.map((lbl, k) => `<button class="opt ${current.ces === VALOR[k] ? 'sel' : ''}" data-action="answer" data-val="${VALOR[k]}"><span class="num">${current.ces === VALOR[k] ? '●' : ''}</span><span>${esc(lbl)}</span></button>`).join('');
+  return header('Resolver problemas com o escritório', pct) + `<div class="wrap"><div class="card">
     <div class="statement">${esc(CES_Q)}</div>
-    ${scaleButtons(current.ces)}
-    <div class="anchors"><span>0 = muito difícil</span><span>10 = muito fácil</span></div>
-    <button class="opt alt ${current.ces === 'NP' ? 'sel' : ''}" data-action="answer" data-val="NP"><span class="num">—</span><span>Nunca precisei</span></button>
+    <div class="opts">${opts}<button class="opt alt ${current.ces === 'NP' ? 'sel' : ''}" data-action="answer" data-val="NP"><span class="num">—</span><span>Nunca precisei</span></button></div>
     ${surveyFooter(true, current.ces != null)}
   </div></div>` + cornerBtn();
 }
@@ -331,6 +393,13 @@ function viewSaveError(){
   </div></div>`;
 }
 
+function viewConfirm(){
+  return header('Confirmar', 0) + `<div class="wrap"><div class="card" style="max-width:560px">
+    <h2>${esc(pendingConfirm ? pendingConfirm.msg : '')}</h2>
+    <div class="row"><button class="btn danger" data-action="confirmyes">Sim</button><button class="btn ghost" data-action="confirmno">Não, voltar</button></div>
+  </div></div>`;
+}
+
 function viewPin(){
   const locked = Date.now() < (settings.lockUntil || 0);
   const dots = '●'.repeat(state.pin.length);
@@ -347,46 +416,58 @@ function viewPin(){
 
 /* ---------------- cálculo das contagens ---------------- */
 function tally(list){
-  const items = ITENS.map(() => ({ c:[0,0,0,0,0], na:0, n:0 }));
+  const items = ITENS.map(() => ({ c:[0,0,0], na:0, n:0 }));   // c[0] = Não (1), c[1] = meio (2), c[2] = Sim (3)
   const enps = { det:0, neu:0, pro:0, n:0 };
-  const ces = { dif:0, med:0, fac:0, np:0, n:0 };
-  let coments = [];
+  const ces = { nao:0, meio:0, sim:0, np:0, n:0 };
+  let coments = [], legado = 0;
   list.forEach(resp => {
+    if (resp.escala !== ESCALA) { legado++; return; }   // resposta de versão anterior (escala 1-5): não mistura
     resp.r.forEach((v, i) => {
       if (v === 'NA') items[i].na++;
-      else if (typeof v === 'number' && v >= 1 && v <= 5) { items[i].c[v-1]++; items[i].n++; }
+      else if (v === 1 || v === 2 || v === 3) { items[i].c[v-1]++; items[i].n++; }
     });
     if (typeof resp.enps === 'number') { enps.n++; if (resp.enps <= 6) enps.det++; else if (resp.enps <= 8) enps.neu++; else enps.pro++; }
     if (resp.ces === 'NP') ces.np++;
-    else if (typeof resp.ces === 'number') { ces.n++; if (resp.ces <= 6) ces.dif++; else if (resp.ces <= 8) ces.med++; else ces.fac++; }
+    else if (resp.ces === 1 || resp.ces === 2 || resp.ces === 3) { ces.n++; if (resp.ces === 1) ces.nao++; else if (resp.ces === 2) ces.meio++; else ces.sim++; }
     if (resp.a1) coments.push(resp.a1);
     if (resp.a2) coments.push(resp.a2);
   });
   coments = shuffle(coments);   // nunca na ordem em que as pessoas responderam
-  const nResp = list.length;
+  const nResp = list.length - legado;
+  // por frase: só mostra a linha se a própria frase tem 3+ respostas válidas (B6 e B14 podem ter muitos "Não se aplica")
+  items.forEach(it => { it.ok = nResp >= N_MIN_TABELA && it.n >= N_MIN_TABELA; it.pctSim = it.ok ? Math.round(it.c[2] / it.n * 100) : null; });
   const enpsVal = enps.n >= N_MIN_DETALHE ? Math.round((enps.pro - enps.det) / enps.n * 100) : null;
-  const cesFacil = ces.n >= N_MIN_DETALHE ? Math.round(ces.fac / ces.n * 100) : null;
-  return { items, enps, ces, coments, nResp, enpsVal, cesFacil };
+  const cesOk = ces.n >= N_MIN_DETALHE;   // 5+ pessoas que precisaram do escritório (sem "Nunca precisei")
+  const cesFacil = cesOk ? Math.round(ces.sim / ces.n * 100) : null;
+  const totSim = items.reduce((a, it) => a + it.c[2], 0), totN = items.reduce((a, it) => a + it.n, 0);
+  const pctSimGeral = totN ? Math.round(totSim / totN * 100) : null;
+  return { items, enps, ces, cesOk, coments, nResp, legado, enpsVal, cesFacil, pctSimGeral };
 }
 
 function tallyText(t){
   const L = [];
-  L.push(`Pesquisa equipe Maxipark\tUnidade: ${settings.unidade}\tMês: ${mesLabel(settings.mes)}\tRespostas: ${t.nResp}\tPreferiram não responder: ${refusals()}`);
+  L.push(`Pesquisa equipe Maxipark v${VERSAO} (escala ${ESCALA}: 3 respostas por frase)\tUnidade: ${settings.unidade}\tMês: ${mesLabel(settings.mes)}\tRespostas: ${t.nResp}\tPreferiram não responder: ${refusals()}`);
+  if (t.legado) L.push(`Atenção: ${t.legado} resposta(s) de versão anterior do app (escala 1-5) não entram nestas contagens — só no arquivo de respostas.`);
   if (t.nResp < N_MIN_TABELA) { L.push(`Menos de ${N_MIN_TABELA} respostas: não divulgar nada por unidade — só no agregado regional.`); return L.join('\n'); }
-  L.push('Frase\tNota 1\tNota 2\tNota 3\tNota 4\tNota 5\tNão aconteceu');
-  t.items.forEach((it, i) => L.push(`B${i+1}\t${it.c.join('\t')}\t${ITENS[i].na ? it.na : '-'}`));
+  L.push('Frase\tNão\tResposta do meio (rótulo)\tSim\tNão se aplica\tResponderam (sem N/A)\t% Sim');
+  t.items.forEach((it, i) => { const c = v => it.ok ? v : '-'; L.push(`B${i+1}\t${c(it.c[0])}\t${c(it.c[1])} (${ITENS[i].opts[1]})\t${c(it.c[2])}\t${ITENS[i].na ? it.na : '-'}\t${it.n}\t${it.ok ? it.pctSim + '%' : '-'}`); });
+  if (t.items.some(it => !it.ok)) L.push(`(- = menos de ${N_MIN_TABELA} respostas válidas na frase: não divulgar; só no agregado regional)`);
+  L.push('Leitura: 3 = Sim, 2 = resposta do meio, 1 = Não. Em B12 "Não lembro" conta como não elogiado; em B15 "Talvez" não é meio-termo: leia essas duas só pelo % Sim.');
   if (t.nResp >= N_MIN_DETALHE) {
-    L.push(`eNPS\t0-6: ${t.enps.det}\t7-8: ${t.enps.neu}\t9-10: ${t.enps.pro}\t${t.enpsVal == null ? '' : 'eNPS = ' + t.enpsVal}`);
-    L.push(`CES\t0-6: ${t.ces.dif}\t7-8: ${t.ces.med}\t9-10: ${t.ces.fac}\tNunca precisei: ${t.ces.np}\t${t.cesFacil == null ? '' : '% fácil = ' + t.cesFacil + '%'}`);
+    L.push(`eNPS (0 a 10)\tDetratores 0-6: ${t.enps.det}\tNeutros 7-8: ${t.enps.neu}\tPromotores 9-10: ${t.enps.pro}\tn = ${t.enps.n}\t${t.enpsVal == null ? '' : 'eNPS = ' + t.enpsVal}`);
+    const c = v => t.cesOk ? v : '-';
+    L.push(`CES (escritório)\tNão, foi difícil: ${c(t.ces.nao)}\tMais ou menos: ${c(t.ces.meio)}\tSim, foi fácil: ${c(t.ces.sim)}\tNunca precisei: ${t.ces.np}\t${t.cesOk ? '% fácil = ' + t.cesFacil + '%' : 'menos de ' + N_MIN_DETALHE + ' precisaram do escritório: não divulgar'}`);
   } else L.push(`eNPS e CES: só com ${N_MIN_DETALHE} ou mais respostas.`);
   return L.join('\n');
 }
 
 function csvText(list){
-  const head = ['unidade','mes', ...ITENS.map(it => 'B' + it.n), 'eNPS', 'CES', 'aberta1', 'aberta2'];
+  // escala B3: B1-B15 → 3 = Sim, 2 = resposta do meio, 1 = Não, NA = não se aplica; CES → 3 = fácil, 2 = mais ou menos, 1 = difícil, NP = nunca precisei.
+  // Linhas sem carimbo (escala B5) vêm da v1.2, com notas de 1 a 5. Sem linha de legenda: o arquivo é só dados, uma pessoa por linha.
+  const head = ['versao','escala','id','unidade','mes', ...ITENS.map(it => 'B' + it.n), 'eNPS', 'CES', 'aberta1', 'aberta2'];
   const q = v => { let s = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
-  const rows = shuffle(list).map(r => [r.unidade, r.mes, ...r.r.map(v => v == null ? '' : v), r.enps == null ? '' : r.enps, r.ces == null ? '' : r.ces, r.a1, r.a2].map(q).join(';'));
-  return '﻿' + head.join(';') + '\n' + rows.join('\n');
+  const rows = shuffle(list).map(r => [r.versao || '1.2', r.escala || 'B5', r.id, r.unidade, r.mes, ...r.r.map(v => v == null ? '' : v), r.enps == null ? '' : r.enps, r.ces == null ? '' : r.ces, r.a1, r.a2].map(q).join(';'));
+  return '﻿' + head.join(';') + '\n' + rows.join('\n') + '\n';
 }
 
 function viewAdmin(){
@@ -399,14 +480,22 @@ function viewAdmin(){
   if (t.nResp === 0) tabela = '<p class="muted">Ainda não há respostas para esta unidade e mês.</p>';
   else if (t.nResp < N_MIN_TABELA) tabela = `<div class="bad"><b>Menos de ${N_MIN_TABELA} respostas.</b> Para proteger quem respondeu, o app não mostra nada por frase. Não divulgue nada por unidade: essas respostas entram só no agregado regional. Continue a coleta ou exporte o arquivo para a área de Experiência do Cliente.</div>`;
   else {
-    const rows = t.items.map((it, i) => `<tr><td class="l"><b>B${i+1}</b> <span class="small muted">${esc(ITENS[i].t)}</span></td>${it.c.map(x => `<td>${x}</td>`).join('')}<td>${ITENS[i].na ? it.na : '—'}</td><td><b>${it.n}</b></td></tr>`).join('');
-    const detalhe = t.nResp >= N_MIN_DETALHE
-      ? `<tr><td class="l"><b>Nota de 0 a 10</b> (recomendaria a Maxipark)</td><td colspan="2">0-6: <b>${t.enps.det}</b></td><td colspan="2">7-8: <b>${t.enps.neu}</b></td><td colspan="2">9-10: <b>${t.enps.pro}</b></td><td><b>${t.enps.n}</b></td></tr>
-         <tr><td class="l"><b>Nota de 0 a 10</b> (fácil resolver com o escritório)</td><td colspan="2">0-6: <b>${t.ces.dif}</b></td><td colspan="2">7-8: <b>${t.ces.med}</b></td><td>9-10: <b>${t.ces.fac}</b></td><td>Nunca precisei: <b>${t.ces.np}</b></td><td><b>${t.ces.n}</b></td></tr>`
-      : `<tr><td class="l" colspan="8" style="text-align:left"><span class="muted">As duas notas de 0 a 10 (eNPS e CES) só aparecem com ${N_MIN_DETALHE} ou mais respostas.</span></td></tr>`;
+    const rows = t.items.map((it, i) => { const c = v => it.ok ? v : '—';
+      return `<tr><td class="l"><b>B${i+1}</b> <span class="small muted">${esc(ITENS[i].t)}</span></td><td>${c(it.c[0])}</td><td>${c(it.c[1])} <span class="small muted">${esc(ITENS[i].opts[1])}</span></td><td>${c(it.c[2])}</td><td>${ITENS[i].na ? it.na : '—'}</td><td><b>${it.n}</b></td><td><b>${it.ok ? it.pctSim + '%' : '—'}</b></td></tr>`; }).join('');
+    const mascaradas = t.items.some(it => !it.ok) ? `<p class="legend">— = menos de ${N_MIN_TABELA} colaboradores responderam a essa frase (os outros marcaram "Não se aplica"): para proteger quem respondeu, não é mostrada nem divulgada; entra só no agregado regional.</p>` : '';
+    let detalhe = '';
+    if (t.nResp >= N_MIN_DETALHE) {
+      const c = v => t.cesOk ? `<b>${v}</b>` : '—';
+      detalhe = `<h3>Nota de 0 a 10 e pergunta sobre o escritório</h3><div style="overflow:auto"><table>
+        <tr><th class="l">Pergunta</th><th>Detratores 0-6</th><th>Neutros 7-8</th><th>Promotores 9-10</th><th>Responderam</th><th>Resultado</th></tr>
+        <tr><td class="l"><b>Recomendaria a Maxipark</b> (0 a 10)</td><td><b>${t.enps.det}</b></td><td><b>${t.enps.neu}</b></td><td><b>${t.enps.pro}</b></td><td><b>${t.enps.n}</b></td><td><b>${t.enpsVal == null ? '—' : (t.enpsVal > 0 ? '+' : '') + t.enpsVal}</b> eNPS</td></tr>
+        <tr><th class="l">Pergunta</th><th>Não, foi difícil</th><th>Mais ou menos</th><th>Sim, foi fácil</th><th>Nunca precisei</th><th>Resultado</th></tr>
+        <tr><td class="l"><b>Foi fácil resolver com o escritório?</b></td><td>${c(t.ces.nao)}</td><td>${c(t.ces.meio)}</td><td>${c(t.ces.sim)}</td><td><b>${t.ces.np}</b></td><td><b>${t.cesOk ? t.cesFacil + '% fácil' : '—'}</b></td></tr></table></div>
+        ${t.cesOk ? '' : `<p class="legend">Escritório: menos de ${N_MIN_DETALHE} colaboradores precisaram resolver algo (os outros marcaram "Nunca precisei"); as respostas deles ficam escondidas para não identificar ninguém.</p>`}`;
+    } else detalhe = `<p class="legend">A nota de 0 a 10 (eNPS) e a pergunta sobre o escritório (CES) só aparecem com ${N_MIN_DETALHE} ou mais respostas.</p>`;
     tabela = `<div style="overflow:auto"><table>
-      <tr><th class="l">Frase</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>Não aconteceu</th><th>Respostas</th></tr>${rows}${detalhe}</table></div>
-      <p class="legend">Cada número é a quantidade de colaboradores que marcou aquela nota. Copie para a ficha em Excel (colunas "Nota 1" a "Nota 5").</p>`;
+      <tr><th class="l">Frase</th><th>Não</th><th>Resposta do meio</th><th>Sim</th><th>Não se aplica</th><th>Responderam (sem N/A)</th><th>% Sim</th></tr>${rows}</table></div>
+      <p class="legend">Cada número é a quantidade de colaboradores que deu aquela resposta. Copie as linhas B1–B15 para a ficha em Excel (colunas Não · Resposta do meio · Sim · Não se aplica). Em B12, "Não lembro" conta como não elogiado; em B15, "Talvez" não é meio-termo — leia essas duas só pelo % Sim.</p>${mascaradas}${detalhe}`;
   }
   const comentHtml = t.nResp >= N_MIN_DETALHE
     ? (t.coments.length ? '<ul>' + t.coments.map(c => `<li>${esc(c)}</li>`).join('') + '</ul><p class="legend">Ordem embaralhada. Na ficha, registre só os temas — nunca copie frases.</p>' : '<p class="muted small">Sem comentários.</p>')
@@ -414,19 +503,21 @@ function viewAdmin(){
   return header('Área do avaliador', 0) + `<div class="wrap"><div class="card" style="max-width:980px">
     <h1>Contagens · ${esc(settings.unidade || '—')} · ${mesLabel(settings.mes) || '—'}</h1>
     ${state.notice ? `<div class="warn">${esc(state.notice)}</div>` : ''}
+    ${t.legado ? `<div class="warn"><b>${t.legado} resposta(s) de versão anterior do app</b> (escala de 1 a 5) estão guardadas para esta unidade e mês. Elas não entram nas contagens abaixo; saem no arquivo de respostas com a coluna <i>escala</i> = B5. Exporte e apague antes de continuar.</div>` : ''}
     <div class="kpi">
       <div><b>${t.nResp}</b><span>respostas completas</span></div>
       <div><b>${refusals()}</b><span>preferiram não responder</span></div>
+      <div><b>${t.nResp >= N_MIN_TABELA && t.pctSimGeral != null ? t.pctSimGeral + '%' : '—'}</b><span>% de "Sim" (todas as respostas às 15 frases)</span></div>
       <div><b>${t.enpsVal == null ? '—' : (t.enpsVal > 0 ? '+' : '') + t.enpsVal}</b><span>eNPS (só com ${N_MIN_DETALHE}+ respostas)</span></div>
-      <div><b>${t.cesFacil == null ? '—' : t.cesFacil + '%'}</b><span>acham fácil resolver com o escritório</span></div>
+      <div><b>${t.cesFacil == null ? '—' : t.cesFacil + '%'}</b><span>acham fácil resolver com o escritório (${N_MIN_DETALHE}+ que precisaram)</span></div>
       ${settings.webhook ? `<div><b>${unsent}</b><span>ainda não enviadas à matriz</span></div>` : ''}
     </div>
-    <h3>Quantos colaboradores deram cada nota</h3>
+    <h3>Quantos colaboradores deram cada resposta</h3>
     ${tabela}
     <h3>Comentários</h3>
     ${comentHtml}
     <h3>Exportar</h3>
-    <p class="small muted">As contagens seguem a regra de anonimato (nada por frase com menos de ${N_MIN_TABELA}; notas 0-10 e comentários só com ${N_MIN_DETALHE}+). O arquivo de respostas tem uma linha por pessoa, em ordem embaralhada — só para a área de Experiência do Cliente.</p>
+    <p class="small muted">As contagens seguem a regra de anonimato (nada por frase com menos de ${N_MIN_TABELA} respostas válidas; eNPS e comentários só com ${N_MIN_DETALHE}+ respostas; CES só com ${N_MIN_DETALHE}+ que precisaram do escritório). O arquivo de respostas tem uma linha por pessoa, em ordem embaralhada, com as colunas <i>versao</i> e <i>escala</i> (${ESCALA} = 3 respostas por frase) — só para a área de Experiência do Cliente. O texto das contagens traz o número de recusas; mande os dois juntos.</p>
     <div class="row">
       <button class="btn light" data-action="copy" ${t.nResp ? '' : 'disabled'}>Copiar contagens</button>
       <button class="btn light" data-action="showtext" ${t.nResp ? '' : 'disabled'}>Ver contagens como texto</button>
@@ -437,7 +528,7 @@ function viewAdmin(){
     <h3>Gerenciar</h3>
     ${otherCount ? `<div class="warn">Este tablet ainda guarda <b>${otherCount}</b> resposta(s) de outras unidades/meses: ${Object.keys(others).map(k => esc(k.replace('|', ' · '))).join(', ')}. <button class="btn link" data-action="wipeothers">Apagar essas outras respostas</button></div>` : ''}
     <div class="row">
-      <button class="btn ghost" data-action="settings">Configurações (unidade, mês, PIN, envio automático)</button>
+      <button class="btn ghost" data-action="settings">Configurações (unidade, mês, lista de unidades, PIN, envio)</button>
       <button class="btn danger" data-action="wipe" ${t.nResp || refusals() ? '' : 'disabled'}>Apagar respostas desta unidade e mês${exported ? '' : ' (ainda não exportadas)'}</button>
     </div>
     <div class="row">
@@ -450,12 +541,20 @@ function viewAdmin(){
 function viewSettings(){
   return header('Configurações', 0) + `<div class="wrap"><div class="card">
     <h1>Configurações</h1>
-    <label>Código da unidade</label><input type="text" id="s-unidade" value="${esc(settings.unidade)}" autocapitalize="characters" autocomplete="off">
+    ${unitField('s', 'settings')}
     <label>Mês da rodada</label><input type="month" id="s-mes" value="${esc(settings.mes)}" placeholder="AAAA-MM">
     <label>Avaliador(a) (não gravado nas respostas)</label><input type="text" id="s-aval" value="${esc(settings.avaliador)}" autocomplete="off">
-    <label>Envio automático (opcional) — URL do fluxo do Power Automate que recebe as respostas</label>
+    <h3>Lista de unidades</h3>
+    <p class="small muted">${esc(unidadesInfo())}. Importe a lista completa da empresa a partir do Excel: colunas <b>Código</b> (obrigatória), Nome/Cliente, Endereço, Bairro/Cidade, Região — a primeira linha pode ser o cabeçalho. Aceita .xlsx (precisa de internet na primeira vez) ou .csv.</p>
+    <div class="row">
+      <button class="btn light" data-action="importfile">Importar do Excel / CSV</button>
+      <button class="btn light" data-action="pastelist">Colar lista</button>
+      <button class="btn link" data-action="resetlist">Voltar à lista padrão</button>
+    </div>
+    <h3>Envio automático (opcional)</h3>
+    <label>URL do fluxo do Power Automate que recebe as respostas</label>
     <input type="url" id="s-webhook" value="${esc(settings.webhook)}" placeholder="https://...">
-    <p class="small muted">Sem URL, as respostas ficam só no tablet e você exporta por arquivo ou e-mail. Com URL, o envio acontece só quando você toca em "Enviar à matriz agora", em lote e em ordem embaralhada (para não registrar a hora de cada pessoa).</p>
+    <p class="small muted">Sem URL, as respostas ficam só no tablet e você exporta por arquivo ou e-mail. Com URL, o envio acontece só quando você toca em "Enviar à matriz agora", em lote e em ordem embaralhada.</p>
     <div class="row">
       <button class="btn" data-action="savesettings">Salvar</button>
       <button class="btn light" data-action="gosetpin">Trocar PIN</button>
@@ -472,6 +571,67 @@ function viewText(){
   </div></div>`;
 }
 
+/* ---------------- importação da lista de unidades ---------------- */
+function parseDelimited(text){
+  const lines = text.replace(/\r/g, '').split('\n').map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return [];
+  const delim = (lines[0].match(/\t/g) || []).length ? '\t' : ((lines[0].match(/;/g) || []).length >= (lines[0].match(/,/g) || []).length ? ';' : ',');
+  const split = l => { const out = []; let cur = '', inQ = false; for (const ch of l) { if (ch === '"') inQ = !inQ; else if (ch === delim && !inQ) { out.push(cur); cur = ''; } else cur += ch; } out.push(cur); return out.map(s => s.trim()); };
+  return lines.map(split);
+}
+function rowsToUnidades(rows){
+  if (!rows.length) return [];
+  const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const head = rows[0].map(norm);
+  const looksHeader = head.some(h => /cod|unid|nome|cliente|ender|bairro|cidade|regi/.test(h));
+  let idx = { codigo:0, nome:1, endereco:2, bairro:3, regiao:4 };
+  if (looksHeader) {
+    const find = re => head.findIndex(h => re.test(h));
+    idx = { codigo: find(/cod|unid|sigla/), nome: find(/nome|cliente|site|local/), endereco: find(/ender|rua|logradouro/), bairro: find(/bairro|cidade|munic/), regiao: find(/regi|zona|roteiro/) };   // colunas de pessoas (supervisor, encarregado) são ignoradas de propósito
+    if (idx.codigo < 0) idx.codigo = 0;
+  }
+  const body = looksHeader ? rows.slice(1) : rows;
+  const seen = new Set(); const out = [];
+  body.forEach(r => {
+    const codigo = String(r[idx.codigo] || '').trim().toUpperCase();
+    if (!codigo || seen.has(codigo)) return; seen.add(codigo);
+    const g = i => (i >= 0 && r[i] != null) ? String(r[i]).trim() : '';
+    out.push({ codigo, nome: g(idx.nome), endereco: g(idx.endereco), bairro: g(idx.bairro), regiao: g(idx.regiao) });
+  });
+  return out;
+}
+function saveUnidades(lista, origem){
+  if (!lista.length) { toast('Nenhuma unidade encontrada. Confira se a primeira coluna é o código.'); return false; }
+  if (!LS.set('mp_unidades', { origem, lista, quando: settings.mes })) { toast('Não foi possível gravar a lista neste aparelho.'); return false; }
+  toast(`${lista.length} unidades importadas.`); return true;
+}
+function loadSheetJS(){
+  return new Promise((resolve, reject) => {
+    if (window.XLSX) return resolve(window.XLSX);
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = () => resolve(window.XLSX); s.onerror = () => reject(new Error('sem internet'));
+    document.head.appendChild(s);
+  });
+}
+async function importFile(file){
+  try {
+    const name = (file.name || '').toLowerCase();
+    let rows;
+    if (/\.xlsx?$/.test(name)) {
+      let XLSX; try { XLSX = await loadSheetJS(); } catch(e) { toast('Para ler .xlsx é preciso internet na primeira vez. Sem internet, salve como CSV no Excel e importe o CSV.'); return; }
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' }).map(r => r.map(c => String(c == null ? '' : c).trim())).filter(r => r.some(Boolean));
+    } else {
+      const text = await file.text();
+      rows = parseDelimited(text);
+    }
+    if (saveUnidades(rowsToUnidades(rows), 'arquivo ' + file.name)) render();
+  } catch(e) { toast('Não consegui ler o arquivo: ' + (e && e.message ? e.message : e)); }
+}
+
 /* ---------------- ações ---------------- */
 function markExported(){ settings.exported[key()] = true; saveSettings(); }
 
@@ -483,9 +643,7 @@ function submitCurrent(){
   list.splice(pos, 0, current);
   if (!saveResponses(list)) { busy = false; go('saveerror'); return; }
   current = null; busy = false;
-  go('thanks');
-  clearTimeout(thanksTimer);
-  thanksTimer = setTimeout(() => { if (state.screen === 'thanks') go('welcome'); }, 20000);
+  startThanks();
 }
 
 async function sendPending(){
@@ -495,8 +653,7 @@ async function sendPending(){
   let ok = 0;
   for (const r of pend) {
     try {
-      const payload = { app:'pesquisa-equipe-maxipark', versao:VERSAO, id:r.id, unidade:r.unidade, mes:r.mes, respostas:r.r, enps:r.enps, ces:r.ces, aberta1:r.a1, aberta2:r.a2 };
-      // text/plain + no-cors: chega ao Power Automate sem preflight CORS; a resposta é opaca, por isso o fluxo deve ignorar 'id' repetido.
+      const payload = { app:'pesquisa-equipe-maxipark', versao:r.versao || '1.2', escala:r.escala || 'B5', id:r.id, unidade:r.unidade, mes:r.mes, respostas:r.r, enps:r.enps, ces:r.ces, aberta1:r.a1, aberta2:r.a2, recusas_unidade_mes:(LS.get('mp_recusas', {})[r.unidade + '|' + r.mes] || 0) };
       await fetch(settings.webhook, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
       const list = allResponses(); const it = list.find(x => x.id === r.id); if (it) { it.sent = true; saveResponses(list); }
       ok++;
@@ -526,20 +683,36 @@ async function copyText(text){
   try { await navigator.clipboard.writeText(text); toast('Contagens copiadas.'); markExported(); render(); }
   catch(e) { go('text', { showText: text }); toast('Toque e segure no texto para copiar.'); markExported(); }
 }
+function readUnitInput(prefix){ const el = document.getElementById(prefix + '-unidade'); return el ? el.value.trim().toUpperCase() : settings.unidade; }
 
 function handle(action, el){
   const list = () => currentResponses();
   switch(action){
     case 'start': {
-      const u = document.getElementById('f-unidade').value.trim().toUpperCase();
+      const u = readUnitInput('f');
       const m = document.getElementById('f-mes').value.trim();
       const a = document.getElementById('f-aval').value.trim();
-      if (!u || !validMes(m)) { toast('Informe o código da unidade e o mês (AAAA-MM).'); return; }
+      if (!u || !validMes(m)) { toast('Escolha a unidade e informe o mês (AAAA-MM).'); return; }
       if (!settings.pin) { toast('Defina o PIN do avaliador primeiro.'); return; }
       settings.unidade = u; settings.mes = m; settings.avaliador = a; saveSettings();
       if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
       go('welcome'); break;
     }
+    case 'pickunit': {
+      // guarda o que já foi digitado nas outras caixas antes de trocar de tela
+      const ret = el.getAttribute('data-ret') || 'setup'; const p = ret === 'setup' ? 'f' : 's';
+      const mesEl = document.getElementById(p + '-mes'), avEl = document.getElementById(p + '-aval');
+      if (mesEl && validMes(mesEl.value.trim())) settings.mes = mesEl.value.trim();
+      if (avEl) settings.avaliador = avEl.value.trim();
+      saveSettings();
+      go('unidades', { pickReturn: ret, filtro: '' }); break;
+    }
+    case 'chooseunit': settings.unidade = el.getAttribute('data-c'); saveSettings(); toast('Unidade: ' + settings.unidade); go(state.pickReturn || 'setup'); break;
+    case 'cancelpick': go(state.pickReturn || 'setup'); break;
+    case 'importfile': document.getElementById('file-unidades').click(); break;
+    case 'pastelist': go('colar'); break;
+    case 'importpaste': { const t = document.getElementById('c-lista').value; if (saveUnidades(rowsToUnidades(parseDelimited(t)), 'lista colada')) go('settings'); break; }
+    case 'resetlist': askConfirm('Voltar à lista padrão de unidades (Grande SP)? A lista importada será removida deste tablet.', () => { localStorage.removeItem('mp_unidades'); toast('Lista padrão restaurada.'); go('settings'); }); break;
     case 'install': if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; render(); } break;
     case 'gosetpin': state.newPin = ''; state.newPinStage = 0; state.newPinFirst = ''; go('setpin'); break;
     case 'cancelsetpin': go(settings.pin ? 'settings' : 'setup'); break;
@@ -559,8 +732,8 @@ function handle(action, el){
       render(); break;
     }
     case 'begin': current = novaResposta(); busy = false; go('q', { q: 0 }); break;
-    case 'refuse': addRefusal(); go('thanks'); clearTimeout(thanksTimer); thanksTimer = setTimeout(() => { if (state.screen === 'thanks') go('welcome'); }, 20000); break;
-    case 'quit': askConfirm('Desistir da pesquisa? Nada será gravado.', () => { current = null; go('thanks'); clearTimeout(thanksTimer); thanksTimer = setTimeout(() => { if (state.screen === 'thanks') go('welcome'); }, 20000); }); break;
+    case 'refuse': addRefusal(); startThanks(); break;
+    case 'quit': askConfirm('Desistir da pesquisa? Nada será gravado.', () => { current = null; startThanks(); }); break;
     case 'confirmyes': { const p = pendingConfirm; pendingConfirm = null; if (p) p.onYes(); break; }
     case 'confirmno': { const p = pendingConfirm; pendingConfirm = null; state.screen = p ? p.from : homeScreen(); state.q = p ? p.q : 0; armIdle(); render(); break; }
     case 'answer': {
@@ -627,18 +800,17 @@ function handle(action, el){
       break;
     }
     case 'savesettings': {
-      const u = document.getElementById('s-unidade').value.trim().toUpperCase();
+      const u = readUnitInput('s');
       const m = document.getElementById('s-mes').value.trim();
       const a = document.getElementById('s-aval').value.trim();
       const w = document.getElementById('s-webhook').value.trim();
-      if (!u || !validMes(m)) { toast('Informe o código da unidade e o mês (AAAA-MM).'); return; }
+      if (!u || !validMes(m)) { toast('Escolha a unidade e informe o mês (AAAA-MM).'); return; }
       if (w && !/^https:\/\//i.test(w)) { toast('A URL de envio deve começar com https://'); return; }
       settings.unidade = u; settings.mes = m; settings.avaliador = a; settings.webhook = w; saveSettings();
       toast('Configurações salvas.'); go('admin', { notice: '' }); break;
     }
   }
 }
-let answerToken = 0;
 
 function advance(){
   if (!current) return;
@@ -669,6 +841,14 @@ document.addEventListener('click', e => {
   if (!el || el.disabled) return;
   handle(el.getAttribute('data-action'), el);
 });
+document.addEventListener('input', e => {
+  if (e.target && e.target.id === 'u-filtro') {
+    state.filtro = e.target.value;
+    const pos = e.target.selectionStart; render();
+    const el = document.getElementById('u-filtro'); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch(err) {} }
+  }
+});
+document.getElementById('file-unidades').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f) importFile(f); e.target.value = ''; });
 ['touchstart','keydown','input'].forEach(ev => document.addEventListener(ev, () => armIdle(), { passive: true }));
 // Botão/gesto "voltar" do Android: não sai do app; age como o "Voltar" da tela.
 history.pushState({ app: 1 }, '');
