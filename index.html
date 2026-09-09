@@ -84,7 +84,7 @@
   .thanks .check{width:96px;height:96px;border-radius:50%;background:var(--ok);color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:12px 18px;border-radius:12px;font-size:16px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;z-index:9}
   .toast.show{opacity:1}
-  .corner{position:fixed;right:0;bottom:0;width:56px;height:56px;border:0;background:transparent;color:transparent;z-index:5}
+  .corner{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.94);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.10)}
   .warn{background:#FFF4D6;border-left:5px solid #E0B400;padding:10px 14px;border-radius:8px;font-size:15px;margin:10px 0}
   .bad{background:#FBE3E3;border-left:5px solid var(--danger);padding:10px 14px;border-radius:8px;font-size:15px;margin:10px 0}
   pre{white-space:pre-wrap;font-size:13px;background:#F7F9F9;border:1px solid var(--line);border-radius:10px;padding:10px;max-height:260px;overflow:auto}
@@ -106,7 +106,7 @@
    Pesquisa com a equipe Maxipark — app de tablet (offline, sem nome)
    Parte B da ficha de Experiência do Cliente Interno.
    ===================================================================== */
-const VERSAO = '1.1';
+const VERSAO = '1.2';
 const ESCALA = ['Discordo totalmente','Discordo','Nem sim nem não','Concordo','Concordo totalmente'];
 const ITENS = [
   {n:1, dim:'Condições no posto', t:'Os equipamentos que uso no posto (cancela, máquina de cartão, sistema, rádio) funcionam bem.'},
@@ -197,7 +197,7 @@ function header(step, pct){
   return `<div class="top"><div class="brand">Pesquisa com a equipe Maxipark</div><div class="step">${esc(step || '')}</div></div>
           <div class="progress"><div style="width:${pct || 0}%"></div></div>`;
 }
-function cornerBtn(){ return `<button class="corner" data-action="pin" data-target="admin" aria-label="Área do avaliador"></button>`; }
+function cornerBtn(){ return `<button class="corner" data-action="pin" data-target="admin" aria-label="Área do avaliador (com PIN)">⚙ Avaliador</button>`; }
 
 function viewSetup(){
   const pinOk = !!settings.pin;
@@ -320,6 +320,7 @@ function viewThanks(){
     <p>Pode entregar o tablet ao avaliador.</p>
     <p class="muted">Em até 15 dias o supervisor traz o retorno: o que ouvimos, o que vamos fazer e quando.</p>
     <div class="row"><button class="btn block" data-action="nextperson">Próximo colaborador</button></div>
+    <div class="row"><button class="btn link block" data-action="pin" data-target="setup">Encerrar a coleta e voltar ao início (avaliador, com PIN)</button></div>
   </div></div>` + cornerBtn();
 }
 
@@ -439,7 +440,10 @@ function viewAdmin(){
       <button class="btn ghost" data-action="settings">Configurações (unidade, mês, PIN, envio automático)</button>
       <button class="btn danger" data-action="wipe" ${t.nResp || refusals() ? '' : 'disabled'}>Apagar respostas desta unidade e mês${exported ? '' : ' (ainda não exportadas)'}</button>
     </div>
-    <div class="row"><button class="btn block" data-action="tocollect">Voltar à coleta com a equipe</button></div>
+    <div class="row">
+      <button class="btn block" data-action="tocollect">Voltar à coleta com a equipe</button>
+      <button class="btn ghost block" data-action="tosetup">Tela inicial (Preparar a coleta)</button>
+    </div>
   </div></div>`;
 }
 
@@ -593,6 +597,7 @@ function handle(action, el){
     case 'admin': go('admin', { notice: '' }); break;
     case 'settings': go('settings'); break;
     case 'tocollect': go(homeScreen()); break;
+    case 'tosetup': go('setup'); break;
     case 'copy': copyText(tallyText(tally(list()))); break;
     case 'showtext': go('text', { showText: tallyText(tally(list())) }); break;
     case 'csv': exportCsv(); break;
