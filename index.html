@@ -149,6 +149,9 @@ const N_DIVULGA_FRASE = 3;   // abaixo disso as contagens identificam quem respo
 const N_DIVULGA_DETALHE = 5; // eNPS, CES e comentários: só divulgar por unidade a partir daqui
 const IDLE_MS = 120000;      // pesquisa abandonada: descarta e volta ao início
 const PIN_MAX_FAILS = 5, PIN_LOCK_MS = 60000;
+// PIN programado pelo gestor (pedido de 2026-09-09): já vem definido, sem a etapa "Crie o PIN". Pode ser trocado em Configurações → Trocar PIN.
+// Atenção: este código é público (GitHub Pages); quem ler o arquivo conhece o PIN padrão.
+const PIN_PADRAO = '2819', PIN_PADRAO_MARCA = '2819-2026-09-09';
 
 /* Lista padrão de unidades (Grande São Paulo — do roteiro da ficha externa). Pode ser substituída pela importação do Excel/CSV. */
 const UNIDADES_PADRAO = [
@@ -183,6 +186,8 @@ const DEFAULT_SETTINGS = { pin:'', unidade:'', mes:'', data:'', webhook:'', expo
 let settings = Object.assign({}, DEFAULT_SETTINGS, LS.get('mp_settings', {}));
 function saveSettings(){ LS.set('mp_settings', settings); }
 if ('avaliador' in settings) { delete settings.avaliador; saveSettings(); }   // apaga o nome do avaliador gravado por versões anteriores
+// PIN programado: aplica o PIN padrão uma única vez (também em tablets que já tinham outro PIN de teste); depois disso, um PIN trocado em Configurações é respeitado.
+if (settings.pinPadraoAplicado !== PIN_PADRAO_MARCA) { settings.pin = PIN_PADRAO; settings.pinFails = 0; settings.lockUntil = 0; settings.pinPadraoAplicado = PIN_PADRAO_MARCA; saveSettings(); }
 function allResponses(){ return LS.get('mp_respostas', []); }
 function saveResponses(list){ return LS.set('mp_respostas', list); }
 function key(u, m){ return (u || settings.unidade) + '|' + (m || settings.mes); }
@@ -545,7 +550,7 @@ function viewAdmin(){
     <h3>Gerenciar</h3>
     ${otherCount ? `<div class="warn">Este tablet ainda guarda <b>${otherCount}</b> resposta(s) de outras unidades/meses: ${Object.keys(others).map(k => esc(k.replace('|', ' · '))).join(', ')}. <button class="btn link" data-action="wipeothers">Apagar essas outras respostas</button></div>` : ''}
     <div class="row">
-      <button class="btn ghost" data-action="settings">Configurações (unidade, mês, lista de unidades, PIN, envio)</button>
+      <button class="btn ghost" data-action="settings">Configurações (unidade, lista de unidades, PIN, envio)</button>
       <button class="btn danger" data-action="wipe" ${list.length || refusals() ? '' : 'disabled'}>Apagar respostas desta unidade e mês${exported ? '' : ' (ainda não exportadas)'}</button>
     </div>
     <div class="row">
