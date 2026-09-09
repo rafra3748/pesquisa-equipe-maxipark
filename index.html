@@ -42,6 +42,7 @@
   .small{font-size:15px}
   .notice{background:var(--teal-soft);border-radius:12px;padding:14px 16px;font-size:16px;margin:12px 0}
   .good{background:#E6F4EA;border:1px solid #9CCFA9;border-radius:12px;padding:12px 14px;margin:10px 0 14px;font-size:16px;color:#1B3D26}
+  .datefield{padding:12px 14px;border:2px dashed var(--line);border-radius:12px;font-size:19px;font-weight:600;color:var(--teal-dark);background:#fff}
   details{margin:8px 0 14px}
   summary{cursor:pointer;color:var(--teal-dark);font-weight:600;font-size:16px;padding:8px 0}
   .dim{display:inline-block;background:var(--teal-soft);color:var(--teal-dark);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600;margin-bottom:8px}
@@ -141,7 +142,7 @@ const ENPS_Q = 'De 0 a 10, quanto você recomendaria a Maxipark a um amigo como 
 const CES_Q = 'Pense na última vez que você precisou resolver algo seu com o escritório da Maxipark (holerite, ponto, uniforme, sistema). Foi fácil resolver?';
 const CES_OPTS = ['Sim, foi fácil', 'Mais ou menos', 'Não, foi difícil'];
 const ABERTAS = ['O que mais atrapalha seu dia de trabalho nesta unidade hoje?', 'Se você pudesse mudar uma coisa na Maxipark, o que seria?'];
-const AVISO = '<b>Sem nome.</b> O app não grava seu nome, cargo nem horário — só o código da unidade e o mês.<br><b>Quem vê suas respostas:</b> só a área de Experiência do Cliente da Maxipark, que aplica esta pesquisa. Seu chefe direto (encarregado ou supervisor) <b>não vê</b> o que você marcou, a nota de 0 a 10 nem o que você escreveu — ele recebe só um resumo, e junto com outras unidades quando a equipe é pequena.<br><b>Unidade com 1 ou 2 colaboradores:</b> como seria fácil saber quem respondeu, o resultado da sua unidade não é mostrado a ninguém fora dessa área. O retorno vem junto com as outras unidades da região.<br><b>Comentários:</b> a área de Experiência do Cliente lê o que você escreveu; para o encarregado e para a equipe vai só o assunto, nunca a frase.<br><b>Ninguém é obrigado</b> a responder.<br><b>Caso grave</b> (assédio, ameaça, acidente): use o canal de denúncia, que consegue voltar a falar com você; esta pesquisa não consegue.';
+const AVISO = '<b>Sem nome.</b> O app não grava seu nome, cargo nem horário — só o código da unidade e o dia da visita, que é o mesmo para toda a equipe.<br><b>Quem vê suas respostas:</b> só a área de Experiência do Cliente da Maxipark, que aplica esta pesquisa. Seu chefe direto (encarregado ou supervisor) <b>não vê</b> o que você marcou, a nota de 0 a 10 nem o que você escreveu — ele recebe só um resumo, e junto com outras unidades quando a equipe é pequena.<br><b>Unidade com 1 ou 2 colaboradores:</b> como seria fácil saber quem respondeu, o resultado da sua unidade não é mostrado a ninguém fora dessa área. O retorno vem junto com as outras unidades da região.<br><b>Comentários:</b> a área de Experiência do Cliente lê o que você escreveu; para o encarregado e para a equipe vai só o assunto, nunca a frase.<br><b>Ninguém é obrigado</b> a responder.<br><b>Caso grave</b> (assédio, ameaça, acidente): use o canal de denúncia, que consegue voltar a falar com você; esta pesquisa não consegue.';
 const GLOSSARIO = '<b>Chefe direto</b> = o encarregado da sua unidade (se não tem encarregado, é o supervisor regional). <b>Maxipark / empresa</b> = a Maxipark inteira: seu chefe direto, o supervisor e o escritório. <b>Escritório da Maxipark</b> = o pessoal de RH, pagamento, uniforme e sistemas, que fica fora do posto.';
 // As contagens são geradas a partir de 1 resposta (há unidades com 1 só colaborador). Os limites abaixo valem para DIVULGAÇÃO, não para o cálculo.
 const N_DIVULGA_FRASE = 3;   // abaixo disso as contagens identificam quem respondeu: uso restrito à área de Experiência do Cliente
@@ -178,9 +179,10 @@ const LS = {
   get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } },
   set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } }
 };
-const DEFAULT_SETTINGS = { pin:'', unidade:'', mes:'', webhook:'', avaliador:'', exported:{}, pinFails:0, lockUntil:0 };
+const DEFAULT_SETTINGS = { pin:'', unidade:'', mes:'', data:'', webhook:'', exported:{}, pinFails:0, lockUntil:0 };   // sem nome do avaliador (pedido do gestor): o app não guarda nome de ninguém
 let settings = Object.assign({}, DEFAULT_SETTINGS, LS.get('mp_settings', {}));
 function saveSettings(){ LS.set('mp_settings', settings); }
+if ('avaliador' in settings) { delete settings.avaliador; saveSettings(); }   // apaga o nome do avaliador gravado por versões anteriores
 function allResponses(){ return LS.get('mp_respostas', []); }
 function saveResponses(list){ return LS.set('mp_respostas', list); }
 function key(u, m){ return (u || settings.unidade) + '|' + (m || settings.mes); }
@@ -202,7 +204,7 @@ let state = { screen: 'setup', q: 0, pin: '', pinTarget: 'admin', showText: '', 
 let current = null;      // resposta em andamento: só existe na memória até o fim
 let thanksTimer = null, idleTimer = null, deferredInstall = null, busy = false, sending = false, answerToken = 0, pendingConfirm = null;
 
-function novaResposta(){ return { id: uid(), versao: VERSAO, escala: ESCALA, unidade: settings.unidade, mes: settings.mes, r: Array(ITENS.length).fill(null), enps: null, ces: null, a1: '', a2: '', sent: false }; }
+function novaResposta(){ if (settings.data !== hojeISO()) { fixarData(); saveSettings(); } return { id: uid(), versao: VERSAO, escala: ESCALA, unidade: settings.unidade, mes: settings.mes, data: settings.data, r: Array(ITENS.length).fill(null), enps: null, ces: null, a1: '', a2: '', sent: false }; }
 function homeScreen(){ return configured() ? 'welcome' : 'setup'; }
 function go(screen, extra){
   state.screen = screen; state.fin = false; Object.assign(state, extra || {});   // fin: chegou aqui por "Finalizar pesquisa"
@@ -221,6 +223,11 @@ function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&
 function toast(msg){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2800); }
 function mesLabel(m){ if(!m) return ''; const [y, mo] = m.split('-'); return mo + '/' + y; }
 function validMes(m){ return /^\d{4}-(0[1-9]|1[0-2])$/.test(m || ''); }
+// Data da coleta: preenchida automaticamente (dia/mês/ano de hoje); o mês de referência deriva dela. A mesma data vale para todos os
+// colaboradores da visita — nunca se grava hora nem ordem de resposta.
+function hojeISO(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function dataLabel(d){ if (!d) return ''; const [y, m, dd] = d.split('-'); return dd + '/' + m + '/' + y; }
+function fixarData(){ settings.data = hojeISO(); settings.mes = settings.data.slice(0, 7); }
 function startThanks(){ go('thanks'); clearTimeout(thanksTimer); thanksTimer = setTimeout(() => { if (state.screen === 'thanks') go('welcome'); }, 20000); }
 
 /* ---------------- telas ---------------- */
@@ -248,19 +255,17 @@ function viewSetup(){
   let fim = '';
   if (state.fin) {   // veio de "Finalizar pesquisa" na tela Obrigado!
     const n = currentResponses().length, rec = refusals();
-    fim = `<div class="good"><b>Pesquisa finalizada · ${esc(settings.unidade)} · ${mesLabel(settings.mes)}</b><br>${n} resposta${n === 1 ? '' : 's'} gravada${n === 1 ? '' : 's'}${rec ? ` · ${rec} preferi${rec === 1 ? 'u' : 'ram'} não responder` : ''}. Exporte as contagens antes de preparar outra unidade.
+    fim = `<div class="good"><b>Pesquisa finalizada · ${esc(settings.unidade)} · ${settings.data ? dataLabel(settings.data) : mesLabel(settings.mes)}</b><br>${n} resposta${n === 1 ? '' : 's'} gravada${n === 1 ? '' : 's'}${rec ? ` · ${rec} preferi${rec === 1 ? 'u' : 'ram'} não responder` : ''}. Exporte as contagens antes de preparar outra unidade.
       <div class="row" style="margin-top:10px"><button class="btn block" data-action="admin">Ver contagens e exportar</button></div></div>`;
   }
   return header('Avaliador · configuração', 0) + `<div class="wrap"><div class="card">
     <h1>Preparar a coleta</h1>
     ${fim}
-    <p class="muted">Preencha antes de entregar o tablet à equipe. Com as respostas ficam gravados só o código da unidade e o mês — nenhum nome, cargo ou horário.</p>
+    <p class="muted">Escolha a unidade antes de entregar o tablet à equipe. Com as respostas ficam gravados só o código da unidade e a data da coleta — nenhum nome, cargo ou horário.</p>
     ${pinOk ? '' : '<div class="warn">Primeiro uso: defina o <b>PIN do avaliador</b>. Ele protege as contagens e as configurações.</div>'}
     ${unitField('f', 'setup')}
-    <label>Mês da rodada</label>
-    <input type="month" id="f-mes" value="${esc(settings.mes)}" placeholder="AAAA-MM">
-    <label>Avaliador(a) — só para o seu controle, não é gravado nas respostas</label>
-    <input type="text" id="f-aval" value="${esc(settings.avaliador)}" placeholder="opcional" autocomplete="off">
+    <label>Data da coleta (preenchida automaticamente)</label>
+    <div class="datefield">${dataLabel(hojeISO())} <span class="small muted">· mês de referência ${mesLabel(hojeISO().slice(0, 7))}</span></div>
     <div class="row">
       ${pinOk ? '<button class="btn block" data-action="start">Iniciar coleta com a equipe</button>' : '<button class="btn block" data-action="gosetpin">Definir PIN do avaliador</button>'}
     </div>
@@ -309,7 +314,7 @@ function viewSetPin(){
 }
 
 function viewWelcome(){
-  return header(settings.unidade + ' · ' + mesLabel(settings.mes), 0) + `<div class="wrap"><div class="card">
+  return header(settings.unidade + ' · ' + (settings.data ? dataLabel(settings.data) : mesLabel(settings.mes)), 0) + `<div class="wrap"><div class="card">
     <h1>Sua opinião melhora o posto onde você trabalha</h1>
     <ul class="plain">
       <li><b>Sem nome.</b> Suas respostas vão só para a área de Experiência do Cliente.</li>
@@ -386,7 +391,7 @@ function viewOpen(){
 
 function viewThanks(){
   // Só 2 botões (pedido do gestor); sem o "⚙ Avaliador" de canto nesta tela, que repetiria o segundo botão.
-  return header(settings.unidade + ' · ' + mesLabel(settings.mes), 100) + `<div class="wrap"><div class="card thanks">
+  return header(settings.unidade + ' · ' + (settings.data ? dataLabel(settings.data) : mesLabel(settings.mes)), 100) + `<div class="wrap"><div class="card thanks">
     <div class="check">✓</div>
     <h1>Obrigado!</h1>
     <p>Pronto — você já terminou. Pode entregar o tablet ao avaliador.</p>
@@ -459,7 +464,7 @@ function tally(list){
 
 function tallyText(t){
   const L = [];
-  L.push(`Pesquisa equipe Maxipark v${VERSAO} (escala ${ESCALA}: 3 respostas por frase)\tUnidade: ${settings.unidade}\tMês: ${mesLabel(settings.mes)}\tRespostas: ${t.nResp}\tPreferiram não responder: ${refusals()}`);
+  L.push(`Pesquisa equipe Maxipark v${VERSAO} (escala ${ESCALA}: 3 respostas por frase)\tUnidade: ${settings.unidade}\tMês: ${mesLabel(settings.mes)}\tData da coleta: ${settings.data ? dataLabel(settings.data) : '-'}\tRespostas: ${t.nResp}\tPreferiram não responder: ${refusals()}`);
   if (t.legado) L.push(`Atenção: ${t.legado} resposta(s) de versão anterior do app (escala 1-5) não entram nestas contagens — só no arquivo de respostas.`);
   if (!t.nResp) { L.push('Ainda não há respostas desta unidade e mês.'); return L.join('\n'); }
   if (t.identificavel) L.push(`ATENÇÃO: só ${t.nResp} resposta${t.nResp > 1 ? 's' : ''} — as contagens abaixo são as respostas de ${t.nResp === 1 ? 'uma pessoa' : 'duas pessoas'}. Uso restrito à área de Experiência do Cliente: digitar na ficha, sim; divulgar por unidade ou mostrar ao encarregado, não.`);
@@ -477,9 +482,9 @@ function tallyText(t){
 function csvText(list){
   // escala B3: B1-B15 → 3 = Sim, 2 = resposta do meio, 1 = Não, NA = não se aplica; CES → 3 = fácil, 2 = mais ou menos, 1 = difícil, NP = nunca precisei.
   // Linhas sem carimbo (escala B5) vêm da v1.2, com notas de 1 a 5. Sem linha de legenda: o arquivo é só dados, uma pessoa por linha.
-  const head = ['versao','escala','id','unidade','mes', ...ITENS.map(it => 'B' + it.n), 'eNPS', 'CES', 'aberta1', 'aberta2'];
+  const head = ['versao','escala','id','unidade','mes','data', ...ITENS.map(it => 'B' + it.n), 'eNPS', 'CES', 'aberta1', 'aberta2'];   // data = dia da coleta (igual para toda a visita)
   const q = v => { let s = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
-  const rows = shuffle(list).map(r => [r.versao || '1.2', r.escala || 'B5', r.id, r.unidade, r.mes, ...r.r.map(v => v == null ? '' : v), r.enps == null ? '' : r.enps, r.ces == null ? '' : r.ces, r.a1, r.a2].map(q).join(';'));
+  const rows = shuffle(list).map(r => [r.versao || '1.2', r.escala || 'B5', r.id, r.unidade, r.mes, r.data || '', ...r.r.map(v => v == null ? '' : v), r.enps == null ? '' : r.enps, r.ces == null ? '' : r.ces, r.a1, r.a2].map(q).join(';'));
   return '﻿' + head.join(';') + '\n' + rows.join('\n') + '\n';
 }
 
@@ -511,7 +516,7 @@ function viewAdmin(){
     : (t.coments.length ? '<ul>' + t.coments.map(c => `<li>${esc(c)}</li>`).join('') + '</ul>' : '<p class="muted small">Sem comentários.</p>')
       + `<p class="legend">Ordem embaralhada. Na ficha, registre só os temas — nunca copie frases.${t.poucasDetalhe ? ` Com menos de ${N_DIVULGA_DETALHE} respostas, os comentários não se divulgam por unidade.` : ''}</p>`;
   return header('Área do avaliador', 0) + `<div class="wrap"><div class="card" style="max-width:980px">
-    <h1>Contagens · ${esc(settings.unidade || '—')} · ${mesLabel(settings.mes) || '—'}</h1>
+    <h1>Contagens · ${esc(settings.unidade || '—')} · ${mesLabel(settings.mes) || '—'}${settings.data ? ` <span class="small muted">· coleta em ${dataLabel(settings.data)}</span>` : ''}</h1>
     <div class="row"><button class="btn ghost" data-action="tosetup">← Tela inicial (Preparar a coleta)</button><button class="btn ghost" data-action="tocollect">Voltar à coleta com a equipe</button></div>
     ${state.notice ? `<div class="warn">${esc(state.notice)}</div>` : ''}
     ${t.legado ? `<div class="warn"><b>${t.legado} resposta(s) de versão anterior do app</b> (escala de 1 a 5) estão guardadas para esta unidade e mês. Elas não entram nas contagens abaixo; saem no arquivo de respostas com a coluna <i>escala</i> = B5. Exporte e apague antes de continuar.</div>` : ''}
@@ -554,8 +559,7 @@ function viewSettings(){
   return header('Configurações', 0) + `<div class="wrap"><div class="card">
     <h1>Configurações</h1>
     ${unitField('s', 'settings')}
-    <label>Mês da rodada</label><input type="month" id="s-mes" value="${esc(settings.mes)}" placeholder="AAAA-MM">
-    <label>Avaliador(a) (não gravado nas respostas)</label><input type="text" id="s-aval" value="${esc(settings.avaliador)}" autocomplete="off">
+    <label>Data da coleta (preenchida automaticamente)</label><div class="datefield">${dataLabel(hojeISO())} <span class="small muted">· mês de referência ${mesLabel(hojeISO().slice(0, 7))}</span></div>
     <h3>Lista de unidades</h3>
     <p class="small muted">${esc(unidadesInfo())}. Importe a lista completa da empresa a partir do Excel: colunas <b>Código</b> (obrigatória), Nome/Cliente, Endereço, Bairro/Cidade, Região — a primeira linha pode ser o cabeçalho. Aceita .xlsx (precisa de internet na primeira vez) ou .csv.</p>
     <div class="row">
@@ -666,7 +670,7 @@ async function sendPending(){
   let ok = 0;
   for (const r of pend) {
     try {
-      const payload = { app:'pesquisa-equipe-maxipark', versao:r.versao || '1.2', escala:r.escala || 'B5', id:r.id, unidade:r.unidade, mes:r.mes, respostas:r.r, enps:r.enps, ces:r.ces, aberta1:r.a1, aberta2:r.a2, recusas_unidade_mes:(LS.get('mp_recusas', {})[r.unidade + '|' + r.mes] || 0) };
+      const payload = { app:'pesquisa-equipe-maxipark', versao:r.versao || '1.2', escala:r.escala || 'B5', id:r.id, unidade:r.unidade, mes:r.mes, data:r.data || '', respostas:r.r, enps:r.enps, ces:r.ces, aberta1:r.a1, aberta2:r.a2, recusas_unidade_mes:(LS.get('mp_recusas', {})[r.unidade + '|' + r.mes] || 0) };
       await fetch(settings.webhook, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
       const list = allResponses(); const it = list.find(x => x.id === r.id); if (it) { it.sent = true; saveResponses(list); }
       ok++;
@@ -703,21 +707,15 @@ function handle(action, el){
   switch(action){
     case 'start': {
       const u = readUnitInput('f');
-      const m = document.getElementById('f-mes').value.trim();
-      const a = document.getElementById('f-aval').value.trim();
-      if (!u || !validMes(m)) { toast('Escolha a unidade e informe o mês (AAAA-MM).'); return; }
+      if (!u) { toast('Escolha a unidade.'); return; }
       if (!settings.pin) { toast('Defina o PIN do avaliador primeiro.'); return; }
-      settings.unidade = u; settings.mes = m; settings.avaliador = a; saveSettings();
+      settings.unidade = u; fixarData(); saveSettings();   // data da coleta = hoje, automática
       if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
       go('welcome'); break;
     }
     case 'pickunit': {
       // guarda o que já foi digitado nas outras caixas antes de trocar de tela
-      const ret = el.getAttribute('data-ret') || 'setup'; const p = ret === 'setup' ? 'f' : 's';
-      const mesEl = document.getElementById(p + '-mes'), avEl = document.getElementById(p + '-aval');
-      if (mesEl && validMes(mesEl.value.trim())) settings.mes = mesEl.value.trim();
-      if (avEl) settings.avaliador = avEl.value.trim();
-      saveSettings();
+      const ret = el.getAttribute('data-ret') || 'setup';
       go('unidades', { pickReturn: ret, filtro: '' }); break;
     }
     case 'chooseunit': settings.unidade = el.getAttribute('data-c'); saveSettings(); toast('Unidade: ' + settings.unidade); go(state.pickReturn || 'setup'); break;
@@ -818,12 +816,10 @@ function handle(action, el){
     }
     case 'savesettings': {
       const u = readUnitInput('s');
-      const m = document.getElementById('s-mes').value.trim();
-      const a = document.getElementById('s-aval').value.trim();
       const w = document.getElementById('s-webhook').value.trim();
-      if (!u || !validMes(m)) { toast('Escolha a unidade e informe o mês (AAAA-MM).'); return; }
+      if (!u) { toast('Escolha a unidade.'); return; }
       if (w && !/^https:\/\//i.test(w)) { toast('A URL de envio deve começar com https://'); return; }
-      settings.unidade = u; settings.mes = m; settings.avaliador = a; settings.webhook = w; saveSettings();
+      settings.unidade = u; fixarData(); settings.webhook = w; saveSettings();
       toast('Configurações salvas.'); go('admin', { notice: '' }); break;
     }
   }
