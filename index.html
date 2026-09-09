@@ -116,7 +116,7 @@
    Escala de 3 respostas por frase (Sim / resposta do meio / Não) + "Não se aplica" onde faz sentido.
    Valores gravados: 3 = Sim, 2 = resposta do meio, 1 = Não, 'NA' = não se aplica.
    ===================================================================== */
-const VERSAO = '1.3';
+const VERSAO = '1.4';
 const ITENS = [
   {n:1,  dim:'Condições no posto', t:'Os equipamentos que uso no posto (cancela, máquina de cartão, sistema, rádio) funcionam bem.', opts:['Sim','Às vezes','Não']},
   {n:2,  dim:'Condições no posto', t:'Consigo parar para comer durante o meu turno.', opts:['Sim','Às vezes','Não']},
@@ -140,36 +140,37 @@ const ENPS_Q = 'De 0 a 10, quanto você recomendaria a Maxipark a um amigo como 
 const CES_Q = 'Pense na última vez que você precisou resolver algo seu com o escritório da Maxipark (holerite, ponto, uniforme, sistema). Foi fácil resolver?';
 const CES_OPTS = ['Sim, foi fácil', 'Mais ou menos', 'Não, foi difícil'];
 const ABERTAS = ['O que mais atrapalha seu dia de trabalho nesta unidade hoje?', 'Se você pudesse mudar uma coisa na Maxipark, o que seria?'];
-const AVISO = 'Esta pesquisa é <b>sem nome</b> e ninguém é obrigado a responder. As respostas ficam guardadas neste tablet sem nome e são levadas pela área de Experiência do Cliente da Maxipark. O encarregado não vê suas respostas — nem o que você marcou em cada frase, nem a nota de 0 a 10, nem o que você escreveu. Ele só recebe um resumo do supervisor, junto com outras unidades quando a equipe é pequena. Os comentários nunca são copiados palavra por palavra. Caso grave (assédio, ameaça, acidente), use o canal de denúncia, que consegue voltar a falar com você; esta pesquisa não consegue.';
+const AVISO = '<b>Sem nome.</b> O app não grava seu nome, cargo nem horário — só o código da unidade e o mês.<br><b>Quem vê suas respostas:</b> só a área de Experiência do Cliente da Maxipark, que aplica esta pesquisa. Seu chefe direto (encarregado ou supervisor) <b>não vê</b> o que você marcou, a nota de 0 a 10 nem o que você escreveu — ele recebe só um resumo, e junto com outras unidades quando a equipe é pequena.<br><b>Unidade com 1 ou 2 colaboradores:</b> como seria fácil saber quem respondeu, o resultado da sua unidade não é mostrado a ninguém fora dessa área. O retorno vem junto com as outras unidades da região.<br><b>Comentários:</b> a área de Experiência do Cliente lê o que você escreveu; para o encarregado e para a equipe vai só o assunto, nunca a frase.<br><b>Ninguém é obrigado</b> a responder.<br><b>Caso grave</b> (assédio, ameaça, acidente): use o canal de denúncia, que consegue voltar a falar com você; esta pesquisa não consegue.';
 const GLOSSARIO = '<b>Chefe direto</b> = o encarregado da sua unidade (se não tem encarregado, é o supervisor regional). <b>Maxipark / empresa</b> = a Maxipark inteira: seu chefe direto, o supervisor e o escritório. <b>Escritório da Maxipark</b> = o pessoal de RH, pagamento, uniforme e sistemas, que fica fora do posto.';
-const N_MIN_TABELA = 3;      // abaixo disso a tela do avaliador não mostra nada por frase
-const N_MIN_DETALHE = 5;     // eNPS, CES e comentários
+// As contagens são geradas a partir de 1 resposta (há unidades com 1 só colaborador). Os limites abaixo valem para DIVULGAÇÃO, não para o cálculo.
+const N_DIVULGA_FRASE = 3;   // abaixo disso as contagens identificam quem respondeu: uso restrito à área de Experiência do Cliente
+const N_DIVULGA_DETALHE = 5; // eNPS, CES e comentários: só divulgar por unidade a partir daqui
 const IDLE_MS = 120000;      // pesquisa abandonada: descarta e volta ao início
 const PIN_MAX_FAILS = 5, PIN_LOCK_MS = 60000;
 
 /* Lista padrão de unidades (Grande São Paulo — do roteiro da ficha externa). Pode ser substituída pela importação do Excel/CSV. */
 const UNIDADES_PADRAO = [
-  ['GAZETA','Av. Paulista 900','Bela Vista','Centro / Paulista / Bela Vista'],['FIESP','Av. Paulista 1313','Jardins','Centro / Paulista / Bela Vista'],['FL.PARA','Rua Cincinato Braga 306','Bela Vista','Centro / Paulista / Bela Vista'],['BP','Rua Maestro Cardim 637','Bela Vista','Centro / Paulista / Bela Vista'],
-  ['HABITAT','Av. Angélica 1529','Santa Cecília','Angélica / Higienópolis / Sta. Cecília'],['LAV.ANGEL','Av. Angélica 1832','Consolação','Angélica / Higienópolis / Sta. Cecília'],['LAV.ANGEL II','Av. Angélica 2229','Santa Cecília','Angélica / Higienópolis / Sta. Cecília'],['ALTA.HIGIE','Rua Maranhão 983','Higienópolis','Angélica / Higienópolis / Sta. Cecília'],
-  ['NSB','Praça N. S. do Brasil 1','Jardim América','Jardins / Cerqueira César'],['ALTA.JARD','Av. Brasil 1802','Jardins','Jardins / Cerqueira César'],['GARDEN','Rua Dr. Melo Alves 53','Cerqueira César','Jardins / Cerqueira César'],['INCOR','Av. Dr. Enéas C. de Aguiar 44','Cerqueira César','Jardins / Cerqueira César'],
-  ['ACCAST','Rua Castro Alves 131','Aclimação','Liberdade / Aclimação / Paraíso'],['ACPRUDE','Rua Prof. Antônio Prudente 211','Liberdade','Liberdade / Aclimação / Paraíso'],['AC.PIRES','Rua Pires da Mota 1167','Liberdade','Liberdade / Aclimação / Paraíso'],['FL.JUND','Av. Jundiaí 1000','Paraíso','Liberdade / Aclimação / Paraíso'],
-  ['SAL.PARAI','Rua Correia Dias 48','Paraíso','Paraíso / Vila Mariana / V. Clementino'],['SAL.VMARIA','Rua Dr. Diogo de Faria 772','Vila Clementino','Paraíso / Vila Mariana / V. Clementino'],['DEL.MAIO','Rua Dr. Diogo de Faria 1379','Vila Clementino','Paraíso / Vila Mariana / V. Clementino'],['DEL.RICAJAF','Av. Dr. Ricardo Jafet 1550','Vila Mariana','Paraíso / Vila Mariana / V. Clementino'],
-  ['PAINEIRA','Rua Fiação da Saúde 145','Vila da Saúde','Saúde / Ipiranga / Mooca'],['LAV.LABAL','Rua Labatut 523','Ipiranga','Saúde / Ipiranga / Mooca'],['A+MOOCA','Av. Paes de Barros 1610','Cambuci','Saúde / Ipiranga / Mooca'],['DEL.MOOCA','Av. Paes de Barros 663','Mooca','Saúde / Ipiranga / Mooca'],
-  ['A+MOEMA','Av. Indianópolis 922','Indianópolis','Moema / Indianópolis'],['LAV.MOE','Al. dos Jurupis 1761','Indianópolis','Moema / Indianópolis'],['SAL.MOE','Rua Araguari 552','Moema','Moema / Indianópolis'],['MONTREAL','Av. Rouxinol 1041','Moema','Moema / Indianópolis'],
-  ['FL.IBIRA','Av. República do Líbano 635','Ibirapuera','Ibirapuera / Planalto Paulista'],['ALTA.IBIRA','Av. República do Líbano 725','Vila Mariana','Ibirapuera / Planalto Paulista'],['VITA.REP','Av. República do Líbano 1008','Moema','Ibirapuera / Planalto Paulista'],['SAL.IBIRA','Av. Divino Salvador 876','Planalto Paulista','Ibirapuera / Planalto Paulista'],
-  ['ALTA.CBEL','Av. Ver. José Diniz 3560','Campo Belo','Campo Belo / Santo Amaro / Brooklin'],['DEL.BROK','Av. Ver. José Diniz 3687','Santo Amaro','Campo Belo / Santo Amaro / Brooklin'],['PET.CBEL','Rua Vieira de Moraes 1862','Campo Belo','Campo Belo / Santo Amaro / Brooklin'],['GLOBO.SP','Av. Dr. Chucri Zaidan 46','Vila Cordeiro','Campo Belo / Santo Amaro / Brooklin'],
-  ['LAV.BORGAT','Av. Santo Amaro 5662','Santo Amaro','Santo Amaro / Marajoara / Vila Andrade'],['A+FLORA','Av. Washington Luís 2480','Jd. Marajoara','Santo Amaro / Marajoara / Vila Andrade'],['DEL.WASLUIS','Av. Washington Luís 2530','Jd. Marajoara','Santo Amaro / Marajoara / Vila Andrade'],['ALTA.PAN','Rua Dep. João Sussumu Hirata 690','Vila Andrade','Santo Amaro / Marajoara / Vila Andrade'],['DEL.JSUL','Rua Jandiatuba 566','Vila Andrade','Santo Amaro / Marajoara / Vila Andrade'],['SAL.PORTAL','Rua Prof. Hilário Veiga de Carvalho 312','Vila Suzana','Santo Amaro / Marajoara / Vila Andrade'],
-  ['FL.ITAIM','Av. Pres. JK 1117','Vila Olímpia','Itaim Bibi / Vila Olímpia'],['DEL.ITAIM','Rua João Cachoeira 743','Itaim Bibi','Itaim Bibi / Vila Olímpia'],['AC.ITAIM','Av. Brig. Luís Antônio 5013','Jardim Paulista','Itaim Bibi / Vila Olímpia'],
-  ['QUITANDA','Rua Mateus Grou 159','Pinheiros','Pinheiros / V. Madalena / Alto de Pinheiros'],['DEL.PIN','Rua Capepuxis 429','Vila Madalena','Pinheiros / V. Madalena / Alto de Pinheiros'],['ALTA.PIN','Praça São Marcos 20','Vila Ida','Pinheiros / V. Madalena / Alto de Pinheiros'],['FL.VILLA','Rua Castro Delgado 188','Alto de Pinheiros','Pinheiros / V. Madalena / Alto de Pinheiros'],
-  ['FL.SUMA','Av. Sumaré 1334','Perdizes','Perdizes / Pompeia'],['CARL','Rua Henrique Valgas 144','Perdizes / Sumaré','Perdizes / Pompeia'],['DEL.POM','Av. Pompéia 1007','Pompeia','Perdizes / Pompeia'],
-  ['CVLOP','Av. Queiroz Filho 1700','Vila Romana','Vila Romana / Alto da Lapa'],['SAL.LAPA','Rua Cerro Corá 1044','Alto da Lapa','Vila Romana / Alto da Lapa'],['A+LAPA','Rua Barão de Jundiaí 284','Lapa','Vila Romana / Alto da Lapa'],
-  ['LAV.LAPA','Rua Tomé de Souza 220','Lapa','Lapa / Osasco'],['BR.LAPA','Rua Domingos Rodrigues 645','Lapa','Lapa / Osasco'],['DEL.LAPA','Rua Brig. Gavião Peixoto 360','Lapa','Lapa / Osasco'],['DEL.OSASCO','Rua General Bittencourt 255','Centro / Osasco','Lapa / Osasco'],['SAL.OSASCO','Av. dos Autonomistas 2632','Vila Yara / Osasco','Lapa / Osasco'],
-  ['A+ALPHA','Av. Copacabana 574','Alphaville / Barueri','Alphaville / Barueri'],['RESERVA','Av. Copacabana 574','Alphaville / Barueri','Alphaville / Barueri'],['ARAGUAI','Al. Araguaia 750','Alphaville / Barueri','Alphaville / Barueri'],['DEL.ALPHA','Av. Juruá 434','Alphaville / Barueri','Alphaville / Barueri'],
-  ['SAL.TATUA','Praça Sílvio Romero 193','Vila Gomes Cardim','Zona Leste (Tatuapé / Carrão / Penha)'],['DEL.TATU','Rua Serra de Bragança 1130','Tatuapé','Zona Leste (Tatuapé / Carrão / Penha)'],['FL.AFRA','Rua Antônio de Barros 2203','Vila Carrão','Zona Leste (Tatuapé / Carrão / Penha)'],['ALTA.AFRAN','Rua Apucarana 1638','Jd. Anália Franco','Zona Leste (Tatuapé / Carrão / Penha)'],['LAV.AMARBUE','Av. Amador Bueno da Veiga 1793','Penha de França','Zona Leste (Tatuapé / Carrão / Penha)'],
-  ['LAV.DARZAN','Rua Darzan 208','Santana','Zona Norte (Santana / Jd. São Paulo)'],['SAL.SANTA','Av. Leôncio de Magalhães 1133','Jd. São Paulo','Zona Norte (Santana / Jd. São Paulo)'],['DEL.DUMVIL','Av. Luiz Dumont Villares 514','Jd. São Paulo','Zona Norte (Santana / Jd. São Paulo)'],
-  ['LAV.TUCUR','Av. Mazzei 264','Tucuruvi','Tucuruvi + Guarulhos'],['DEL.GUARU','Av. Paulo Faccini 291','Macedo / Guarulhos','Tucuruvi + Guarulhos'],['A+GUARU','Av. Paulo Faccini 1315','Centro / Guarulhos','Tucuruvi + Guarulhos'],
-  ['A+SAND','Av. Dom Pedro II 293','Santo André','ABC (Santo André + S. Bernardo)'],['DEL.SAND II','Av. Dom Pedro II 781','Santo André','ABC (Santo André + S. Bernardo)'],['DEL.SAND I','Av. Portugal 1136','Centro / Santo André','ABC (Santo André + S. Bernardo)'],['DEL.SBC','Av. Lucas Nogueira Garcez 755','Centro / S.B. Campo','ABC (Santo André + S. Bernardo)'],['FL.SBC','Av. Lucas Nogueira Garcez 666','Centro / S.B. Campo','ABC (Santo André + S. Bernardo)'],
-].map(a => ({ codigo:a[0], nome:'', endereco:a[1], bairro:a[2], regiao:a[3] }));
+  ['GAZETA','Bela Vista'],['FIESP','Jardins'],['FL.PARA','Bela Vista'],['BP','Bela Vista'],
+  ['HABITAT','Santa Cecília'],['LAV.ANGEL','Consolação'],['LAV.ANGEL II','Santa Cecília'],['ALTA.HIGIE','Higienópolis'],
+  ['NSB','Jardim América'],['ALTA.JARD','Jardins'],['GARDEN','Cerqueira César'],['INCOR','Cerqueira César'],
+  ['ACCAST','Aclimação'],['ACPRUDE','Liberdade'],['AC.PIRES','Liberdade'],['FL.JUND','Paraíso'],
+  ['SAL.PARAI','Paraíso'],['SAL.VMARIA','Vila Clementino'],['DEL.MAIO','Vila Clementino'],['DEL.RICAJAF','Vila Mariana'],
+  ['PAINEIRA','Vila da Saúde'],['LAV.LABAL','Ipiranga'],['A+MOOCA','Cambuci'],['DEL.MOOCA','Mooca'],
+  ['A+MOEMA','Indianópolis'],['LAV.MOE','Indianópolis'],['SAL.MOE','Moema'],['MONTREAL','Moema'],
+  ['FL.IBIRA','Ibirapuera'],['ALTA.IBIRA','Vila Mariana'],['VITA.REP','Moema'],['SAL.IBIRA','Planalto Paulista'],
+  ['ALTA.CBEL','Campo Belo'],['DEL.BROK','Santo Amaro'],['PET.CBEL','Campo Belo'],['GLOBO.SP','Vila Cordeiro'],
+  ['LAV.BORGAT','Santo Amaro'],['A+FLORA','Jd. Marajoara'],['DEL.WASLUIS','Jd. Marajoara'],['ALTA.PAN','Vila Andrade'],['DEL.JSUL','Vila Andrade'],['SAL.PORTAL','Vila Suzana'],
+  ['FL.ITAIM','Vila Olímpia'],['DEL.ITAIM','Itaim Bibi'],['AC.ITAIM','Jardim Paulista'],
+  ['QUITANDA','Pinheiros'],['DEL.PIN','Vila Madalena'],['ALTA.PIN','Vila Ida'],['FL.VILLA','Alto de Pinheiros'],
+  ['FL.SUMA','Perdizes'],['CARL','Perdizes / Sumaré'],['DEL.POM','Pompeia'],
+  ['CVLOP','Vila Romana'],['SAL.LAPA','Alto da Lapa'],['A+LAPA','Lapa'],
+  ['LAV.LAPA','Lapa'],['BR.LAPA','Lapa'],['DEL.LAPA','Lapa'],['DEL.OSASCO','Centro / Osasco'],['SAL.OSASCO','Vila Yara / Osasco'],
+  ['A+ALPHA','Alphaville / Barueri'],['RESERVA','Alphaville / Barueri'],['ARAGUAI','Alphaville / Barueri'],['DEL.ALPHA','Alphaville / Barueri'],
+  ['SAL.TATUA','Vila Gomes Cardim'],['DEL.TATU','Tatuapé'],['FL.AFRA','Vila Carrão'],['ALTA.AFRAN','Jd. Anália Franco'],['LAV.AMARBUE','Penha de França'],
+  ['LAV.DARZAN','Santana'],['SAL.SANTA','Jd. São Paulo'],['DEL.DUMVIL','Jd. São Paulo'],
+  ['LAV.TUCUR','Tucuruvi'],['DEL.GUARU','Macedo / Guarulhos'],['A+GUARU','Centro / Guarulhos'],
+  ['A+SAND','Santo André'],['DEL.SAND II','Santo André'],['DEL.SAND I','Centro / Santo André'],['DEL.SBC','Centro / S.B. Campo'],['FL.SBC','Centro / S.B. Campo'],
+].map(a => ({ codigo:a[0], nome:a[1] }));   // lista padrão: só código e nome (local) — sem endereço; a lista completa da empresa vem pela importação
 
 /* ---------------- armazenamento local (só neste tablet) ---------------- */
 const LS = {
@@ -270,7 +271,7 @@ function viewUnidades(){
   const shown = hits.slice(0, 80);
   return header('Escolher unidade', 0) + `<div class="wrap"><div class="card">
     <h2>Qual é a unidade?</h2>
-    <input type="search" id="u-filtro" value="${esc(state.filtro)}" placeholder="Digite parte do código, bairro, endereço ou região" autocomplete="off" autofocus>
+    <input type="search" id="u-filtro" value="${esc(state.filtro)}" placeholder="${(LS.get('mp_unidades', null) || {}).origem ? 'Digite parte do código, do cliente, do endereço, do bairro ou da região' : 'Digite parte do código ou do bairro (ex.: GAZETA ou Bela Vista)'}" autocomplete="off" autofocus>
     <p class="small muted" style="margin:8px 0 0">${hits.length} de ${lista.length} unidades${hits.length > shown.length ? ' (mostrando as primeiras ' + shown.length + ' — refine a busca)' : ''} · ${esc(unidadesInfo())}</p>
     <div class="ulist">${shown.map(u => `<button class="uitem" data-action="chooseunit" data-c="${esc(u.codigo)}"><b>${esc(u.codigo)}${u.nome ? ' · ' + esc(u.nome) : ''}</b><span>${esc([u.endereco, u.bairro, u.regiao].filter(Boolean).join(' · '))}</span></button>`).join('') || '<p class="muted">Nenhuma unidade com esse texto. Você pode digitar o código direto no campo Unidade.</p>'}</div>
     <div class="row"><button class="btn ghost block" data-action="cancelpick">Voltar</button></div>
@@ -300,12 +301,12 @@ function viewSetPin(){
 }
 
 function viewWelcome(){
-  return header(esc(settings.unidade) + ' · ' + mesLabel(settings.mes), 0) + `<div class="wrap"><div class="card">
+  return header(settings.unidade + ' · ' + mesLabel(settings.mes), 0) + `<div class="wrap"><div class="card">
     <h1>Sua opinião melhora o posto onde você trabalha</h1>
     <ul class="plain">
-      <li><b>Sem nome.</b> Ninguém sabe o que você marcou.</li>
+      <li><b>Sem nome.</b> Suas respostas vão só para a área de Experiência do Cliente.</li>
       <li><b>Ninguém é obrigado</b> a responder.</li>
-      <li>O encarregado <b>não vê</b> suas respostas.</li>
+      <li>Seu chefe direto (encarregado ou supervisor) <b>não vê</b> suas respostas.</li>
       <li>15 frases para marcar <b>Sim</b>, <b>Não</b> ou uma resposta do meio, uma nota de 0 a 10, uma pergunta sobre o escritório e duas perguntas para escrever se quiser. Uns 4 minutos.</li>
     </ul>
     <details><summary>Ler o aviso completo e o que significam as palavras</summary>
@@ -376,14 +377,15 @@ function viewOpen(){
 }
 
 function viewThanks(){
-  return header(esc(settings.unidade) + ' · ' + mesLabel(settings.mes), 100) + `<div class="wrap"><div class="card thanks">
+  // Só 2 botões (pedido do gestor); sem o "⚙ Avaliador" de canto nesta tela, que repetiria o segundo botão.
+  return header(settings.unidade + ' · ' + mesLabel(settings.mes), 100) + `<div class="wrap"><div class="card thanks">
     <div class="check">✓</div>
     <h1>Obrigado!</h1>
-    <p>Pode entregar o tablet ao avaliador.</p>
-    <p class="muted">Em até 15 dias o supervisor traz o retorno: o que ouvimos, o que vamos fazer e quando.</p>
+    <p>Pronto — você já terminou. Pode entregar o tablet ao avaliador.</p>
+    <p class="muted">Em até 15 dias vem o retorno — da sua unidade ou, se a equipe é pequena, da região: o que ouvimos, o que vamos fazer e quando.</p>
     <div class="row"><button class="btn block" data-action="nextperson">Próximo colaborador</button></div>
-    <div class="row"><button class="btn link block" data-action="pin" data-target="setup">Encerrar a coleta e voltar ao início (avaliador, com PIN)</button></div>
-  </div></div>` + cornerBtn();
+    <div class="row"><button class="btn ghost block" data-action="pin" data-target="admin">Finalizar pesquisa — só o avaliador (pede o PIN)</button></div>
+  </div></div>`;
 }
 
 function viewSaveError(){
@@ -434,30 +436,33 @@ function tally(list){
   });
   coments = shuffle(coments);   // nunca na ordem em que as pessoas responderam
   const nResp = list.length - legado;
-  // por frase: só mostra a linha se a própria frase tem 3+ respostas válidas (B6 e B14 podem ter muitos "Não se aplica")
-  items.forEach(it => { it.ok = nResp >= N_MIN_TABELA && it.n >= N_MIN_TABELA; it.pctSim = it.ok ? Math.round(it.c[2] / it.n * 100) : null; });
-  const enpsVal = enps.n >= N_MIN_DETALHE ? Math.round((enps.pro - enps.det) / enps.n * 100) : null;
-  const cesOk = ces.n >= N_MIN_DETALHE;   // 5+ pessoas que precisaram do escritório (sem "Nunca precisei")
-  const cesFacil = cesOk ? Math.round(ces.sim / ces.n * 100) : null;
+  // tudo é calculado a partir de 1 resposta; os sinais abaixo só dizem o que pode ser DIVULGADO por unidade
+  // 'poucas' só quando a unidade tem respostas suficientes mas a frase não (houve "Não se aplica"); com 1-2 respostas o banner vermelho já cobre
+  items.forEach(it => { it.pctSim = it.n ? Math.round(it.c[2] / it.n * 100) : null; it.poucas = nResp >= N_DIVULGA_FRASE && it.n > 0 && it.n < N_DIVULGA_FRASE; });
+  const enpsVal = enps.n ? Math.round((enps.pro - enps.det) / enps.n * 100) : null;
+  const cesFacil = ces.n ? Math.round(ces.sim / ces.n * 100) : null;
   const totSim = items.reduce((a, it) => a + it.c[2], 0), totN = items.reduce((a, it) => a + it.n, 0);
   const pctSimGeral = totN ? Math.round(totSim / totN * 100) : null;
-  return { items, enps, ces, cesOk, coments, nResp, legado, enpsVal, cesFacil, pctSimGeral };
+  const identificavel = nResp > 0 && nResp < N_DIVULGA_FRASE;          // 1 ou 2 pessoas: as contagens são as respostas delas
+  const poucasDetalhe = nResp > 0 && nResp < N_DIVULGA_DETALHE;        // eNPS, CES e comentários: não divulgar por unidade
+  const cesPoucas = ces.n > 0 && ces.n < N_DIVULGA_DETALHE;            // poucos precisaram do escritório
+  return { items, enps, ces, coments, nResp, legado, enpsVal, cesFacil, pctSimGeral, identificavel, poucasDetalhe, cesPoucas };
 }
 
 function tallyText(t){
   const L = [];
   L.push(`Pesquisa equipe Maxipark v${VERSAO} (escala ${ESCALA}: 3 respostas por frase)\tUnidade: ${settings.unidade}\tMês: ${mesLabel(settings.mes)}\tRespostas: ${t.nResp}\tPreferiram não responder: ${refusals()}`);
   if (t.legado) L.push(`Atenção: ${t.legado} resposta(s) de versão anterior do app (escala 1-5) não entram nestas contagens — só no arquivo de respostas.`);
-  if (t.nResp < N_MIN_TABELA) { L.push(`Menos de ${N_MIN_TABELA} respostas: não divulgar nada por unidade — só no agregado regional.`); return L.join('\n'); }
+  if (!t.nResp) { L.push('Ainda não há respostas desta unidade e mês.'); return L.join('\n'); }
+  if (t.identificavel) L.push(`ATENÇÃO: só ${t.nResp} resposta${t.nResp > 1 ? 's' : ''} — as contagens abaixo são as respostas de ${t.nResp === 1 ? 'uma pessoa' : 'duas pessoas'}. Uso restrito à área de Experiência do Cliente: digitar na ficha, sim; divulgar por unidade ou mostrar ao encarregado, não.`);
+  else if (t.poucasDetalhe) L.push(`${t.nResp} respostas: pode digitar na ficha e divulgar Nota B e dimensões; eNPS, CES e comentários só se divulgam por unidade com ${N_DIVULGA_DETALHE} ou mais.`);
   L.push('Frase\tNão\tResposta do meio (rótulo)\tSim\tNão se aplica\tResponderam (sem N/A)\t% Sim');
-  t.items.forEach((it, i) => { const c = v => it.ok ? v : '-'; L.push(`B${i+1}\t${c(it.c[0])}\t${c(it.c[1])} (${ITENS[i].opts[1]})\t${c(it.c[2])}\t${ITENS[i].na ? it.na : '-'}\t${it.n}\t${it.ok ? it.pctSim + '%' : '-'}`); });
-  if (t.items.some(it => !it.ok)) L.push(`(- = menos de ${N_MIN_TABELA} respostas válidas na frase: não divulgar; só no agregado regional)`);
+  t.items.forEach((it, i) => L.push(`B${i+1}\t${it.c[0]}\t${it.c[1]} (${ITENS[i].opts[1]})\t${it.c[2]}\t${ITENS[i].na ? it.na : '-'}\t${it.n}\t${it.pctSim == null ? '-' : it.pctSim + '%' + (it.poucas ? ' *' : '')}`));
+  if (t.items.some(it => it.poucas)) L.push(`(* = menos de ${N_DIVULGA_FRASE} responderam a essa frase; os outros marcaram "Não se aplica" — % frágil, não divulgar por unidade)`);
   L.push('Leitura: 3 = Sim, 2 = resposta do meio, 1 = Não. Em B12 "Não lembro" conta como não elogiado; em B15 "Talvez" não é meio-termo: leia essas duas só pelo % Sim.');
-  if (t.nResp >= N_MIN_DETALHE) {
-    L.push(`eNPS (0 a 10)\tDetratores 0-6: ${t.enps.det}\tNeutros 7-8: ${t.enps.neu}\tPromotores 9-10: ${t.enps.pro}\tn = ${t.enps.n}\t${t.enpsVal == null ? '' : 'eNPS = ' + t.enpsVal}`);
-    const c = v => t.cesOk ? v : '-';
-    L.push(`CES (escritório)\tNão, foi difícil: ${c(t.ces.nao)}\tMais ou menos: ${c(t.ces.meio)}\tSim, foi fácil: ${c(t.ces.sim)}\tNunca precisei: ${t.ces.np}\t${t.cesOk ? '% fácil = ' + t.cesFacil + '%' : 'menos de ' + N_MIN_DETALHE + ' precisaram do escritório: não divulgar'}`);
-  } else L.push(`eNPS e CES: só com ${N_MIN_DETALHE} ou mais respostas.`);
+  L.push(`eNPS (0 a 10)\tDetratores 0-6: ${t.enps.det}\tNeutros 7-8: ${t.enps.neu}\tPromotores 9-10: ${t.enps.pro}\tn = ${t.enps.n}\t${t.enpsVal == null ? '' : 'eNPS = ' + t.enpsVal}`);
+  L.push(`CES (escritório)\tNão, foi difícil: ${t.ces.nao}\tMais ou menos: ${t.ces.meio}\tSim, foi fácil: ${t.ces.sim}\tNunca precisei: ${t.ces.np}\t${t.cesFacil == null ? '' : '% fácil = ' + t.cesFacil + '%'}${t.cesPoucas ? ' (menos de ' + N_DIVULGA_DETALHE + ' precisaram do escritório)' : ''}`);
+  if (t.poucasDetalhe) L.push(`(eNPS e CES: não divulgar por unidade com menos de ${N_DIVULGA_DETALHE} respostas)`);
   return L.join('\n');
 }
 
@@ -476,40 +481,38 @@ function viewAdmin(){
   const unsent = allResponses().filter(r => !r.sent).length;
   const others = otherKeys(); const otherCount = Object.values(others).reduce((a, b) => a + b, 0);
   const exported = !!settings.exported[key()];
-  let tabela = '';
+  let tabela = '', aviso = '';
+  const obs = refusals() ? 'Como houve quem preferiu não responder, quem viu a fila sabe quem respondeu: redobre o cuidado.' : 'Se a unidade tem só 1 ou 2 colaboradores, isso é esperado.';
+  if (t.identificavel) aviso = `<div class="bad"><b>Só ${t.nResp} resposta${t.nResp > 1 ? 's' : ''}: as contagens abaixo são as respostas de ${t.nResp === 1 ? 'uma pessoa' : 'duas pessoas'}.</b> Servem para preencher a ficha, mas são de uso restrito da área de Experiência do Cliente: não divulgue por unidade e não mostre esta tela ao encarregado nem ao supervisor. ${obs} A devolutiva vem junto com outras unidades da região.</div>`;
+  else if (t.poucasDetalhe) aviso = `<div class="warn"><b>${t.nResp} respostas.</b> Pode digitar na ficha e divulgar Nota B e dimensões por unidade; eNPS, CES e comentários só se divulgam por unidade com ${N_DIVULGA_DETALHE} ou mais respostas.</div>`;
   if (t.nResp === 0) tabela = '<p class="muted">Ainda não há respostas para esta unidade e mês.</p>';
-  else if (t.nResp < N_MIN_TABELA) tabela = `<div class="bad"><b>Menos de ${N_MIN_TABELA} respostas.</b> Para proteger quem respondeu, o app não mostra nada por frase. Não divulgue nada por unidade: essas respostas entram só no agregado regional. Continue a coleta ou exporte o arquivo para a área de Experiência do Cliente.</div>`;
   else {
-    const rows = t.items.map((it, i) => { const c = v => it.ok ? v : '—';
-      return `<tr><td class="l"><b>B${i+1}</b> <span class="small muted">${esc(ITENS[i].t)}</span></td><td>${c(it.c[0])}</td><td>${c(it.c[1])} <span class="small muted">${esc(ITENS[i].opts[1])}</span></td><td>${c(it.c[2])}</td><td>${ITENS[i].na ? it.na : '—'}</td><td><b>${it.n}</b></td><td><b>${it.ok ? it.pctSim + '%' : '—'}</b></td></tr>`; }).join('');
-    const mascaradas = t.items.some(it => !it.ok) ? `<p class="legend">— = menos de ${N_MIN_TABELA} colaboradores responderam a essa frase (os outros marcaram "Não se aplica"): para proteger quem respondeu, não é mostrada nem divulgada; entra só no agregado regional.</p>` : '';
-    let detalhe = '';
-    if (t.nResp >= N_MIN_DETALHE) {
-      const c = v => t.cesOk ? `<b>${v}</b>` : '—';
-      detalhe = `<h3>Nota de 0 a 10 e pergunta sobre o escritório</h3><div style="overflow:auto"><table>
+    const rows = t.items.map((it, i) => `<tr><td class="l"><b>B${i+1}</b> <span class="small muted">${esc(ITENS[i].t)}</span></td><td>${it.c[0]}</td><td>${it.c[1]} <span class="small muted">${esc(ITENS[i].opts[1])}</span></td><td>${it.c[2]}</td><td>${ITENS[i].na ? it.na : '—'}</td><td><b>${it.n}</b></td><td><b>${it.pctSim == null ? '—' : it.pctSim + '%'}</b>${it.poucas ? ' *' : ''}</td></tr>`).join('');
+    const poucas = t.items.some(it => it.poucas) ? `<p class="legend">* = menos de ${N_DIVULGA_FRASE} colaboradores responderam a essa frase (os outros marcaram "Não se aplica"): o % é frágil e não deve ser divulgado por unidade.</p>` : '';
+    const detalhe = `<h3>Nota de 0 a 10 e pergunta sobre o escritório</h3><div style="overflow:auto"><table>
         <tr><th class="l">Pergunta</th><th>Detratores 0-6</th><th>Neutros 7-8</th><th>Promotores 9-10</th><th>Responderam</th><th>Resultado</th></tr>
         <tr><td class="l"><b>Recomendaria a Maxipark</b> (0 a 10)</td><td><b>${t.enps.det}</b></td><td><b>${t.enps.neu}</b></td><td><b>${t.enps.pro}</b></td><td><b>${t.enps.n}</b></td><td><b>${t.enpsVal == null ? '—' : (t.enpsVal > 0 ? '+' : '') + t.enpsVal}</b> eNPS</td></tr>
         <tr><th class="l">Pergunta</th><th>Não, foi difícil</th><th>Mais ou menos</th><th>Sim, foi fácil</th><th>Nunca precisei</th><th>Resultado</th></tr>
-        <tr><td class="l"><b>Foi fácil resolver com o escritório?</b></td><td>${c(t.ces.nao)}</td><td>${c(t.ces.meio)}</td><td>${c(t.ces.sim)}</td><td><b>${t.ces.np}</b></td><td><b>${t.cesOk ? t.cesFacil + '% fácil' : '—'}</b></td></tr></table></div>
-        ${t.cesOk ? '' : `<p class="legend">Escritório: menos de ${N_MIN_DETALHE} colaboradores precisaram resolver algo (os outros marcaram "Nunca precisei"); as respostas deles ficam escondidas para não identificar ninguém.</p>`}`;
-    } else detalhe = `<p class="legend">A nota de 0 a 10 (eNPS) e a pergunta sobre o escritório (CES) só aparecem com ${N_MIN_DETALHE} ou mais respostas.</p>`;
+        <tr><td class="l"><b>Foi fácil resolver com o escritório?</b></td><td><b>${t.ces.nao}</b></td><td><b>${t.ces.meio}</b></td><td><b>${t.ces.sim}</b></td><td><b>${t.ces.np}</b></td><td><b>${t.cesFacil == null ? '—' : t.cesFacil + '% fácil'}</b></td></tr></table></div>
+        ${t.poucasDetalhe || t.cesPoucas ? `<p class="legend">${t.poucasDetalhe ? `eNPS e CES por unidade só se divulgam com ${N_DIVULGA_DETALHE} ou mais respostas${t.cesPoucas ? ' (no CES, contam só os que precisaram do escritório)' : ''}` : `CES por unidade só se divulga quando ${N_DIVULGA_DETALHE} ou mais colaboradores precisaram do escritório (aqui: ${t.ces.n}); o eNPS pode ser divulgado`}. Com menos, entra só no agregado da região.</p>` : ''}`;
     tabela = `<div style="overflow:auto"><table>
       <tr><th class="l">Frase</th><th>Não</th><th>Resposta do meio</th><th>Sim</th><th>Não se aplica</th><th>Responderam (sem N/A)</th><th>% Sim</th></tr>${rows}</table></div>
-      <p class="legend">Cada número é a quantidade de colaboradores que deu aquela resposta. Copie as linhas B1–B15 para a ficha em Excel (colunas Não · Resposta do meio · Sim · Não se aplica). Em B12, "Não lembro" conta como não elogiado; em B15, "Talvez" não é meio-termo — leia essas duas só pelo % Sim.</p>${mascaradas}${detalhe}`;
+      <p class="legend">Cada número é a quantidade de colaboradores que deu aquela resposta. Copie as linhas B1–B15 para a ficha em Excel (colunas Não · Resposta do meio · Sim · Não se aplica). Em B12, "Não lembro" conta como não elogiado; em B15, "Talvez" não é meio-termo — leia essas duas só pelo % Sim.</p>${poucas}${detalhe}`;
   }
-  const comentHtml = t.nResp >= N_MIN_DETALHE
-    ? (t.coments.length ? '<ul>' + t.coments.map(c => `<li>${esc(c)}</li>`).join('') + '</ul><p class="legend">Ordem embaralhada. Na ficha, registre só os temas — nunca copie frases.</p>' : '<p class="muted small">Sem comentários.</p>')
-    : `<div class="warn">Comentários só aparecem com ${N_MIN_DETALHE} ou mais respostas nesta unidade e mês (anonimato). Eles seguem no arquivo exportado para a área de Experiência do Cliente.</div>`;
+  const comentHtml = !t.nResp ? '<p class="muted small">Sem respostas.</p>'
+    : (t.coments.length ? '<ul>' + t.coments.map(c => `<li>${esc(c)}</li>`).join('') + '</ul>' : '<p class="muted small">Sem comentários.</p>')
+      + `<p class="legend">Ordem embaralhada. Na ficha, registre só os temas — nunca copie frases.${t.poucasDetalhe ? ` Com menos de ${N_DIVULGA_DETALHE} respostas, os comentários não se divulgam por unidade.` : ''}</p>`;
   return header('Área do avaliador', 0) + `<div class="wrap"><div class="card" style="max-width:980px">
     <h1>Contagens · ${esc(settings.unidade || '—')} · ${mesLabel(settings.mes) || '—'}</h1>
     ${state.notice ? `<div class="warn">${esc(state.notice)}</div>` : ''}
     ${t.legado ? `<div class="warn"><b>${t.legado} resposta(s) de versão anterior do app</b> (escala de 1 a 5) estão guardadas para esta unidade e mês. Elas não entram nas contagens abaixo; saem no arquivo de respostas com a coluna <i>escala</i> = B5. Exporte e apague antes de continuar.</div>` : ''}
+    ${aviso}
     <div class="kpi">
-      <div><b>${t.nResp}</b><span>respostas completas</span></div>
+      <div><b>${t.nResp}</b><span>${t.nResp === 1 ? 'resposta completa' : 'respostas completas'}</span></div>
       <div><b>${refusals()}</b><span>preferiram não responder</span></div>
-      <div><b>${t.nResp >= N_MIN_TABELA && t.pctSimGeral != null ? t.pctSimGeral + '%' : '—'}</b><span>% de "Sim" (todas as respostas às 15 frases)</span></div>
-      <div><b>${t.enpsVal == null ? '—' : (t.enpsVal > 0 ? '+' : '') + t.enpsVal}</b><span>eNPS (só com ${N_MIN_DETALHE}+ respostas)</span></div>
-      <div><b>${t.cesFacil == null ? '—' : t.cesFacil + '%'}</b><span>acham fácil resolver com o escritório (${N_MIN_DETALHE}+ que precisaram)</span></div>
+      <div><b>${t.pctSimGeral != null ? t.pctSimGeral + '%' : '—'}</b><span>% de "Sim" (todas as respostas às 15 frases)</span></div>
+      <div><b>${t.enpsVal == null ? '—' : (t.enpsVal > 0 ? '+' : '') + t.enpsVal}</b><span>eNPS</span></div>
+      <div><b>${t.cesFacil == null ? '—' : t.cesFacil + '%'}</b><span>acham fácil resolver com o escritório</span></div>
       ${settings.webhook ? `<div><b>${unsent}</b><span>ainda não enviadas à matriz</span></div>` : ''}
     </div>
     <h3>Quantos colaboradores deram cada resposta</h3>
@@ -517,11 +520,11 @@ function viewAdmin(){
     <h3>Comentários</h3>
     ${comentHtml}
     <h3>Exportar</h3>
-    <p class="small muted">As contagens seguem a regra de anonimato (nada por frase com menos de ${N_MIN_TABELA} respostas válidas; eNPS e comentários só com ${N_MIN_DETALHE}+ respostas; CES só com ${N_MIN_DETALHE}+ que precisaram do escritório). O arquivo de respostas tem uma linha por pessoa, em ordem embaralhada, com as colunas <i>versao</i> e <i>escala</i> (${ESCALA} = 3 respostas por frase) — só para a área de Experiência do Cliente. O texto das contagens traz o número de recusas; mande os dois juntos.</p>
+    <p class="small muted">As contagens saem a partir de 1 resposta (há unidades com 1 colaborador). Regra de divulgação por unidade: com menos de ${N_DIVULGA_FRASE} respostas, nada — uso restrito da área de Experiência do Cliente; com ${N_DIVULGA_FRASE} a ${N_DIVULGA_DETALHE - 1}, Nota B e dimensões; eNPS, CES e comentários só com ${N_DIVULGA_DETALHE} ou mais. O arquivo de respostas tem uma linha por pessoa, em ordem embaralhada, com as colunas <i>versao</i> e <i>escala</i> (${ESCALA} = 3 respostas por frase) — só para a área de Experiência do Cliente. O texto das contagens traz o número de recusas; mande os dois juntos.</p>
     <div class="row">
       <button class="btn light" data-action="copy" ${t.nResp ? '' : 'disabled'}>Copiar contagens</button>
       <button class="btn light" data-action="showtext" ${t.nResp ? '' : 'disabled'}>Ver contagens como texto</button>
-      <button class="btn light" data-action="csv" ${t.nResp ? '' : 'disabled'}>${navigator.share ? 'Compartilhar arquivo de respostas' : 'Baixar arquivo de respostas (CSV)'}</button>
+      <button class="btn light" data-action="csv" ${list.length ? '' : 'disabled'}>${navigator.share ? 'Compartilhar arquivo de respostas' : 'Baixar arquivo de respostas (CSV)'}</button>
       <button class="btn light" data-action="mail" ${t.nResp ? '' : 'disabled'}>Enviar contagens por e-mail</button>
       ${settings.webhook ? `<button class="btn light" data-action="resend" ${unsent ? '' : 'disabled'}>Enviar à matriz agora (${unsent})</button>` : ''}
     </div>
@@ -529,7 +532,7 @@ function viewAdmin(){
     ${otherCount ? `<div class="warn">Este tablet ainda guarda <b>${otherCount}</b> resposta(s) de outras unidades/meses: ${Object.keys(others).map(k => esc(k.replace('|', ' · '))).join(', ')}. <button class="btn link" data-action="wipeothers">Apagar essas outras respostas</button></div>` : ''}
     <div class="row">
       <button class="btn ghost" data-action="settings">Configurações (unidade, mês, lista de unidades, PIN, envio)</button>
-      <button class="btn danger" data-action="wipe" ${t.nResp || refusals() ? '' : 'disabled'}>Apagar respostas desta unidade e mês${exported ? '' : ' (ainda não exportadas)'}</button>
+      <button class="btn danger" data-action="wipe" ${list.length || refusals() ? '' : 'disabled'}>Apagar respostas desta unidade e mês${exported ? '' : ' (ainda não exportadas)'}</button>
     </div>
     <div class="row">
       <button class="btn block" data-action="tocollect">Voltar à coleta com a equipe</button>
@@ -583,7 +586,8 @@ function rowsToUnidades(rows){
   if (!rows.length) return [];
   const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   const head = rows[0].map(norm);
-  const looksHeader = head.some(h => /cod|unid|nome|cliente|ender|bairro|cidade|regi/.test(h));
+  // cabeçalho só se a 1ª coluna parece "código/unidade" ou se 2+ colunas COMEÇAM com nome de campo (evita descartar uma unidade cujo bairro é "Cidade Jardim")
+  const looksHeader = /^(cod|unid|sigla)/.test(head[0]) || head.filter(h => /^(nome|cliente|ender|logradouro|bairro|cidade|munic|regi)/.test(h)).length >= 2;
   let idx = { codigo:0, nome:1, endereco:2, bairro:3, regiao:4 };
   if (looksHeader) {
     const find = re => head.findIndex(h => re.test(h));
@@ -775,9 +779,13 @@ function handle(action, el){
     case 'showtext': go('text', { showText: tallyText(tally(list())) }); break;
     case 'csv': exportCsv(); break;
     case 'mail': {
-      const body = tallyText(tally(list())).replace(/\t/g, ' | ');
-      location.href = 'mailto:?subject=' + encodeURIComponent(`Pesquisa equipe Maxipark - ${settings.unidade} - ${mesLabel(settings.mes)}`) + '&body=' + encodeURIComponent(body + '\n\n(O arquivo com as respostas sai pelo botão "arquivo de respostas" no tablet.)');
-      markExported(); break;
+      const t = tally(list());
+      const restrito = t.identificavel || t.poucasDetalhe;   // poucas respostas: o e-mail carrega respostas quase individuais
+      const subject = (restrito ? 'RESTRITO Experiência do Cliente - ' : '') + `Pesquisa equipe Maxipark - ${settings.unidade} - ${mesLabel(settings.mes)}`;
+      const body = (restrito ? 'USO RESTRITO da área de Experiência do Cliente: não encaminhe ao encarregado nem ao supervisor; não divulgue por unidade.\n\n' : '') + tallyText(t).replace(/\t/g, ' | ') + '\n\n(O arquivo com as respostas sai pelo botão "arquivo de respostas" no tablet.)';
+      location.href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      toast('Depois de enviar o e-mail, exporte também o arquivo de respostas.');
+      break;   // sem markExported(): o e-mail pode ter sido cancelado
     }
     case 'resend': sendPending(); break;
     case 'wipe': {
