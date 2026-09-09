@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Pesquisa Equipe Maxipark</title>
+<meta name="theme-color" content="#1F6E6E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Pesquisa Equipe">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root{
+    --teal:#1F6E6E; --teal-dark:#155252; --teal-soft:#D6ECEC; --bg:#F1F5F5; --card:#FFFFFF;
+    --text:#1B1F1F; --muted:#5A6B6B; --line:#D5DEDE; --sel:#FFD54F; --sel-text:#3A2E00;
+    --danger:#B23A3A; --ok:#2E7D32; --radius:18px;
+    color-scheme: light;   /* o app é sempre claro: evita texto claro do modo escuro do aparelho em botões e campos */
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  button{font-family:inherit;color:var(--text)}
+  details summary{color:var(--teal-dark)}
+  html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:18px;line-height:1.35}
+  body{overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  textarea,input,pre{-webkit-user-select:text;user-select:text}
+  #app{min-height:100vh;display:flex;flex-direction:column}
+  .top{background:var(--teal);color:#fff;padding:calc(12px + env(safe-area-inset-top,0px)) 20px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .top .brand{font-weight:700;font-size:17px}
+  .top .step{font-size:15px;opacity:.92;text-align:right}
+  .progress{height:6px;background:rgba(255,255,255,.25)}
+  .progress > div{height:100%;background:var(--sel);transition:width .25s}
+  .wrap{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px 16px calc(28px + env(safe-area-inset-bottom,0px))}
+  .card{width:100%;max-width:820px;background:var(--card);border-radius:var(--radius);padding:22px 22px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+  h1{font-size:28px;line-height:1.2;margin:0 0 10px;color:var(--teal-dark)}
+  h2{font-size:23px;line-height:1.25;margin:0 0 12px}
+  h3{font-size:19px;margin:18px 0 8px;color:var(--teal-dark)}
+  p{margin:0 0 12px}
+  ul.plain{margin:0 0 14px;padding-left:22px}
+  ul.plain li{margin:6px 0;font-size:19px}
+  .muted{color:var(--muted)}
+  .small{font-size:15px}
+  .notice{background:var(--teal-soft);border-radius:12px;padding:14px 16px;font-size:16px;margin:12px 0}
+  details{margin:8px 0 14px}
+  summary{cursor:pointer;color:var(--teal-dark);font-weight:600;font-size:16px;padding:8px 0}
+  .dim{display:inline-block;background:var(--teal-soft);color:var(--teal-dark);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600;margin-bottom:8px}
+  .statement{font-size:25px;font-weight:600;line-height:1.3;margin:4px 0 16px}
+  .opts{display:flex;flex-direction:column;gap:9px}
+  .opt{display:flex;align-items:center;gap:16px;width:100%;min-height:58px;padding:8px 16px;border:2px solid var(--line);border-radius:14px;background:#fff;font-size:19px;text-align:left;cursor:pointer;color:var(--text)}
+  .opt .num{flex:0 0 44px;height:44px;border-radius:50%;background:var(--teal-soft);color:var(--teal-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px}
+  .opt.sel{background:var(--sel);border-color:#E0B400;color:var(--sel-text)}
+  .opt.sel .num{background:#fff}
+  .opt.alt{border-style:dashed;color:var(--muted);font-size:17px;min-height:50px}
+  .scale{display:grid;grid-template-columns:repeat(11,1fr);gap:8px;margin:8px 0 6px}
+  .scale button{min-height:62px;border:2px solid var(--line);border-radius:12px;background:#fff;font-size:22px;font-weight:700;cursor:pointer;color:var(--text)}
+  .scale button.sel{background:var(--sel);border-color:#E0B400;color:var(--sel-text)}
+  .anchors{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);margin-bottom:12px;gap:10px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:56px;padding:12px 22px;border-radius:14px;border:0;background:var(--teal);color:#fff;font-size:19px;font-weight:600;cursor:pointer}
+  .btn.block{width:100%}
+  .btn.ghost{background:#fff;color:var(--teal-dark);border:2px solid var(--teal)}
+  .btn.light{background:var(--teal-soft);color:var(--teal-dark)}
+  .btn.danger{background:var(--danger)}
+  .btn.link{background:transparent;color:var(--muted);font-weight:500;font-size:16px;min-height:44px;padding:8px 12px}
+  .btn:disabled{opacity:.45;cursor:default}
+  .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .row > .btn{flex:1 1 200px}
+  .spread{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:18px;flex-wrap:wrap}
+  label{display:block;font-weight:600;margin:14px 0 6px}
+  input[type=text],input[type=month],input[type=password],input[type=url],textarea,select{width:100%;font:inherit;font-size:19px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--text)}
+  textarea{min-height:140px;resize:vertical}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  th,td{border:1px solid var(--line);padding:6px 6px;text-align:center}
+  th{background:var(--teal-soft);color:var(--teal-dark)}
+  td.l,th.l{text-align:left}
+  .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:10px 0}
+  .kpi div{background:var(--teal-soft);border-radius:12px;padding:12px;text-align:center}
+  .kpi b{display:block;font-size:26px;color:var(--teal-dark)}
+  .kpi span{font-size:13px;color:var(--muted)}
+  .pinpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:320px;margin:12px auto}
+  .pinpad button{min-height:62px;font-size:26px;border-radius:14px;border:2px solid var(--line);background:#fff;cursor:pointer;color:var(--text)}
+  .pinpad button.ok{background:var(--teal);border-color:var(--teal);color:#fff;font-size:20px;font-weight:700}
+  .pinshow{text-align:center;font-size:34px;letter-spacing:12px;min-height:48px;margin:6px 0}
+  .thanks{text-align:center;padding:36px 10px}
+  .thanks .check{width:96px;height:96px;border-radius:50%;background:var(--ok);color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:12px 18px;border-radius:12px;font-size:16px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;z-index:9}
+  .toast.show{opacity:1}
+  .corner{position:fixed;right:0;bottom:0;width:56px;height:56px;border:0;background:transparent;color:transparent;z-index:5}
+  .warn{background:#FFF4D6;border-left:5px solid #E0B400;padding:10px 14px;border-radius:8px;font-size:15px;margin:10px 0}
+  .bad{background:#FBE3E3;border-left:5px solid var(--danger);padding:10px 14px;border-radius:8px;font-size:15px;margin:10px 0}
+  pre{white-space:pre-wrap;font-size:13px;background:#F7F9F9;border:1px solid var(--line);border-radius:10px;padding:10px;max-height:260px;overflow:auto}
+  .legend{font-size:13px;color:var(--muted);margin:6px 0 0}
+  @media (max-width:560px){ .statement{font-size:22px} .scale{grid-template-columns:repeat(6,1fr)} h1{font-size:25px} .opt{font-size:17px} }
+  @media (max-height:820px) and (orientation:landscape){
+    .wrap{padding:10px 16px 16px} .card{padding:14px 18px} .statement{font-size:21px;margin:2px 0 10px}
+    .opts{gap:6px} .opt{min-height:46px;padding:4px 14px;font-size:17px} .opt .num{flex-basis:36px;height:36px;font-size:17px}
+    .spread{margin-top:10px} .dim{margin-bottom:4px} .scale button{min-height:50px} .top{padding-top:8px;padding-bottom:8px}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast"></div>
+<script>
+'use strict';
+/* =====================================================================
+   Pesquisa com a equipe Maxipark — app de tablet (offline, sem nome)
+   Parte B da ficha de Experiência do Cliente Interno.
+   ===================================================================== */
+const VERSAO = '1.1';
+const ESCALA = ['Discordo totalmente','Discordo','Nem sim nem não','Concordo','Concordo totalmente'];
+const ITENS = [
+  {n:1, dim:'Condições no posto', t:'Os equipamentos que uso no posto (cancela, máquina de cartão, sistema, rádio) funcionam bem.'},
+  {n:2, dim:'Condições no posto', t:'Consigo parar para comer durante o meu turno.'},
+  {n:3, dim:'Condições no posto', t:'No meu turno tem gente suficiente para atender bem.'},
+  {n:4, dim:'Escala, pagamento e apoio do escritório', t:'Minhas folgas são respeitadas como estão na escala.'},
+  {n:5, dim:'Escala, pagamento e apoio do escritório', t:'Meu pagamento (salário, vales, horas extras) vem sem erro.'},
+  {n:6, dim:'Escala, pagamento e apoio do escritório', t:'Quando peço algo ao escritório da Maxipark (holerite, uniforme, ponto), resolvem em poucos dias.', na:true},
+  {n:7, dim:'Escala, pagamento e apoio do escritório', t:'Recebi treinamento suficiente para fazer meu trabalho neste posto.'},
+  {n:8, dim:'Escala, pagamento e apoio do escritório', t:'Fico sabendo, com antecedência, das mudanças que afetam meu trabalho (posto, horário, regras).'},
+  {n:9, dim:'Chefia e reconhecimento', t:'Meu chefe direto me trata com respeito.'},
+  {n:10, dim:'Chefia e reconhecimento', t:'Meu chefe direto é justo com todos da equipe.'},
+  {n:11, dim:'Chefia e reconhecimento', t:'Meu chefe direto me ouve quando aviso um problema ou dou uma ideia.'},
+  {n:12, dim:'Chefia e reconhecimento', t:'Nos últimos 30 dias, meu chefe direto ou o supervisor elogiou meu trabalho.'},
+  {n:13, dim:'Segurança e apoio', t:'Me sinto seguro(a) no meu posto (risco de atropelamento, assalto, escuro à noite).'},
+  {n:14, dim:'Segurança e apoio', t:'Se um motorista ou alguém do local me trata mal, a Maxipark me apoia.', na:true},
+  {n:15, dim:'Futuro', t:'Vejo chance de crescer na Maxipark.'},
+];
+const ENPS_Q = 'De 0 a 10, quanto você recomendaria a Maxipark a um amigo como um bom lugar para trabalhar?';
+const CES_Q = 'Pense na última vez que você precisou resolver algo seu com o escritório da Maxipark (holerite, ponto, uniforme, sistema). Foi fácil resolver?';
+const ABERTAS = ['O que mais atrapalha seu dia de trabalho nesta unidade hoje?', 'Se você pudesse mudar uma coisa na Maxipark, o que seria?'];
+const AVISO = 'Esta pesquisa é <b>sem nome</b> e ninguém é obrigado a responder. As respostas ficam guardadas neste tablet sem nome e são levadas pela área de Experiência do Cliente da Maxipark. O encarregado não vê as respostas nem a nota de cada frase — ele só recebe um resumo do supervisor, junto com outras unidades quando a equipe é pequena. Os comentários nunca são copiados palavra por palavra. Caso grave (assédio, ameaça, acidente), use o canal de denúncia, que consegue voltar a falar com você; esta pesquisa não consegue.';
+const GLOSSARIO = '<b>Chefe direto</b> = o encarregado da sua unidade (se não tem encarregado, é o supervisor regional). <b>Maxipark / empresa</b> = a Maxipark inteira: seu chefe direto, o supervisor e o escritório. <b>Escritório da Maxipark</b> = o pessoal de RH, pagamento, uniforme e sistemas, que fica fora do posto.';
+const N_MIN_TABELA = 3;      // abaixo disso a tela do avaliador não mostra nada por frase
+const N_MIN_DETALHE = 5;     // eNPS, CES e comentários
+const IDLE_MS = 120000;      // pesquisa abandonada: descarta e volta ao início
+const PIN_MAX_FAILS = 5, PIN_LOCK_MS = 60000;
+
+/* ---------------- armazenamento local (só neste tablet) ---------------- */
+const LS = {
+  get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } }
+};
+const DEFAULT_SETTINGS = { pin:'', unidade:'', mes:'', webhook:'', avaliador:'', exported:{}, pinFails:0, lockUntil:0 };
+let settings = Object.assign({}, DEFAULT_SETTINGS, LS.get('mp_settings', {}));
+function saveSettings(){ LS.set('mp_settings', settings); }
+function allResponses(){ return LS.get('mp_respostas', []); }
+function saveResponses(list){ return LS.set('mp_respostas', list); }
+function key(u, m){ return (u || settings.unidade) + '|' + (m || settings.mes); }
+function currentResponses(){ return allResponses().filter(r => r.unidade === settings.unidade && r.mes === settings.mes); }
+function otherKeys(){ const m = {}; allResponses().forEach(r => { const k = key(r.unidade, r.mes); if (k !== key()) m[k] = (m[k] || 0) + 1; }); return m; }
+function refusals(){ const m = LS.get('mp_recusas', {}); return m[key()] || 0; }
+function addRefusal(){ const m = LS.get('mp_recusas', {}); m[key()] = (m[key()] || 0) + 1; LS.set('mp_recusas', m); }
+function uid(){ return Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6); }
+function shuffle(a){ const x = a.slice(); for (let i = x.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [x[i], x[j]] = [x[j], x[i]]; } return x; }
+function configured(){ return !!(settings.pin && settings.unidade && settings.mes); }
+
+/* ---------------- estado da tela ---------------- */
+const SURVEY_SCREENS = ['q','enps','ces','open'];
+let state = { screen: 'setup', q: 0, pin: '', pinTarget: 'admin', showText: '', newPin: '', notice: '' };
+let current = null;      // resposta em andamento: só existe na memória até o fim
+let thanksTimer = null, idleTimer = null, deferredInstall = null, busy = false, sending = false;
+
+function novaResposta(){ return { id: uid(), unidade: settings.unidade, mes: settings.mes, r: Array(ITENS.length).fill(null), enps: null, ces: null, a1: '', a2: '', sent: false }; }
+function homeScreen(){ return configured() ? 'welcome' : 'setup'; }
+function go(screen, extra){
+  state.screen = screen; Object.assign(state, extra || {});
+  // fora das telas de resposta, a pesquisa em andamento só sobrevive na tela de erro de gravação e na tela de PIN (até o PIN ser confirmado)
+  if (!SURVEY_SCREENS.includes(screen) && screen !== 'saveerror' && screen !== 'pin' && screen !== 'confirm') current = null;
+  armIdle(); render(); window.scrollTo(0, 0);
+}
+let pendingConfirm = null;
+function askConfirm(msg, onYes){ pendingConfirm = { msg, onYes, from: state.screen, q: state.q }; state.screen = 'confirm'; armIdle(); render(); window.scrollTo(0, 0); }
+function viewConfirm(){
+  return header('Confirmar', 0) + `<div class="wrap"><div class="card" style="max-width:560px">
+    <h2>${esc(pendingConfirm ? pendingConfirm.msg : '')}</h2>
+    <div class="row"><button class="btn danger" data-action="confirmyes">Sim</button><button class="btn ghost" data-action="confirmno">Não, voltar</button></div>
+  </div></div>`;
+}
+function discardAndHome(){ current = null; busy = false; go(homeScreen()); }
+function armIdle(){
+  clearTimeout(idleTimer);
+  const inSurvey = () => SURVEY_SCREENS.includes(state.screen) || (state.screen === 'confirm' && pendingConfirm && SURVEY_SCREENS.includes(pendingConfirm.from));
+  if (inSurvey()) idleTimer = setTimeout(() => { if (inSurvey()) { pendingConfirm = null; discardAndHome(); } }, IDLE_MS);
+}
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function toast(msg){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600); }
+function mesLabel(m){ if(!m) return ''; const [y, mo] = m.split('-'); return mo + '/' + y; }
+function validMes(m){ return /^\d{4}-(0[1-9]|1[0-2])$/.test(m || ''); }
+
+/* ---------------- telas ---------------- */
+function render(){
+  const s = state.screen;
+  const views = { setup:viewSetup, setpin:viewSetPin, welcome:viewWelcome, q:viewQuestion, enps:viewEnps, ces:viewCes, open:viewOpen, thanks:viewThanks, pin:viewPin, admin:viewAdmin, settings:viewSettings, text:viewText, saveerror:viewSaveError, confirm:viewConfirm };
+  document.getElementById('app').innerHTML = (views[s] || viewSetup)();
+}
+function header(step, pct){
+  return `<div class="top"><div class="brand">Pesquisa com a equipe Maxipark</div><div class="step">${esc(step || '')}</div></div>
+          <div class="progress"><div style="width:${pct || 0}%"></div></div>`;
+}
+function cornerBtn(){ return `<button class="corner" data-action="pin" data-target="admin" aria-label="Área do avaliador"></button>`; }
+
+function viewSetup(){
+  const pinOk = !!settings.pin;
+  return header('Avaliador · configuração', 0) + `<div class="wrap"><div class="card">
+    <h1>Preparar a coleta</h1>
+    <p class="muted">Preencha antes de entregar o tablet à equipe. Com as respostas ficam gravados só o código da unidade e o mês — nenhum nome, cargo ou horário.</p>
+    ${pinOk ? '' : '<div class="warn">Primeiro uso: defina o <b>PIN do avaliador</b>. Ele protege as contagens e as configurações.</div>'}
+    <label>Código da unidade</label>
+    <input type="text" id="f-unidade" value="${esc(settings.unidade)}" placeholder="ex.: GAZETA" autocapitalize="characters" autocomplete="off">
+    <label>Mês da rodada</label>
+    <input type="month" id="f-mes" value="${esc(settings.mes)}" placeholder="AAAA-MM">
+    <label>Avaliador(a) — só para o seu controle, não é gravado nas respostas</label>
+    <input type="text" id="f-aval" value="${esc(settings.avaliador)}" placeholder="opcional" autocomplete="off">
+    <div class="row">
+      ${pinOk ? '<button class="btn block" data-action="start">Iniciar coleta com a equipe</button>' : '<button class="btn block" data-action="gosetpin">Definir PIN do avaliador</button>'}
+    </div>
+    <div class="row">
+      <button class="btn ghost" data-action="pin" data-target="admin" ${pinOk ? '' : 'disabled'}>Área do avaliador (contagens e exportar)</button>
+      ${deferredInstall ? '<button class="btn light" data-action="install">Instalar como app no tablet</button>' : ''}
+    </div>
+    <p class="small muted" style="margin-top:18px">Versão ${VERSAO} · funciona sem internet · <b>exporte e apague as respostas no fim de cada visita</b>.</p>
+  </div></div>`;
+}
+
+function viewSetPin(){
+  const dots = '●'.repeat(state.newPin.length);
+  const keys = ['1','2','3','4','5','6','7','8','9','←','0','OK'];
+  const repeat = state.newPinStage === 1;
+  return header('Definir PIN', 0) + `<div class="wrap"><div class="card" style="max-width:520px">
+    <h2 style="text-align:center">${repeat ? 'Digite o PIN de novo para confirmar' : (settings.pin ? 'Novo PIN do avaliador' : 'Crie o PIN do avaliador')}</h2>
+    <p class="small muted" style="text-align:center">${repeat ? 'Repita os mesmos números e toque em OK.' : '4 a 8 números. Não use 1234, 0000 ou datas fáceis. Digite e toque em <b>OK</b>.'}</p>
+    <div class="pinshow">${dots || '&nbsp;'}</div>
+    <div class="pinpad">${keys.map(k => `<button class="${k === 'OK' ? 'ok' : ''}" data-action="newpinkey" data-k="${k}">${k}</button>`).join('')}</div>
+    <div class="row"><button class="btn link block" data-action="cancelsetpin">Cancelar</button></div>
+  </div></div>`;
+}
+
+function viewWelcome(){
+  return header(esc(settings.unidade) + ' · ' + mesLabel(settings.mes), 0) + `<div class="wrap"><div class="card">
+    <h1>Sua opinião melhora o posto onde você trabalha</h1>
+    <ul class="plain">
+      <li><b>Sem nome.</b> Ninguém sabe o que você marcou.</li>
+      <li><b>Ninguém é obrigado</b> a responder.</li>
+      <li>O encarregado <b>não vê</b> suas respostas.</li>
+      <li>15 frases, duas notas e duas perguntas. Uns 5 minutos.</li>
+    </ul>
+    <details><summary>Ler o aviso completo e o que significam as palavras</summary>
+      <div class="notice">${AVISO}</div>
+      <p class="small muted">${GLOSSARIO}</p>
+    </details>
+    <div class="row"><button class="btn block" data-action="begin">Começar</button></div>
+    <div class="row"><button class="btn link" data-action="refuse">Prefiro não responder</button></div>
+  </div></div>` + cornerBtn();
+}
+
+function surveyFooter(canBack, canNext, nextLabel){
+  return `<div class="spread">
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn link" data-action="back" ${canBack ? '' : 'disabled'}>← Voltar</button>
+        <button class="btn link" data-action="quit">Desistir</button>
+      </div>
+      <button class="btn light" data-action="next" ${canNext ? '' : 'disabled'}>${nextLabel || 'Próxima →'}</button>
+    </div>`;
+}
+
+function viewQuestion(){
+  const i = state.q, it = ITENS[i], val = current.r[i];
+  const pct = Math.round((i / (ITENS.length + 4)) * 100);
+  const opts = ESCALA.map((lbl, k) => `<button class="opt ${val === k+1 ? 'sel' : ''}" data-action="answer" data-val="${k+1}"><span class="num">${k+1}</span><span>${lbl}</span></button>`).join('');
+  const na = it.na ? `<button class="opt alt ${val === 'NA' ? 'sel' : ''}" data-action="answer" data-val="NA"><span class="num">—</span><span>Não aconteceu comigo</span></button>` : '';
+  return header(`Frase ${i+1} de ${ITENS.length}`, pct) + `<div class="wrap"><div class="card">
+    <span class="dim">${esc(it.dim)}</span>
+    <div class="statement">${esc(it.t)}</div>
+    <p class="small muted" style="margin-bottom:8px">O quanto você concorda? Toque em uma opção.</p>
+    <div class="opts">${opts}${na}</div>
+    ${surveyFooter(i > 0, val != null)}
+  </div></div>` + cornerBtn();
+}
+
+function scaleButtons(val){
+  let h = '';
+  for (let k = 0; k <= 10; k++) h += `<button class="${val === k ? 'sel' : ''}" data-action="answer" data-val="${k}">${k}</button>`;
+  return `<div class="scale">${h}</div>`;
+}
+function viewEnps(){
+  const pct = Math.round((ITENS.length / (ITENS.length + 4)) * 100);
+  return header('Nota de 0 a 10', pct) + `<div class="wrap"><div class="card">
+    <div class="statement">${esc(ENPS_Q)}</div>
+    ${scaleButtons(current.enps)}
+    <div class="anchors"><span>0 = não recomendaria de jeito nenhum</span><span>10 = recomendaria com certeza</span></div>
+    ${surveyFooter(true, current.enps != null)}
+  </div></div>` + cornerBtn();
+}
+function viewCes(){
+  const pct = Math.round(((ITENS.length + 1) / (ITENS.length + 4)) * 100);
+  return header('Nota de 0 a 10', pct) + `<div class="wrap"><div class="card">
+    <div class="statement">${esc(CES_Q)}</div>
+    ${scaleButtons(current.ces)}
+    <div class="anchors"><span>0 = muito difícil</span><span>10 = muito fácil</span></div>
+    <button class="opt alt ${current.ces === 'NP' ? 'sel' : ''}" data-action="answer" data-val="NP"><span class="num">—</span><span>Nunca precisei</span></button>
+    ${surveyFooter(true, current.ces != null)}
+  </div></div>` + cornerBtn();
+}
+function viewOpen(){
+  const k = state.q; // 0 ou 1
+  const pct = Math.round(((ITENS.length + 2 + k) / (ITENS.length + 4)) * 100);
+  const val = k === 0 ? current.a1 : current.a2;
+  return header(`Com suas palavras · ${k+1} de 2`, pct) + `<div class="wrap"><div class="card">
+    <div class="statement">${esc(ABERTAS[k])}</div>
+    <p class="small muted">${k === 1 ? 'Opcional. ' : ''}Escreva do seu jeito. Não escreva seu nome nem o de outras pessoas. Pode deixar em branco.</p>
+    <textarea id="f-open" maxlength="600" placeholder="Toque aqui para escrever">${esc(val)}</textarea>
+    ${surveyFooter(true, true, k === 1 ? 'Enviar respostas' : 'Próxima →')}
+  </div></div>` + cornerBtn();
+}
+
+function viewThanks(){
+  return header(esc(settings.unidade) + ' · ' + mesLabel(settings.mes), 100) + `<div class="wrap"><div class="card thanks">
+    <div class="check">✓</div>
+    <h1>Obrigado!</h1>
+    <p>Pode entregar o tablet ao avaliador.</p>
+    <p class="muted">Em até 15 dias o supervisor traz o retorno: o que ouvimos, o que vamos fazer e quando.</p>
+    <div class="row"><button class="btn block" data-action="nextperson">Próximo colaborador</button></div>
+  </div></div>` + cornerBtn();
+}
+
+function viewSaveError(){
+  return header('Atenção', 100) + `<div class="wrap"><div class="card">
+    <div class="bad"><b>Não foi possível guardar a resposta neste tablet</b> (memória do navegador cheia ou bloqueada). A resposta ainda está na tela — chame o avaliador.</div>
+    <div class="row"><button class="btn" data-action="retrysave">Tentar guardar de novo</button><button class="btn ghost" data-action="pin" data-target="admin">Área do avaliador</button></div>
+  </div></div>`;
+}
+
+function viewPin(){
+  const locked = Date.now() < (settings.lockUntil || 0);
+  const dots = '●'.repeat(state.pin.length);
+  const keys = ['1','2','3','4','5','6','7','8','9','←','0','OK'];
+  return header('Área do avaliador', 0) + `<div class="wrap"><div class="card" style="max-width:520px">
+    <h2 style="text-align:center">Digite o PIN do avaliador</h2>
+    ${current ? '<div class="warn">Há uma pesquisa em andamento. Ao entrar, ela será descartada sem gravar.</div>' : ''}
+    ${locked ? `<div class="bad">Muitas tentativas erradas. Aguarde ${Math.ceil((settings.lockUntil - Date.now())/1000)} s.</div>` : ''}
+    <div class="pinshow">${dots || '&nbsp;'}</div>
+    <div class="pinpad">${keys.map(k => `<button class="${k === 'OK' ? 'ok' : ''}" data-action="pinkey" data-k="${k}" ${locked ? 'disabled' : ''}>${k}</button>`).join('')}</div>
+    <div class="row"><button class="btn link block" data-action="cancelpin">Cancelar</button></div>
+  </div></div>`;
+}
+
+/* ---------------- cálculo das contagens ---------------- */
+function tally(list){
+  const items = ITENS.map(() => ({ c:[0,0,0,0,0], na:0, n:0 }));
+  const enps = { det:0, neu:0, pro:0, n:0 };
+  const ces = { dif:0, med:0, fac:0, np:0, n:0 };
+  let coments = [];
+  list.forEach(resp => {
+    resp.r.forEach((v, i) => {
+      if (v === 'NA') items[i].na++;
+      else if (typeof v === 'number' && v >= 1 && v <= 5) { items[i].c[v-1]++; items[i].n++; }
+    });
+    if (typeof resp.enps === 'number') { enps.n++; if (resp.enps <= 6) enps.det++; else if (resp.enps <= 8) enps.neu++; else enps.pro++; }
+    if (resp.ces === 'NP') ces.np++;
+    else if (typeof resp.ces === 'number') { ces.n++; if (resp.ces <= 6) ces.dif++; else if (resp.ces <= 8) ces.med++; else ces.fac++; }
+    if (resp.a1) coments.push(resp.a1);
+    if (resp.a2) coments.push(resp.a2);
+  });
+  coments = shuffle(coments);   // nunca na ordem em que as pessoas responderam
+  const nResp = list.length;
+  const enpsVal = enps.n >= N_MIN_DETALHE ? Math.round((enps.pro - enps.det) / enps.n * 100) : null;
+  const cesFacil = ces.n >= N_MIN_DETALHE ? Math.round(ces.fac / ces.n * 100) : null;
+  return { items, enps, ces, coments, nResp, enpsVal, cesFacil };
+}
+
+function tallyText(t){
+  const L = [];
+  L.push(`Pesquisa equipe Maxipark\tUnidade: ${settings.unidade}\tMês: ${mesLabel(settings.mes)}\tRespostas: ${t.nResp}\tPreferiram não responder: ${refusals()}`);
+  if (t.nResp < N_MIN_TABELA) { L.push(`Menos de ${N_MIN_TABELA} respostas: não divulgar nada por unidade — só no agregado regional.`); return L.join('\n'); }
+  L.push('Frase\tNota 1\tNota 2\tNota 3\tNota 4\tNota 5\tNão aconteceu');
+  t.items.forEach((it, i) => L.push(`B${i+1}\t${it.c.join('\t')}\t${ITENS[i].na ? it.na : '-'}`));
+  if (t.nResp >= N_MIN_DETALHE) {
+    L.push(`eNPS\t0-6: ${t.enps.det}\t7-8: ${t.enps.neu}\t9-10: ${t.enps.pro}\t${t.enpsVal == null ? '' : 'eNPS = ' + t.enpsVal}`);
+    L.push(`CES\t0-6: ${t.ces.dif}\t7-8: ${t.ces.med}\t9-10: ${t.ces.fac}\tNunca precisei: ${t.ces.np}\t${t.cesFacil == null ? '' : '% fácil = ' + t.cesFacil + '%'}`);
+  } else L.push(`eNPS e CES: só com ${N_MIN_DETALHE} ou mais respostas.`);
+  return L.join('\n');
+}
+
+function csvText(list){
+  const head = ['unidade','mes', ...ITENS.map(it => 'B' + it.n), 'eNPS', 'CES', 'aberta1', 'aberta2'];
+  const q = v => { let s = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
+  const rows = shuffle(list).map(r => [r.unidade, r.mes, ...r.r.map(v => v == null ? '' : v), r.enps == null ? '' : r.enps, r.ces == null ? '' : r.ces, r.a1, r.a2].map(q).join(';'));
+  return '﻿' + head.join(';') + '\n' + rows.join('\n');
+}
+
+function viewAdmin(){
+  const list = currentResponses();
+  const t = tally(list);
+  const unsent = allResponses().filter(r => !r.sent).length;
+  const others = otherKeys(); const otherCount = Object.values(others).reduce((a, b) => a + b, 0);
+  const exported = !!settings.exported[key()];
+  let tabela = '';
+  if (t.nResp === 0) tabela = '<p class="muted">Ainda não há respostas para esta unidade e mês.</p>';
+  else if (t.nResp < N_MIN_TABELA) tabela = `<div class="bad"><b>Menos de ${N_MIN_TABELA} respostas.</b> Para proteger quem respondeu, o app não mostra nada por frase. Não divulgue nada por unidade: essas respostas entram só no agregado regional. Continue a coleta ou exporte o arquivo para a área de Experiência do Cliente.</div>`;
+  else {
+    const rows = t.items.map((it, i) => `<tr><td class="l"><b>B${i+1}</b> <span class="small muted">${esc(ITENS[i].t)}</span></td>${it.c.map(x => `<td>${x}</td>`).join('')}<td>${ITENS[i].na ? it.na : '—'}</td><td><b>${it.n}</b></td></tr>`).join('');
+    const detalhe = t.nResp >= N_MIN_DETALHE
+      ? `<tr><td class="l"><b>Nota de 0 a 10</b> (recomendaria a Maxipark)</td><td colspan="2">0-6: <b>${t.enps.det}</b></td><td colspan="2">7-8: <b>${t.enps.neu}</b></td><td colspan="2">9-10: <b>${t.enps.pro}</b></td><td><b>${t.enps.n}</b></td></tr>
+         <tr><td class="l"><b>Nota de 0 a 10</b> (fácil resolver com o escritório)</td><td colspan="2">0-6: <b>${t.ces.dif}</b></td><td colspan="2">7-8: <b>${t.ces.med}</b></td><td>9-10: <b>${t.ces.fac}</b></td><td>Nunca precisei: <b>${t.ces.np}</b></td><td><b>${t.ces.n}</b></td></tr>`
+      : `<tr><td class="l" colspan="8" style="text-align:left"><span class="muted">As duas notas de 0 a 10 (eNPS e CES) só aparecem com ${N_MIN_DETALHE} ou mais respostas.</span></td></tr>`;
+    tabela = `<div style="overflow:auto"><table>
+      <tr><th class="l">Frase</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>Não aconteceu</th><th>Respostas</th></tr>${rows}${detalhe}</table></div>
+      <p class="legend">Cada número é a quantidade de colaboradores que marcou aquela nota. Copie para a ficha em Excel (colunas "Nota 1" a "Nota 5").</p>`;
+  }
+  const comentHtml = t.nResp >= N_MIN_DETALHE
+    ? (t.coments.length ? '<ul>' + t.coments.map(c => `<li>${esc(c)}</li>`).join('') + '</ul><p class="legend">Ordem embaralhada. Na ficha, registre só os temas — nunca copie frases.</p>' : '<p class="muted small">Sem comentários.</p>')
+    : `<div class="warn">Comentários só aparecem com ${N_MIN_DETALHE} ou mais respostas nesta unidade e mês (anonimato). Eles seguem no arquivo exportado para a área de Experiência do Cliente.</div>`;
+  return header('Área do avaliador', 0) + `<div class="wrap"><div class="card" style="max-width:980px">
+    <h1>Contagens · ${esc(settings.unidade || '—')} · ${mesLabel(settings.mes) || '—'}</h1>
+    ${state.notice ? `<div class="warn">${esc(state.notice)}</div>` : ''}
+    <div class="kpi">
+      <div><b>${t.nResp}</b><span>respostas completas</span></div>
+      <div><b>${refusals()}</b><span>preferiram não responder</span></div>
+      <div><b>${t.enpsVal == null ? '—' : (t.enpsVal > 0 ? '+' : '') + t.enpsVal}</b><span>eNPS (só com ${N_MIN_DETALHE}+ respostas)</span></div>
+      <div><b>${t.cesFacil == null ? '—' : t.cesFacil + '%'}</b><span>acham fácil resolver com o escritório</span></div>
+      ${settings.webhook ? `<div><b>${unsent}</b><span>ainda não enviadas à matriz</span></div>` : ''}
+    </div>
+    <h3>Quantos colaboradores deram cada nota</h3>
+    ${tabela}
+    <h3>Comentários</h3>
+    ${comentHtml}
+    <h3>Exportar</h3>
+    <p class="small muted">As contagens seguem a regra de anonimato (nada por frase com menos de ${N_MIN_TABELA}; notas 0-10 e comentários só com ${N_MIN_DETALHE}+). O arquivo de respostas tem uma linha por pessoa, em ordem embaralhada — só para a área de Experiência do Cliente.</p>
+    <div class="row">
+      <button class="btn light" data-action="copy" ${t.nResp ? '' : 'disabled'}>Copiar contagens</button>
+      <button class="btn light" data-action="showtext" ${t.nResp ? '' : 'disabled'}>Ver contagens como texto</button>
+      <button class="btn light" data-action="csv" ${t.nResp ? '' : 'disabled'}>${navigator.share ? 'Compartilhar arquivo de respostas' : 'Baixar arquivo de respostas (CSV)'}</button>
+      <button class="btn light" data-action="mail" ${t.nResp ? '' : 'disabled'}>Enviar contagens por e-mail</button>
+      ${settings.webhook ? `<button class="btn light" data-action="resend" ${unsent ? '' : 'disabled'}>Enviar à matriz agora (${unsent})</button>` : ''}
+    </div>
+    <h3>Gerenciar</h3>
+    ${otherCount ? `<div class="warn">Este tablet ainda guarda <b>${otherCount}</b> resposta(s) de outras unidades/meses: ${Object.keys(others).map(k => esc(k.replace('|', ' · '))).join(', ')}. <button class="btn link" data-action="wipeothers">Apagar essas outras respostas</button></div>` : ''}
+    <div class="row">
+      <button class="btn ghost" data-action="settings">Configurações (unidade, mês, PIN, envio automático)</button>
+      <button class="btn danger" data-action="wipe" ${t.nResp || refusals() ? '' : 'disabled'}>Apagar respostas desta unidade e mês${exported ? '' : ' (ainda não exportadas)'}</button>
+    </div>
+    <div class="row"><button class="btn block" data-action="tocollect">Voltar à coleta com a equipe</button></div>
+  </div></div>`;
+}
+
+function viewSettings(){
+  return header('Configurações', 0) + `<div class="wrap"><div class="card">
+    <h1>Configurações</h1>
+    <label>Código da unidade</label><input type="text" id="s-unidade" value="${esc(settings.unidade)}" autocapitalize="characters" autocomplete="off">
+    <label>Mês da rodada</label><input type="month" id="s-mes" value="${esc(settings.mes)}" placeholder="AAAA-MM">
+    <label>Avaliador(a) (não gravado nas respostas)</label><input type="text" id="s-aval" value="${esc(settings.avaliador)}" autocomplete="off">
+    <label>Envio automático (opcional) — URL do fluxo do Power Automate que recebe as respostas</label>
+    <input type="url" id="s-webhook" value="${esc(settings.webhook)}" placeholder="https://...">
+    <p class="small muted">Sem URL, as respostas ficam só no tablet e você exporta por arquivo ou e-mail. Com URL, o envio acontece só quando você toca em "Enviar à matriz agora", em lote e em ordem embaralhada (para não registrar a hora de cada pessoa).</p>
+    <div class="row">
+      <button class="btn" data-action="savesettings">Salvar</button>
+      <button class="btn light" data-action="gosetpin">Trocar PIN</button>
+      <button class="btn ghost" data-action="admin">Cancelar</button>
+    </div>
+  </div></div>`;
+}
+
+function viewText(){
+  return header('Contagens como texto', 0) + `<div class="wrap"><div class="card">
+    <p class="small muted">Toque e segure para selecionar e copiar. Está separado por tabulação: cola direto na planilha.</p>
+    <pre id="txt">${esc(state.showText)}</pre>
+    <div class="row"><button class="btn" data-action="admin">Voltar</button></div>
+  </div></div>`;
+}
+
+/* ---------------- ações ---------------- */
+function markExported(){ settings.exported[key()] = true; saveSettings(); }
+
+function submitCurrent(){
+  if (busy || !current) return;
+  busy = true;
+  const list = allResponses();
+  const pos = Math.floor(Math.random() * (list.length + 1));   // posição aleatória: a ordem não revela quem respondeu
+  list.splice(pos, 0, current);
+  if (!saveResponses(list)) { busy = false; go('saveerror'); return; }
+  current = null; busy = false;
+  go('thanks');
+  clearTimeout(thanksTimer);
+  thanksTimer = setTimeout(() => { if (state.screen === 'thanks') go('welcome'); }, 20000);
+}
+
+async function sendPending(){
+  if (sending || !settings.webhook) return;
+  sending = true;
+  const pend = shuffle(allResponses().filter(r => !r.sent));
+  let ok = 0;
+  for (const r of pend) {
+    try {
+      const payload = { app:'pesquisa-equipe-maxipark', versao:VERSAO, id:r.id, unidade:r.unidade, mes:r.mes, respostas:r.r, enps:r.enps, ces:r.ces, aberta1:r.a1, aberta2:r.a2 };
+      // text/plain + no-cors: chega ao Power Automate sem preflight CORS; a resposta é opaca, por isso o fluxo deve ignorar 'id' repetido.
+      await fetch(settings.webhook, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+      const list = allResponses(); const it = list.find(x => x.id === r.id); if (it) { it.sent = true; saveResponses(list); }
+      ok++;
+    } catch(e) { /* sem rede: fica pendente */ }
+  }
+  sending = false;
+  if (ok) markExported();
+  if (state.screen === 'admin') { toast(ok === pend.length ? 'Tudo enviado à matriz.' : `${ok} enviada(s); ${pend.length - ok} ainda pendente(s).`); render(); }
+}
+
+async function exportCsv(){
+  const list = currentResponses();
+  const name = `pesquisa_${settings.unidade}_${settings.mes}.csv`;
+  const text = csvText(list);
+  try {
+    if (navigator.share && navigator.canShare) {
+      const file = new File([text], name, { type: 'text/csv' });
+      if (navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); markExported(); render(); return; }
+    }
+  } catch(e) { if (e && e.name === 'AbortError') return; }
+  const blob = new Blob([text], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  markExported(); render();
+}
+async function copyText(text){
+  try { await navigator.clipboard.writeText(text); toast('Contagens copiadas.'); markExported(); render(); }
+  catch(e) { go('text', { showText: text }); toast('Toque e segure no texto para copiar.'); markExported(); }
+}
+
+function handle(action, el){
+  const list = () => currentResponses();
+  switch(action){
+    case 'start': {
+      const u = document.getElementById('f-unidade').value.trim().toUpperCase();
+      const m = document.getElementById('f-mes').value.trim();
+      const a = document.getElementById('f-aval').value.trim();
+      if (!u || !validMes(m)) { toast('Informe o código da unidade e o mês (AAAA-MM).'); return; }
+      if (!settings.pin) { toast('Defina o PIN do avaliador primeiro.'); return; }
+      settings.unidade = u; settings.mes = m; settings.avaliador = a; saveSettings();
+      if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+      go('welcome'); break;
+    }
+    case 'install': if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; render(); } break;
+    case 'gosetpin': state.newPin = ''; state.newPinStage = 0; state.newPinFirst = ''; go('setpin'); break;
+    case 'cancelsetpin': go(settings.pin ? 'settings' : 'setup'); break;
+    case 'newpinkey': {
+      const k = el.getAttribute('data-k');
+      if (k === '←') state.newPin = state.newPin.slice(0, -1);
+      else if (k === 'OK') {
+        if (state.newPinStage !== 1) {
+          if (!/^\d{4,8}$/.test(state.newPin)) { toast('Use de 4 a 8 números e toque em OK.'); return; }
+          if (['1234','0000','1111','2222','123456','12345678'].includes(state.newPin)) { toast('PIN muito fácil. Escolha outro.'); state.newPin = ''; render(); return; }
+          state.newPinFirst = state.newPin; state.newPin = ''; state.newPinStage = 1; render(); return;
+        }
+        if (state.newPin !== state.newPinFirst) { toast('Os PINs não conferem. Comece de novo.'); state.newPin = ''; state.newPinFirst = ''; state.newPinStage = 0; render(); return; }
+        settings.pin = state.newPin; settings.pinFails = 0; settings.lockUntil = 0; saveSettings(); state.newPin = ''; state.newPinFirst = ''; state.newPinStage = 0;
+        toast('PIN definido.'); go(settings.unidade && settings.mes ? 'settings' : 'setup'); return;
+      } else if (state.newPin.length < 8) state.newPin += k;
+      render(); break;
+    }
+    case 'begin': current = novaResposta(); busy = false; go('q', { q: 0 }); break;
+    case 'refuse': addRefusal(); go('thanks'); clearTimeout(thanksTimer); thanksTimer = setTimeout(() => { if (state.screen === 'thanks') go('welcome'); }, 20000); break;
+    case 'quit': askConfirm('Desistir da pesquisa? Nada será gravado.', () => { current = null; go('thanks'); clearTimeout(thanksTimer); thanksTimer = setTimeout(() => { if (state.screen === 'thanks') go('welcome'); }, 20000); }); break;
+    case 'confirmyes': { const p = pendingConfirm; pendingConfirm = null; if (p) p.onYes(); break; }
+    case 'confirmno': { const p = pendingConfirm; pendingConfirm = null; state.screen = p ? p.from : homeScreen(); state.q = p ? p.q : 0; armIdle(); render(); break; }
+    case 'answer': {
+      if (!current) return;
+      const raw = el.getAttribute('data-val');
+      const v = (raw === 'NA' || raw === 'NP') ? raw : Number(raw);
+      const screen = state.screen, q = state.q, token = ++answerToken;
+      if (screen === 'q') current.r[q] = v; else if (screen === 'enps') current.enps = v; else if (screen === 'ces') current.ces = v; else return;
+      render(); armIdle();
+      setTimeout(() => { if (token === answerToken && state.screen === screen && state.q === q && current) advance(); }, 260);
+      break;
+    }
+    case 'next': advance(); break;
+    case 'back': back(); break;
+    case 'nextperson': clearTimeout(thanksTimer); go('welcome'); break;
+    case 'retrysave': submitCurrent(); break;
+    case 'pin': state.pin = ''; state.pinTarget = el.getAttribute('data-target') || 'admin'; go('pin'); break;
+    case 'cancelpin': current = null; go(homeScreen()); break;
+    case 'pinkey': {
+      if (Date.now() < (settings.lockUntil || 0)) return;
+      const k = el.getAttribute('data-k');
+      if (k === '←') state.pin = state.pin.slice(0, -1);
+      else if (k === 'OK') {
+        if (state.pin === settings.pin) { state.pin = ''; settings.pinFails = 0; saveSettings(); const had = !!current; current = null; go(state.pinTarget, { notice: had ? 'Uma pesquisa em andamento foi descartada sem gravar.' : '' }); }
+        else {
+          state.pin = ''; settings.pinFails = (settings.pinFails || 0) + 1;
+          if (settings.pinFails >= PIN_MAX_FAILS) { settings.lockUntil = Date.now() + PIN_LOCK_MS; settings.pinFails = 0; }
+          saveSettings(); toast('PIN incorreto.'); render();
+        }
+        return;
+      } else if (state.pin.length < 8) state.pin += k;
+      render(); break;
+    }
+    case 'admin': go('admin', { notice: '' }); break;
+    case 'settings': go('settings'); break;
+    case 'tocollect': go(homeScreen()); break;
+    case 'copy': copyText(tallyText(tally(list()))); break;
+    case 'showtext': go('text', { showText: tallyText(tally(list())) }); break;
+    case 'csv': exportCsv(); break;
+    case 'mail': {
+      const body = tallyText(tally(list())).replace(/\t/g, ' | ');
+      location.href = 'mailto:?subject=' + encodeURIComponent(`Pesquisa equipe Maxipark - ${settings.unidade} - ${mesLabel(settings.mes)}`) + '&body=' + encodeURIComponent(body + '\n\n(O arquivo com as respostas sai pelo botão "arquivo de respostas" no tablet.)');
+      markExported(); break;
+    }
+    case 'resend': sendPending(); break;
+    case 'wipe': {
+      const n = list().length;
+      const aviso = settings.exported[key()] ? '' : ' ATENÇÃO: estas respostas ainda NÃO foram exportadas.';
+      askConfirm(`Apagar as ${n} respostas de ${settings.unidade} · ${mesLabel(settings.mes)} deste tablet?${aviso}`, () => {
+        saveResponses(allResponses().filter(r => !(r.unidade === settings.unidade && r.mes === settings.mes)));
+        const m = LS.get('mp_recusas', {}); delete m[key()]; LS.set('mp_recusas', m);
+        delete settings.exported[key()]; saveSettings();
+        toast('Respostas apagadas.'); go('admin', { notice: '' });
+      });
+      break;
+    }
+    case 'wipeothers': {
+      askConfirm('Apagar as respostas de OUTRAS unidades/meses guardadas neste tablet? Confirme que já foram exportadas.', () => {
+        saveResponses(allResponses().filter(r => r.unidade === settings.unidade && r.mes === settings.mes));
+        const m = LS.get('mp_recusas', {}); Object.keys(m).forEach(k => { if (k !== key()) delete m[k]; }); LS.set('mp_recusas', m);
+        toast('Outras respostas apagadas.'); go('admin', { notice: '' });
+      });
+      break;
+    }
+    case 'savesettings': {
+      const u = document.getElementById('s-unidade').value.trim().toUpperCase();
+      const m = document.getElementById('s-mes').value.trim();
+      const a = document.getElementById('s-aval').value.trim();
+      const w = document.getElementById('s-webhook').value.trim();
+      if (!u || !validMes(m)) { toast('Informe o código da unidade e o mês (AAAA-MM).'); return; }
+      if (w && !/^https:\/\//i.test(w)) { toast('A URL de envio deve começar com https://'); return; }
+      settings.unidade = u; settings.mes = m; settings.avaliador = a; settings.webhook = w; saveSettings();
+      toast('Configurações salvas.'); go('admin', { notice: '' }); break;
+    }
+  }
+}
+let answerToken = 0;
+
+function advance(){
+  if (!current) return;
+  if (state.screen === 'q') {
+    if (current.r[state.q] == null) return;
+    if (state.q < ITENS.length - 1) go('q', { q: state.q + 1 }); else go('enps');
+  } else if (state.screen === 'enps') { if (current.enps == null) return; go('ces'); }
+  else if (state.screen === 'ces') { if (current.ces == null) return; go('open', { q: 0 }); }
+  else if (state.screen === 'open') {
+    const ta = document.getElementById('f-open');
+    const v = ta ? ta.value.trim().slice(0, 600) : '';
+    if (state.q === 0) { current.a1 = v; go('open', { q: 1 }); } else { current.a2 = v; submitCurrent(); }
+  }
+}
+function back(){
+  if (!current) return;
+  if (state.screen === 'q') { if (state.q > 0) go('q', { q: state.q - 1 }); }
+  else if (state.screen === 'enps') go('q', { q: ITENS.length - 1 });
+  else if (state.screen === 'ces') go('enps');
+  else if (state.screen === 'open') {
+    const ta = document.getElementById('f-open'); const v = ta ? ta.value.trim().slice(0, 600) : '';
+    if (state.q === 0) { current.a1 = v; go('ces'); } else { current.a2 = v; go('open', { q: 0 }); }
+  }
+}
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el || el.disabled) return;
+  handle(el.getAttribute('data-action'), el);
+});
+['touchstart','keydown','input'].forEach(ev => document.addEventListener(ev, () => armIdle(), { passive: true }));
+// Botão/gesto "voltar" do Android: não sai do app; age como o "Voltar" da tela.
+history.pushState({ app: 1 }, '');
+window.addEventListener('popstate', () => { history.pushState({ app: 1 }, ''); if (SURVEY_SCREENS.includes(state.screen)) back(); });
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; if (state.screen === 'setup') render(); });
+if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) { navigator.serviceWorker.register('sw.js').catch(() => {}); }
+state.screen = homeScreen();
+render();
+</script>
+</body>
+</html>
