@@ -70,6 +70,7 @@
   label{display:block;font-weight:600;margin:14px 0 6px}
   input[type=text],input[type=month],input[type=password],input[type=url],input[type=search],textarea,select{width:100%;font:inherit;font-size:19px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--text)}
   textarea{min-height:140px;resize:vertical}
+  textarea.obs{min-height:54px;font-size:16px;margin-top:12px;padding:8px 12px;border-style:dashed}
   .unitfield{display:flex;gap:10px;align-items:stretch}
   .unitfield input{flex:1}
   .unitfield .btn{flex:0 0 auto;min-height:0;padding:8px 16px;font-size:16px}
@@ -98,6 +99,17 @@
   .bad{background:#FBE3E3;border-left:5px solid var(--danger);padding:10px 14px;border-radius:8px;font-size:15px;margin:10px 0}
   pre{white-space:pre-wrap;font-size:13px;background:#F7F9F9;border:1px solid var(--line);border-radius:10px;padding:10px;max-height:260px;overflow:auto}
   .legend{font-size:13px;color:var(--muted);margin:6px 0 0}
+  .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:6px}
+  .filters label{margin:0 0 4px;font-size:13px;color:var(--muted)}
+  .filters select{font-size:16px;padding:8px 10px}
+  .tag{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700}
+  .tag.ok{background:#E6F4EA;color:#1E6B34}
+  .tag.pend{background:#FBE3E3;color:#9B1C1C}
+  .up{color:#1E6B34;font-weight:700} .down{color:var(--danger);font-weight:700}
+  tr.cur td{background:#F1F8F4}
+  .check{display:flex;gap:10px;align-items:center;font-weight:500;margin:10px 0 4px;font-size:16px}
+  .check input{width:22px;height:22px}
+  .obslist{padding-left:18px;font-size:15px} .obslist > li{margin:8px 0} .obslist ul{padding-left:18px;margin:4px 0}
   @media (max-width:560px){ .statement{font-size:23px} .scale{grid-template-columns:repeat(6,1fr)} h1{font-size:25px} .opt{font-size:19px} }
   @media (max-height:820px) and (orientation:landscape){
     .wrap{padding:10px 16px 60px} .card{padding:14px 18px} .statement{font-size:22px;margin:2px 0 10px}
@@ -110,6 +122,7 @@
 <div id="app"></div>
 <div id="toast" class="toast"></div>
 <input type="file" id="file-unidades" accept=".csv,.txt,.xlsx,.xls" style="display:none">
+<input type="file" id="file-hist" accept=".csv,.txt" multiple style="display:none">
 <script>
 'use strict';
 /* =====================================================================
@@ -118,7 +131,7 @@
    Escala de 3 respostas por frase (Sim / resposta do meio / Não) + "Não se aplica" onde faz sentido.
    Valores gravados: 3 = Sim, 2 = resposta do meio, 1 = Não, 'NA' = não se aplica.
    ===================================================================== */
-const VERSAO = '1.4';
+const VERSAO = '1.5';
 const ITENS = [
   {n:1,  dim:'Condições no posto', t:'Os equipamentos que uso no posto (cancela, máquina de cartão, sistema, rádio) funcionam bem.', opts:['Sim','Às vezes','Não']},
   {n:2,  dim:'Condições no posto', t:'Consigo parar para comer durante o meu turno.', opts:['Sim','Às vezes','Não']},
@@ -152,6 +165,8 @@ const PIN_MAX_FAILS = 5, PIN_LOCK_MS = 60000;
 // PIN programado pelo gestor (pedido de 2026-09-09): já vem definido, sem a etapa "Crie o PIN". Pode ser trocado em Configurações → Trocar PIN.
 // Atenção: este código é público (GitHub Pages); quem ler o arquivo conhece o PIN padrão.
 const PIN_PADRAO = '2819', PIN_PADRAO_MARCA = '2819-2026-09-09';
+// Senha separada para "Zerar todo o histórico" (pedido do gestor): padrão 5541, trocável em Configurações → Trocar senha de zerar.
+const SENHA_ZERAR_PADRAO = '5541', SENHA_ZERAR_MARCA = '5541-2026-09-09';
 
 /* Lista padrão de unidades (Grande São Paulo — do roteiro da ficha externa). Pode ser substituída pela importação do Excel/CSV. */
 const UNIDADES_PADRAO = [
@@ -182,17 +197,59 @@ const LS = {
   get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } },
   set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } }
 };
-const DEFAULT_SETTINGS = { pin:'', unidade:'', mes:'', data:'', webhook:'', exported:{}, pinFails:0, lockUntil:0 };   // sem nome do avaliador (pedido do gestor): o app não guarda nome de ninguém
+const DEFAULT_SETTINGS = { pin:'', unidade:'', mes:'', data:'', rodada:'R1', webhook:'', exported:{}, pinFails:0, lockUntil:0 };   // sem nome do avaliador (pedido do gestor): o app não guarda nome de ninguém
 let settings = Object.assign({}, DEFAULT_SETTINGS, LS.get('mp_settings', {}));
 function saveSettings(){ LS.set('mp_settings', settings); }
 if ('avaliador' in settings) { delete settings.avaliador; saveSettings(); }   // apaga o nome do avaliador gravado por versões anteriores
 // PIN programado: aplica o PIN padrão uma única vez (também em tablets que já tinham outro PIN de teste); depois disso, um PIN trocado em Configurações é respeitado.
 if (settings.pinPadraoAplicado !== PIN_PADRAO_MARCA) { settings.pin = PIN_PADRAO; settings.pinFails = 0; settings.lockUntil = 0; settings.pinPadraoAplicado = PIN_PADRAO_MARCA; saveSettings(); }
+if (settings.senhaZerarAplicada !== SENHA_ZERAR_MARCA) { settings.senhaZerar = SENHA_ZERAR_PADRAO; settings.senhaZerarAplicada = SENHA_ZERAR_MARCA; saveSettings(); }
+// Zerar histórico: apaga respostas, recusas, rodadas e importadas deste aparelho; mantém PIN, senha de zerar e lista de unidades.
+function zerarHistorico(){
+  ['mp_respostas', 'mp_recusas', 'mp_hist', 'mp_rodadas'].forEach(k => { try { localStorage.removeItem(k); } catch(e) {} });
+  settings.exported = {}; settings.rodada = 'R1'; settings.unidade = ''; settings.mes = ''; settings.data = ''; saveSettings();
+}
+// Pedido do gestor (09/09/2026): ao atualizar para esta versão, cada tablet começa do zero (uma única vez, controlado pela marca abaixo).
+const ZERAR_MARCA = 'zerar-2026-09-09';
+if (settings.zeradoEm !== ZERAR_MARCA) { zerarHistorico(); settings.zeradoEm = ZERAR_MARCA; saveSettings(); }
 function allResponses(){ return LS.get('mp_respostas', []); }
 function saveResponses(list){ return LS.set('mp_respostas', list); }
-function key(u, m){ return (u || settings.unidade) + '|' + (m || settings.mes); }
-function currentResponses(){ return allResponses().filter(r => r.unidade === settings.unidade && r.mes === settings.mes); }
-function otherKeys(){ const m = {}; allResponses().forEach(r => { const k = key(r.unidade, r.mes); if (k !== key()) m[k] = (m[k] || 0) + 1; }); return m; }
+/* Rodadas: cada "pesquisa" é uma rodada (R1, R2…). Uma nova rodada zera as contagens da coleta sem apagar nada; o histórico fica no Consolidado. */
+function rodadas(){
+  let l = LS.get('mp_rodadas', null);
+  if (!Array.isArray(l) || !l.length) {
+    const datas = allResponses().map(r => r.data || (r.mes ? r.mes + '-01' : '')).filter(Boolean).sort();
+    l = [{ id:'R1', nome:'Rodada 1', inicio: datas[0] || hojeISO(), fim:'' }];
+    LS.set('mp_rodadas', l);
+  }
+  return l;
+}
+function saveRodadas(l){ return LS.set('mp_rodadas', l); }
+function rodadaDe(r){ return (r && r.rodada) || 'R1'; }   // respostas antigas (sem carimbo) pertencem à Rodada 1
+function rodadaNome(id){ const x = rodadas().find(r => r.id === id); return x ? x.nome : (id || 'Rodada 1'); }
+function garantirRodada(id){ const l = rodadas(); if (!l.find(r => r.id === id)) { l.push({ id, nome: 'Rodada ' + String(id).replace(/^R/, '') + ' (importada)', inicio:'', fim:'' }); saveRodadas(l); } }
+function novaRodada(){
+  const l = rodadas(); const atual = l.find(r => r.id === settings.rodada); if (atual) atual.fim = hojeISO();
+  const n = Math.max(0, ...l.map(r => parseInt(String(r.id).replace(/^R/, ''), 10) || 0)) + 1;
+  const nova = { id: 'R' + n, nome: 'Rodada ' + n, inicio: hojeISO(), fim:'' };
+  l.push(nova); saveRodadas(l); settings.rodada = nova.id; saveSettings();
+  return nova;
+}
+if (!settings.rodada) { settings.rodada = 'R1'; saveSettings(); }
+// chaves antigas "unidade|AAAA-MM" (recusas e marcação de exportado) passam a "unidade|R1"
+(function migrarChavesRodada(){
+  const re = /\|\d{4}-\d{2}$/;
+  const rec = LS.get('mp_recusas', {}); let mudou = false; const novo = {};
+  Object.keys(rec).forEach(k => { const nk = re.test(k) ? k.replace(re, '|R1') : k; if (nk !== k) mudou = true; novo[nk] = (novo[nk] || 0) + (rec[k] || 0); });
+  if (mudou) LS.set('mp_recusas', novo);
+  const ex = settings.exported || {}; let m2 = false; const ne = {};
+  Object.keys(ex).forEach(k => { const nk = re.test(k) ? k.replace(re, '|R1') : k; if (nk !== k) m2 = true; ne[nk] = ne[nk] || ex[k]; });
+  if (m2) { settings.exported = ne; saveSettings(); }
+})();
+function key(u, r){ return (u || settings.unidade) + '|' + (r || settings.rodada); }
+function currentResponses(){ return allResponses().filter(r => r.unidade === settings.unidade && rodadaDe(r) === settings.rodada); }
+function otherKeys(){ const m = {}; allResponses().forEach(r => { const k = key(r.unidade, rodadaDe(r)); if (k !== key()) m[k] = (m[k] || 0) + 1; }); return m; }
+function keyLabel(k){ const [u, r] = k.split('|'); return u + ' · ' + rodadaNome(r); }
 function refusals(){ const m = LS.get('mp_recusas', {}); return m[key()] || 0; }
 function addRefusal(){ const m = LS.get('mp_recusas', {}); m[key()] = (m[key()] || 0) + 1; LS.set('mp_recusas', m); }
 function uid(){ return Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6); }
@@ -209,7 +266,16 @@ let state = { screen: 'setup', q: 0, pin: '', pinTarget: 'admin', showText: '', 
 let current = null;      // resposta em andamento: só existe na memória até o fim
 let thanksTimer = null, idleTimer = null, deferredInstall = null, busy = false, sending = false, answerToken = 0, pendingConfirm = null;
 
-function novaResposta(){ if (settings.data !== hojeISO()) { fixarData(); saveSettings(); } return { id: uid(), versao: VERSAO, escala: ESCALA, unidade: settings.unidade, mes: settings.mes, data: settings.data, r: Array(ITENS.length).fill(null), enps: null, ces: null, a1: '', a2: '', sent: false }; }
+function novaResposta(){ if (settings.data !== hojeISO()) { fixarData(); saveSettings(); } return { id: uid(), versao: VERSAO, escala: ESCALA, unidade: settings.unidade, mes: settings.mes, data: settings.data, rodada: settings.rodada, r: Array(ITENS.length).fill(null), c: Array(ITENS.length).fill(''), enps: null, cEnps: '', ces: null, cCes: '', a1: '', a2: '', sent: false }; }
+// comentário opcional em cada página da pesquisa (pedido do gestor): c[i] por frase, cEnps e cCes
+function obsField(val){ return `<textarea id="f-obs" class="obs" maxlength="300" rows="2" placeholder="Comentário (opcional) — não escreva nomes">${esc(val || '')}</textarea>`; }
+function captureObs(){
+  const ta = document.getElementById('f-obs'); if (!ta || !current) return;
+  const v = ta.value.trim().slice(0, 300);
+  if (state.screen === 'q') { if (!current.c) current.c = Array(ITENS.length).fill(''); current.c[state.q] = v; }
+  else if (state.screen === 'enps') current.cEnps = v; else if (state.screen === 'ces') current.cCes = v;
+}
+function obsAtual(screen, q){ if (!current) return ''; return screen === 'q' ? ((current.c || [])[q] || '') : screen === 'enps' ? (current.cEnps || '') : screen === 'ces' ? (current.cCes || '') : ''; }
 function homeScreen(){ return configured() ? 'welcome' : 'setup'; }
 function go(screen, extra){
   state.screen = screen; state.fin = false; Object.assign(state, extra || {});   // fin: chegou aqui por "Finalizar pesquisa"
@@ -237,7 +303,7 @@ function startThanks(){ go('thanks'); clearTimeout(thanksTimer); thanksTimer = s
 
 /* ---------------- telas ---------------- */
 function render(){
-  const views = { setup:viewSetup, setpin:viewSetPin, welcome:viewWelcome, q:viewQuestion, enps:viewEnps, ces:viewCes, open:viewOpen, thanks:viewThanks, pin:viewPin, admin:viewAdmin, settings:viewSettings, text:viewText, saveerror:viewSaveError, confirm:viewConfirm, unidades:viewUnidades, colar:viewColar };
+  const views = { setup:viewSetup, setpin:viewSetPin, welcome:viewWelcome, q:viewQuestion, enps:viewEnps, ces:viewCes, open:viewOpen, thanks:viewThanks, pin:viewPin, admin:viewAdmin, settings:viewSettings, text:viewText, saveerror:viewSaveError, confirm:viewConfirm, unidades:viewUnidades, colar:viewColar, consolidado:viewConsolidado };
   document.getElementById('app').innerHTML = (views[state.screen] || viewSetup)();
 }
 function header(step, pct){
@@ -309,9 +375,10 @@ function viewSetPin(){
   const dots = '●'.repeat(state.newPin.length);
   const keys = ['1','2','3','4','5','6','7','8','9','←','0','OK'];
   const repeat = state.newPinStage === 1;
-  return header('Definir PIN', 0) + `<div class="wrap"><div class="card" style="max-width:520px">
-    <h2 style="text-align:center">${repeat ? 'Digite o PIN de novo para confirmar' : (settings.pin ? 'Novo PIN do avaliador' : 'Crie o PIN do avaliador')}</h2>
-    <p class="small muted" style="text-align:center">${repeat ? 'Repita os mesmos números e toque em OK.' : '4 a 8 números. Não use 1234, 0000 ou datas fáceis. Digite e toque em <b>OK</b>.'}</p>
+  const zerar = state.setPinMode === 'zerar';
+  return header(zerar ? 'Senha de zerar' : 'Definir PIN', 0) + `<div class="wrap"><div class="card" style="max-width:520px">
+    <h2 style="text-align:center">${repeat ? (zerar ? 'Digite a senha de novo para confirmar' : 'Digite o PIN de novo para confirmar') : (zerar ? 'Nova senha para zerar o histórico' : (settings.pin ? 'Novo PIN do avaliador' : 'Crie o PIN do avaliador'))}</h2>
+    <p class="small muted" style="text-align:center">${repeat ? 'Repita os mesmos números e toque em OK.' : '4 a 8 números. Não use 1234, 0000 ou datas fáceis. Digite e toque em <b>OK</b>.'}${zerar ? ' Esta senha só serve para apagar todo o histórico do tablet; é diferente do PIN do avaliador.' : ''}</p>
     <div class="pinshow">${dots || '&nbsp;'}</div>
     <div class="pinpad">${keys.map(k => `<button class="${k === 'OK' ? 'ok' : ''}" data-action="newpinkey" data-k="${k}">${k}</button>`).join('')}</div>
     <div class="row"><button class="btn link block" data-action="cancelsetpin">Cancelar</button></div>
@@ -336,13 +403,11 @@ function viewWelcome(){
   </div></div>` + cornerBtn();
 }
 
+// Sem botão "Voltar" e sem avanço automático (pedido do gestor): a página só muda pelo botão "Próxima", para dar tempo de escrever o comentário.
 function surveyFooter(canBack, canNext, nextLabel){
   return `<div class="spread">
-      <div style="display:flex;gap:6px;align-items:center">
-        <button class="btn link" data-action="back" ${canBack ? '' : 'disabled'}>← Voltar</button>
-        <button class="btn link" data-action="quit">Desistir</button>
-      </div>
-      <button class="btn light" data-action="next" ${canNext ? '' : 'disabled'}>${nextLabel || 'Próxima →'}</button>
+      <button class="btn link" data-action="quit">Desistir</button>
+      <button class="btn ${canNext ? '' : 'light'}" data-action="next" ${canNext ? '' : 'disabled'}>${nextLabel || 'Próxima →'}</button>
     </div>`;
 }
 
@@ -355,6 +420,7 @@ function viewQuestion(){
     <span class="dim">${esc(it.dim)}</span>
     <div class="statement">${esc(it.t)}</div>
     <div class="opts">${opts}${na}</div>
+    ${obsField((current.c || [])[i])}
     ${surveyFooter(i > 0, val != null)}
   </div></div>` + cornerBtn();
 }
@@ -370,6 +436,7 @@ function viewEnps(){
     <div class="statement">${esc(ENPS_Q)}</div>
     ${scaleButtons(current.enps)}
     <div class="anchors"><span>0 = não recomendaria de jeito nenhum</span><span>10 = recomendaria com certeza</span></div>
+    ${obsField(current.cEnps)}
     ${surveyFooter(true, current.enps != null)}
   </div></div>` + cornerBtn();
 }
@@ -379,6 +446,7 @@ function viewCes(){
   return header('Resolver problemas com o escritório', pct) + `<div class="wrap"><div class="card">
     <div class="statement">${esc(CES_Q)}</div>
     <div class="opts">${opts}<button class="opt alt ${current.ces === 'NP' ? 'sel' : ''}" data-action="answer" data-val="NP"><span class="num">—</span><span>Nunca precisei</span></button></div>
+    ${obsField(current.cCes)}
     ${surveyFooter(true, current.ces != null)}
   </div></div>` + cornerBtn();
 }
@@ -425,7 +493,8 @@ function viewPin(){
   const dots = '●'.repeat(state.pin.length);
   const keys = ['1','2','3','4','5','6','7','8','9','←','0','OK'];
   return header('Área do avaliador', 0) + `<div class="wrap"><div class="card" style="max-width:520px">
-    <h2 style="text-align:center">Digite o PIN do avaliador</h2>
+    <h2 style="text-align:center">${state.pinTarget === 'zerar' ? 'Confirmação final: digite a senha de zerar' : 'Digite o PIN do avaliador'}</h2>
+    ${state.pinTarget === 'zerar' ? '<div class="bad">A senha de zerar é diferente do PIN do avaliador (troca em Configurações). Ao confirmar, todas as respostas, recusas, rodadas e importadas deste tablet são apagadas. Isso não tem volta.</div>' : ''}
     ${current ? '<div class="warn">Há uma pesquisa em andamento. Ao entrar, ela será descartada sem gravar.</div>' : ''}
     ${locked ? `<div class="bad">Muitas tentativas erradas. Aguarde ${Math.ceil((settings.lockUntil - Date.now())/1000)} s.</div>` : ''}
     <div class="pinshow">${dots || '&nbsp;'}</div>
@@ -439,7 +508,7 @@ function tally(list){
   const items = ITENS.map(() => ({ c:[0,0,0], na:0, n:0 }));   // c[0] = Não (1), c[1] = meio (2), c[2] = Sim (3)
   const enps = { det:0, neu:0, pro:0, n:0 };
   const ces = { nao:0, meio:0, sim:0, np:0, n:0 };
-  let coments = [], legado = 0;
+  let coments = [], legado = 0, obsItens = ITENS.map(() => []), obsEnps = [], obsCes = [];
   list.forEach(resp => {
     if (resp.escala !== ESCALA) { legado++; return; }   // resposta de versão anterior (escala 1-5): não mistura
     resp.r.forEach((v, i) => {
@@ -451,8 +520,12 @@ function tally(list){
     else if (resp.ces === 1 || resp.ces === 2 || resp.ces === 3) { ces.n++; if (resp.ces === 1) ces.nao++; else if (resp.ces === 2) ces.meio++; else ces.sim++; }
     if (resp.a1) coments.push(resp.a1);
     if (resp.a2) coments.push(resp.a2);
+    (resp.c || []).forEach((txt, i) => { if (txt && obsItens[i]) obsItens[i].push(txt); });
+    if (resp.cEnps) obsEnps.push(resp.cEnps);
+    if (resp.cCes) obsCes.push(resp.cCes);
   });
   coments = shuffle(coments);   // nunca na ordem em que as pessoas responderam
+  obsItens.forEach((l, i) => { obsItens[i] = shuffle(l); }); obsEnps = shuffle(obsEnps); obsCes = shuffle(obsCes);
   const nResp = list.length - legado;
   // tudo é calculado a partir de 1 resposta; os sinais abaixo só dizem o que pode ser DIVULGADO por unidade
   // 'poucas' só quando a unidade tem respostas suficientes mas a frase não (houve "Não se aplica"); com 1-2 respostas o banner vermelho já cobre
@@ -464,12 +537,12 @@ function tally(list){
   const identificavel = nResp > 0 && nResp < N_DIVULGA_FRASE;          // 1 ou 2 pessoas: as contagens são as respostas delas
   const poucasDetalhe = nResp > 0 && nResp < N_DIVULGA_DETALHE;        // eNPS, CES e comentários: não divulgar por unidade
   const cesPoucas = ces.n > 0 && ces.n < N_DIVULGA_DETALHE;            // poucos precisaram do escritório
-  return { items, enps, ces, coments, nResp, legado, enpsVal, cesFacil, pctSimGeral, identificavel, poucasDetalhe, cesPoucas };
+  return { items, enps, ces, coments, obsItens, obsEnps, obsCes, nResp, legado, enpsVal, cesFacil, pctSimGeral, identificavel, poucasDetalhe, cesPoucas };
 }
 
 function tallyText(t){
   const L = [];
-  L.push(`Pesquisa equipe Maxipark v${VERSAO} (escala ${ESCALA}: 3 respostas por frase)\tUnidade: ${settings.unidade}\tMês: ${mesLabel(settings.mes)}\tData da coleta: ${settings.data ? dataLabel(settings.data) : '-'}\tRespostas: ${t.nResp}\tPreferiram não responder: ${refusals()}`);
+  L.push(`Pesquisa equipe Maxipark v${VERSAO} (escala ${ESCALA}: 3 respostas por frase)\tUnidade: ${settings.unidade}\t${rodadaNome(settings.rodada)}\tMês: ${mesLabel(settings.mes)}\tData da coleta: ${settings.data ? dataLabel(settings.data) : '-'}\tRespostas: ${t.nResp}\tPreferiram não responder: ${refusals()}`);
   if (t.legado) L.push(`Atenção: ${t.legado} resposta(s) de versão anterior do app (escala 1-5) não entram nestas contagens — só no arquivo de respostas.`);
   if (!t.nResp) { L.push('Ainda não há respostas desta unidade e mês.'); return L.join('\n'); }
   if (t.identificavel) L.push(`ATENÇÃO: só ${t.nResp} resposta${t.nResp > 1 ? 's' : ''} — as contagens abaixo são as respostas de ${t.nResp === 1 ? 'uma pessoa' : 'duas pessoas'}. Uso restrito à área de Experiência do Cliente: digitar na ficha, sim; divulgar por unidade ou mostrar ao encarregado, não.`);
@@ -487,9 +560,9 @@ function tallyText(t){
 function csvText(list){
   // escala B3: B1-B15 → 3 = Sim, 2 = resposta do meio, 1 = Não, NA = não se aplica; CES → 3 = fácil, 2 = mais ou menos, 1 = difícil, NP = nunca precisei.
   // Linhas sem carimbo (escala B5) vêm da v1.2, com notas de 1 a 5. Sem linha de legenda: o arquivo é só dados, uma pessoa por linha.
-  const head = ['versao','escala','id','unidade','mes','data', ...ITENS.map(it => 'B' + it.n), 'eNPS', 'CES', 'aberta1', 'aberta2'];   // data = dia da coleta (igual para toda a visita)
+  const head = ['versao','escala','id','unidade','mes','data','rodada', ...ITENS.map(it => 'B' + it.n), 'eNPS', 'CES', 'aberta1', 'aberta2', ...ITENS.map(it => 'cB' + it.n), 'cENPS', 'cCES'];   // data = dia da coleta; rodada = R1, R2…; cB1… = comentário escrito na página da frase
   const q = v => { let s = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
-  const rows = shuffle(list).map(r => [r.versao || '1.2', r.escala || 'B5', r.id, r.unidade, r.mes, r.data || '', ...r.r.map(v => v == null ? '' : v), r.enps == null ? '' : r.enps, r.ces == null ? '' : r.ces, r.a1, r.a2].map(q).join(';'));
+  const rows = shuffle(list).map(r => [r.versao || '1.2', r.escala || 'B5', r.id, r.unidade, r.mes, r.data || '', rodadaDe(r), ...r.r.map(v => v == null ? '' : v), r.enps == null ? '' : r.enps, r.ces == null ? '' : r.ces, r.a1, r.a2, ...ITENS.map((it, i) => (r.c || [])[i] || ''), r.cEnps || '', r.cCes || ''].map(q).join(';'));
   return '﻿' + head.join(';') + '\n' + rows.join('\n') + '\n';
 }
 
@@ -518,10 +591,14 @@ function viewAdmin(){
       <p class="legend">Cada número é a quantidade de colaboradores que deu aquela resposta. Copie as linhas B1–B15 para a ficha em Excel (colunas Não · Resposta do meio · Sim · Não se aplica). Em B12, "Não lembro" conta como não elogiado; em B15, "Talvez" não é meio-termo — leia essas duas só pelo % Sim.</p>${poucas}${detalhe}`;
   }
   const comentHtml = !t.nResp ? '<p class="muted small">Sem respostas.</p>'
-    : (t.coments.length ? '<ul>' + t.coments.map(c => `<li>${esc(c)}</li>`).join('') + '</ul>' : '<p class="muted small">Sem comentários.</p>')
+    : (t.coments.length ? '<ul>' + t.coments.map(c => `<li>${esc(c)}</li>`).join('') + '</ul>' : '<p class="muted small">Sem comentários nas perguntas abertas.</p>')
+      + (() => { const blocos = []; t.obsItens.forEach((l, i) => { if (l.length) blocos.push(`<li><b>B${i+1}</b> <span class="small muted">${esc(ITENS[i].t)}</span><ul>${l.map(c => `<li>${esc(c)}</li>`).join('')}</ul></li>`); });
+        if (t.obsEnps.length) blocos.push(`<li><b>Nota de 0 a 10</b><ul>${t.obsEnps.map(c => `<li>${esc(c)}</li>`).join('')}</ul></li>`);
+        if (t.obsCes.length) blocos.push(`<li><b>Escritório (CES)</b><ul>${t.obsCes.map(c => `<li>${esc(c)}</li>`).join('')}</ul></li>`);
+        return blocos.length ? `<h3 style="font-size:17px">Comentários escritos nas páginas da pesquisa</h3><ul class="obslist">${blocos.join('')}</ul>` : ''; })()
       + `<p class="legend">Ordem embaralhada. Na ficha, registre só os temas — nunca copie frases.${t.poucasDetalhe ? ` Com menos de ${N_DIVULGA_DETALHE} respostas, os comentários não se divulgam por unidade.` : ''}</p>`;
   return header('Área do avaliador', 0) + `<div class="wrap"><div class="card" style="max-width:980px">
-    <h1>Contagens · ${esc(settings.unidade || '—')} · ${mesLabel(settings.mes) || '—'}${settings.data ? ` <span class="small muted">· coleta em ${dataLabel(settings.data)}</span>` : ''}</h1>
+    <h1>Contagens · ${esc(settings.unidade || '—')} · ${esc(rodadaNome(settings.rodada))}${settings.data ? ` <span class="small muted">· coleta em ${dataLabel(settings.data)}</span>` : ''}</h1>
     <div class="row"><button class="btn ghost" data-action="tosetup">← Tela inicial (Preparar a coleta)</button><button class="btn ghost" data-action="tocollect">Voltar à coleta com a equipe</button></div>
     ${state.notice ? `<div class="warn">${esc(state.notice)}</div>` : ''}
     ${t.legado ? `<div class="warn"><b>${t.legado} resposta(s) de versão anterior do app</b> (escala de 1 a 5) estão guardadas para esta unidade e mês. Elas não entram nas contagens abaixo; saem no arquivo de respostas com a coluna <i>escala</i> = B5. Exporte e apague antes de continuar.</div>` : ''}
@@ -548,10 +625,11 @@ function viewAdmin(){
       ${settings.webhook ? `<button class="btn light" data-action="resend" ${unsent ? '' : 'disabled'}>Enviar à matriz agora (${unsent})</button>` : ''}
     </div>
     <h3>Gerenciar</h3>
-    ${otherCount ? `<div class="warn">Este tablet ainda guarda <b>${otherCount}</b> resposta(s) de outras unidades/meses: ${Object.keys(others).map(k => esc(k.replace('|', ' · '))).join(', ')}. <button class="btn link" data-action="wipeothers">Apagar essas outras respostas</button></div>` : ''}
+    ${otherCount ? `<div class="warn">Este tablet também guarda <b>${otherCount}</b> resposta(s) de outras unidades ou rodadas: ${Object.keys(others).map(k => esc(keyLabel(k))).join(', ')}. Elas aparecem no Consolidado. <button class="btn link" data-action="wipeothers">Apagar essas outras respostas</button></div>` : ''}
     <div class="row">
+      <button class="btn" data-action="consolidado">Consolidado de todas as unidades e rodadas</button>
       <button class="btn ghost" data-action="settings">Configurações (unidade, lista de unidades, PIN, envio)</button>
-      <button class="btn danger" data-action="wipe" ${list.length || refusals() ? '' : 'disabled'}>Apagar respostas desta unidade e mês${exported ? '' : ' (ainda não exportadas)'}</button>
+      <button class="btn danger" data-action="wipe" ${list.length || refusals() ? '' : 'disabled'}>Apagar respostas desta unidade e rodada${exported ? '' : ' (ainda não exportadas)'}</button>
     </div>
     <div class="row">
       <button class="btn block" data-action="tocollect">Voltar à coleta com a equipe</button>
@@ -579,6 +657,7 @@ function viewSettings(){
     <div class="row">
       <button class="btn" data-action="savesettings">Salvar</button>
       <button class="btn light" data-action="gosetpin">Trocar PIN</button>
+      <button class="btn light" data-action="gosetzerar">Trocar senha de zerar</button>
       <button class="btn ghost" data-action="admin">Cancelar</button>
     </div>
   </div></div>`;
@@ -590,6 +669,185 @@ function viewText(){
     <pre id="txt">${esc(state.showText)}</pre>
     <div class="row"><button class="btn" data-action="admin">Voltar</button></div>
   </div></div>`;
+}
+
+/* ---------------- consolidado de todas as unidades e rodadas ---------------- */
+const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+function histResponses(){ return LS.get('mp_hist', []); }   // respostas importadas de outros tablets (CSV do app)
+function poolConsolidado(){
+  const seen = new Set(), lista = []; let legado = 0;
+  allResponses().concat(histResponses()).forEach(r => { if (!r || !r.id || seen.has(r.id)) return; seen.add(r.id); if (r.escala !== ESCALA) { legado++; return; } lista.push(r); });
+  return { lista, legado };
+}
+function agregar(list){   // um grupo de respostas (uma unidade ou todas)
+  const a = { n: list.length, totSim: 0, totN: 0, enps: { n:0, pro:0, det:0 }, ces: { n:0, sim:0 }, itens: ITENS.map(() => ({ c:[0,0,0], na:0, n:0 })) };
+  list.forEach(r => {
+    (r.r || []).forEach((v, i) => { const it = a.itens[i]; if (!it) return; if (v === 'NA') it.na++; else if (v === 1 || v === 2 || v === 3) { it.c[v-1]++; it.n++; a.totN++; if (v === 3) a.totSim++; } });
+    if (typeof r.enps === 'number') { a.enps.n++; if (r.enps <= 6) a.enps.det++; else if (r.enps >= 9) a.enps.pro++; }
+    if (r.ces === 1 || r.ces === 2 || r.ces === 3) { a.ces.n++; if (r.ces === 3) a.ces.sim++; }
+  });
+  a.pctSim = a.totN ? Math.round(a.totSim / a.totN * 100) : null;
+  a.enpsVal = a.enps.n >= N_DIVULGA_DETALHE ? Math.round((a.enps.pro - a.enps.det) / a.enps.n * 100) : null;
+  a.cesFacil = a.ces.n >= N_DIVULGA_DETALHE ? Math.round(a.ces.sim / a.ces.n * 100) : null;
+  a.identificavel = a.n > 0 && a.n < N_DIVULGA_FRASE;
+  return a;
+}
+function porUnidade(list){ const m = {}; list.forEach(r => { (m[r.unidade] = m[r.unidade] || []).push(r); }); return Object.keys(m).map(u => Object.assign({ unidade: u }, agregar(m[u]))); }
+function filtrarPool(lista, cf, semUnidade){
+  return lista.filter(r => {
+    if (cf.rodada && rodadaDe(r) !== cf.rodada) return false;
+    const data = r.data || '', mes = r.mes || data.slice(0, 7);
+    if (cf.ano && mes.slice(0, 4) !== cf.ano) return false;
+    if (cf.mes && mes.slice(5, 7) !== cf.mes) return false;
+    if (cf.dia && data.slice(8, 10) !== cf.dia) return false;   // respostas antigas sem dia ficam fora quando se filtra por dia
+    if (!semUnidade && cf.unidade && r.unidade !== cf.unidade) return false;
+    return true;
+  });
+}
+function cfDefault(){ return { rodada: settings.rodada, ano:'', mes:'', dia:'', unidade:'', ordem:'melhores', soPend:false, comp:'' }; }
+function rankingTexto(units, compMap){
+  const L = [['#','Unidade','Nome','Respostas','% Sim','eNPS','% fácil (CES)'].concat(compMap ? ['% Sim (comparação)','Diferença (pts)'] : []).join('\t')];
+  units.forEach((u, i) => { const c = compMap ? compMap[u.unidade] : null; L.push([i+1, u.unidade, (unidadePorCodigo(u.unidade) || {}).nome || '', u.n, u.pctSim == null ? '' : u.pctSim + '%', u.enpsVal == null ? '' : u.enpsVal, u.cesFacil == null ? '' : u.cesFacil + '%'].concat(compMap ? [c && c.pctSim != null ? c.pctSim + '%' : '', (c && u.pctSim != null && c.pctSim != null) ? (u.pctSim - c.pctSim) : ''] : []).join('\t')); });
+  return L.join('\n');
+}
+function viewConsolidado(){
+  if (!state.cf) state.cf = cfDefault();
+  const cf = state.cf; const rl = rodadas();
+  if (cf.rodada && !rl.find(r => r.id === cf.rodada)) cf.rodada = settings.rodada;
+  const pool = poolConsolidado(); const todas = pool.lista;
+  const base = filtrarPool(todas, cf, true);                       // rodada + datas (sem unidade): serve à cobertura
+  const filt = cf.unidade ? base.filter(r => r.unidade === cf.unidade) : base;
+  const geral = agregar(filt);
+  const units = porUnidade(filt);
+  let compMap = null;
+  if (cf.comp) { compMap = {}; porUnidade(todas.filter(r => rodadaDe(r) === cf.comp && (!cf.unidade || r.unidade === cf.unidade))).forEach(u => { compMap[u.unidade] = u; }); }
+  const ord = {
+    melhores: (a, b) => ((b.pctSim == null ? -1 : b.pctSim) - (a.pctSim == null ? -1 : a.pctSim)) || (b.n - a.n) || a.unidade.localeCompare(b.unidade),
+    piores: (a, b) => ((a.pctSim == null ? 101 : a.pctSim) - (b.pctSim == null ? 101 : b.pctSim)) || (b.n - a.n) || a.unidade.localeCompare(b.unidade),
+    respostas: (a, b) => (b.n - a.n) || a.unidade.localeCompare(b.unidade),
+    nome: (a, b) => a.unidade.localeCompare(b.unidade)
+  };
+  units.sort(ord[cf.ordem] || ord.melhores);
+  const opt = (arr, sel, fmt) => arr.map(v => `<option value="${esc(v)}" ${v === sel ? 'selected' : ''}>${esc(fmt ? fmt(v) : v)}</option>`).join('');
+  const naRodada = todas.filter(r => !cf.rodada || rodadaDe(r) === cf.rodada);
+  const mesDe = r => r.mes || (r.data || '').slice(0, 7);
+  const anos = [...new Set(naRodada.map(r => mesDe(r).slice(0, 4)).filter(Boolean))].sort();
+  const meses = [...new Set(naRodada.filter(r => !cf.ano || mesDe(r).slice(0, 4) === cf.ano).map(r => mesDe(r).slice(5, 7)).filter(Boolean))].sort();
+  const dias = [...new Set(naRodada.filter(r => r.data && (!cf.ano || r.data.slice(0, 4) === cf.ano) && (!cf.mes || r.data.slice(5, 7) === cf.mes)).map(r => r.data.slice(8, 10)))].sort();
+  const unidadesOpt = [...new Set(todas.map(r => r.unidade))].sort();
+  // cobertura: cadastradas × pesquisadas (dentro da rodada/datas escolhidas)
+  const cad = unidades(); const pesq = new Set(base.map(r => r.unidade));
+  const pendentes = cad.filter(u => !pesq.has(u.codigo));
+  const naoCad = [...pesq].filter(c => !cad.find(u => u.codigo === c)).sort();
+  const nBase = {}; base.forEach(r => { nBase[r.unidade] = (nBase[r.unidade] || 0) + 1; });
+  const covRows = (cf.soPend ? pendentes : cad).map(u => `<tr><td class="l"><b>${esc(u.codigo)}</b>${u.nome ? ' <span class="small muted">' + esc(u.nome) + '</span>' : ''}</td><td>${pesq.has(u.codigo) ? '<span class="tag ok">pesquisada</span>' : '<span class="tag pend">pendente</span>'}</td><td>${nBase[u.codigo] || 0}</td></tr>`).join('')
+    + (cf.soPend ? '' : naoCad.map(c => `<tr><td class="l"><b>${esc(c)}</b> <span class="small muted">fora da lista de unidades</span></td><td><span class="tag ok">pesquisada</span></td><td>${nBase[c]}</td></tr>`).join(''));
+  const fmtDelta = (a, b) => (a == null || b == null) ? '—' : ((a - b > 0 ? '+' : '') + (a - b) + ' pts');
+  const unitRows = units.map((u, i) => { const c = compMap ? compMap[u.unidade] : null; const d = (c && u.pctSim != null && c.pctSim != null) ? u.pctSim - c.pctSim : null;
+    return `<tr><td>${i+1}</td><td class="l"><b>${esc(u.unidade)}</b> <span class="small muted">${esc((unidadePorCodigo(u.unidade) || {}).nome || '')}</span>${u.identificavel ? ` <span class="tag pend" title="1 ou 2 respostas: identificável">⚠ ${u.n}</span>` : ''}</td><td>${u.n}</td><td><b>${u.pctSim == null ? '—' : u.pctSim + '%'}</b></td><td>${u.enpsVal == null ? '—' : (u.enpsVal > 0 ? '+' : '') + u.enpsVal}</td><td>${u.cesFacil == null ? '—' : u.cesFacil + '%'}</td>${compMap ? `<td>${c && c.pctSim != null ? c.pctSim + '%' : '—'} <span class="small muted">(${c ? c.n : 0})</span></td><td class="${d == null ? '' : (d >= 0 ? 'up' : 'down')}">${fmtDelta(u.pctSim, c ? c.pctSim : null)}</td>` : ''}</tr>`; }).join('');
+  const obsPorFrase = ITENS.map(() => []); const obsOutros = { enps: [], ces: [] };
+  filt.forEach(r => { (r.c || []).forEach((txt, i) => { if (txt && obsPorFrase[i]) obsPorFrase[i].push(txt); }); if (r.cEnps) obsOutros.enps.push(r.cEnps); if (r.cCes) obsOutros.ces.push(r.cCes); });
+  const fraseRows = geral.itens.map((it, i) => `<tr><td class="l"><b>B${i+1}</b> <span class="small muted">${esc(ITENS[i].t)}</span></td><td>${it.c[0]}</td><td>${it.c[1]} <span class="small muted">${esc(ITENS[i].opts[1])}</span></td><td>${it.c[2]}</td><td>${ITENS[i].na ? it.na : '—'}</td><td>${it.n}</td><td><b>${it.n ? Math.round(it.c[2] / it.n * 100) + '%' : '—'}</b></td><td>${obsPorFrase[i].length}</td></tr>`).join('');
+  const nObs = obsPorFrase.reduce((a, l) => a + l.length, 0) + obsOutros.enps.length + obsOutros.ces.length;
+  const obsHtml = nObs ? `<details><summary>Ler os ${nObs} comentários escritos nas páginas (ordem embaralhada)</summary><ul class="obslist">${obsPorFrase.map((l, i) => l.length ? `<li><b>B${i+1}</b> <span class="small muted">${esc(ITENS[i].t)}</span><ul>${shuffle(l).map(c => `<li>${esc(c)}</li>`).join('')}</ul></li>` : '').join('')}${obsOutros.enps.length ? `<li><b>Nota de 0 a 10</b><ul>${shuffle(obsOutros.enps).map(c => `<li>${esc(c)}</li>`).join('')}</ul></li>` : ''}${obsOutros.ces.length ? `<li><b>Escritório (CES)</b><ul>${shuffle(obsOutros.ces).map(c => `<li>${esc(c)}</li>`).join('')}</ul></li>` : ''}</ul><p class="legend">Registre só os temas; nunca copie frases. Comentários são de uso restrito da área de Experiência do Cliente.</p></details>` : '';
+  const rodRows = rl.map(r => { const lst = todas.filter(x => rodadaDe(x) === r.id); return `<tr class="${r.id === settings.rodada ? 'cur' : ''}"><td class="l"><b>${esc(r.nome)}</b>${r.id === settings.rodada ? ' <span class="tag ok">atual</span>' : ''}</td><td>${r.inicio ? dataLabel(r.inicio) : '—'}</td><td>${r.fim ? dataLabel(r.fim) : (r.id === settings.rodada ? 'em andamento' : '—')}</td><td>${lst.length}</td><td>${new Set(lst.map(x => x.unidade)).size}</td></tr>`; }).join('');
+  const nIdent = units.filter(u => u.identificavel).length;
+  const filtroTxt = [cf.rodada ? rodadaNome(cf.rodada) : 'todas as rodadas', cf.ano || 'todos os anos', cf.mes ? MESES[+cf.mes - 1] : 'todos os meses', cf.dia ? 'dia ' + cf.dia : 'todos os dias', cf.unidade || 'todas as unidades'].join(' · ');
+  return header('Consolidado', 0) + `<div class="wrap"><div class="card" style="max-width:1100px">
+    <h1>Consolidado de todas as unidades</h1>
+    <div class="row" style="margin-top:6px"><button class="btn ghost" data-action="admin">← Área do avaliador</button><button class="btn ghost" data-action="tosetup">Tela inicial (Preparar a coleta)</button></div>
+    <p class="small muted">Junta as respostas deste tablet com as importadas de outros tablets (arquivo CSV do app). Rodada atual da coleta: <b>${esc(rodadaNome(settings.rodada))}</b>.${pool.legado ? ` ${pool.legado} resposta(s) de versão antiga do app (escala 1-5) ficam fora das contas.` : ''}${histResponses().length ? ` ${histResponses().length} resposta(s) importada(s) de outros tablets.` : ''}</p>
+    <h3>Filtros</h3>
+    <div class="filters">
+      <div><label>Rodada (pesquisa)</label><select data-cf="rodada"><option value="" ${cf.rodada ? '' : 'selected'}>Todas</option>${opt(rl.map(r => r.id), cf.rodada, id => rodadaNome(id))}</select></div>
+      <div><label>Ano</label><select data-cf="ano"><option value="">Todos</option>${opt(anos, cf.ano)}</select></div>
+      <div><label>Mês</label><select data-cf="mes"><option value="">Todos</option>${opt(meses, cf.mes, m => MESES[+m - 1] || m)}</select></div>
+      <div><label>Dia</label><select data-cf="dia"><option value="">Todos</option>${opt(dias, cf.dia)}</select></div>
+      <div><label>Unidade</label><select data-cf="unidade"><option value="">Todas</option>${opt(unidadesOpt, cf.unidade, c => unidadeLabel(c))}</select></div>
+      <div><label>Comparar com a rodada</label><select data-cf="comp"><option value="">— sem comparação —</option>${opt(rl.map(r => r.id).filter(id => id !== cf.rodada), cf.comp, id => rodadaNome(id))}</select></div>
+    </div>
+    <p class="legend">Mostrando: ${esc(filtroTxt)}.</p>
+    <div class="kpi">
+      <div><b>${geral.n}</b><span>respostas</span></div>
+      <div><b>${units.length}</b><span>unidades com respostas</span></div>
+      <div><b>${geral.pctSim == null ? '—' : geral.pctSim + '%'}</b><span>% de "Sim" nas 15 frases</span></div>
+      <div><b>${geral.enpsVal == null ? '—' : (geral.enpsVal > 0 ? '+' : '') + geral.enpsVal}</b><span>eNPS (${N_DIVULGA_DETALHE}+ respostas)</span></div>
+      <div><b>${geral.cesFacil == null ? '—' : geral.cesFacil + '%'}</b><span>acham fácil resolver com o escritório</span></div>
+    </div>
+    <h3>Ranking das unidades</h3>
+    <div class="row" style="margin-top:6px">
+      <button class="btn ${cf.ordem === 'melhores' ? '' : 'light'}" data-action="cfordem" data-v="melhores">Melhores avaliadas</button>
+      <button class="btn ${cf.ordem === 'piores' ? '' : 'light'}" data-action="cfordem" data-v="piores">Piores avaliadas</button>
+      <button class="btn ${cf.ordem === 'respostas' ? '' : 'light'}" data-action="cfordem" data-v="respostas">Mais respostas</button>
+      <button class="btn ${cf.ordem === 'nome' ? '' : 'light'}" data-action="cfordem" data-v="nome">A–Z</button>
+    </div>
+    ${units.length ? `<div style="overflow:auto"><table>
+      <tr><th>#</th><th class="l">Unidade</th><th>Respostas</th><th>% Sim</th><th>eNPS</th><th>% fácil (CES)</th>${compMap ? `<th>% Sim em ${esc(rodadaNome(cf.comp))}</th><th>Diferença</th>` : ''}</tr>${unitRows}</table></div>
+      <p class="legend">Ordenado por % de "Sim" nas 15 frases (indicador principal). eNPS e CES só aparecem com ${N_DIVULGA_DETALHE}+ respostas na unidade.${nIdent ? ` ⚠ = unidade com 1 ou 2 respostas: o resultado identifica quem respondeu — uso restrito da área de Experiência do Cliente, não divulgar por unidade.` : ''}${compMap ? ' Diferença = pontos percentuais de % Sim em relação à rodada comparada (mesma unidade).' : ''}</p>` : '<p class="muted">Nenhuma resposta nos filtros escolhidos.</p>'}
+    <h3>Cobertura: unidades cadastradas × pesquisadas</h3>
+    <div class="kpi">
+      <div><b>${cad.length}</b><span>unidades cadastradas</span></div>
+      <div><b>${cad.length - pendentes.length}</b><span>já pesquisadas${cf.rodada ? ' nesta rodada' : ''}</span></div>
+      <div><b>${pendentes.length}</b><span>ainda sem pesquisa</span></div>
+      <div><b>${cad.length ? Math.round((cad.length - pendentes.length) / cad.length * 100) : 0}%</b><span>cobertura</span></div>
+    </div>
+    <label class="check"><input type="checkbox" data-cf="soPend" ${cf.soPend ? 'checked' : ''}> Mostrar só as unidades que ainda não foram pesquisadas (${pendentes.length})</label>
+    <div style="overflow:auto;max-height:420px"><table><tr><th class="l">Unidade</th><th>Situação</th><th>Respostas</th></tr>${covRows || '<tr><td colspan="3" class="muted">Nenhuma unidade pendente.</td></tr>'}</table></div>
+    <p class="legend">A cobertura considera a rodada e as datas escolhidas nos filtros (não o filtro de unidade). Lista de unidades: ${esc(unidadesInfo())}.</p>
+    <h3>Por frase (todas as respostas do filtro)</h3>
+    <div style="overflow:auto"><table><tr><th class="l">Frase</th><th>Não</th><th>Resposta do meio</th><th>Sim</th><th>Não se aplica</th><th>Responderam</th><th>% Sim</th><th>Comentários</th></tr>${fraseRows}</table></div>
+    ${obsHtml}
+    <h3>Rodadas (histórico das pesquisas)</h3>
+    <div style="overflow:auto"><table><tr><th class="l">Rodada</th><th>Início</th><th>Fim</th><th>Respostas</th><th>Unidades</th></tr>${rodRows}</table></div>
+    <div class="row"><button class="btn" data-action="novarodada">Iniciar nova rodada (guarda o histórico)</button></div>
+    <p class="legend">Uma nova rodada zera a coleta de todas as unidades sem apagar nada: as respostas antigas continuam aqui, e você compara rodadas pelo filtro "Comparar com a rodada".</p>
+    <h3>Juntar tablets e exportar</h3>
+    <div class="row">
+      <button class="btn light" data-action="importhist">Importar respostas de outro tablet (CSV do app)</button>
+      <button class="btn light" data-action="csvcons" ${filt.length ? '' : 'disabled'}>Baixar CSV consolidado (filtro atual)</button>
+      <button class="btn light" data-action="copycons" ${units.length ? '' : 'disabled'}>Copiar ranking (para o Excel)</button>
+      ${histResponses().length ? '<button class="btn link" data-action="wipehist">Apagar as respostas importadas</button>' : ''}
+    </div>
+    <h3>Zerar</h3>
+    <div class="row"><button class="btn danger" data-action="zerartudo">Zerar todo o histórico deste tablet</button></div>
+    <p class="legend">Apaga todas as respostas (de todas as unidades e rodadas), recusas, rodadas e respostas importadas deste aparelho, e volta à Rodada 1. Mantém o PIN e a lista de unidades. Pede confirmação e depois a <b>senha de zerar</b> (diferente do PIN; troca em Configurações). Use para começar um teste do zero — exporte antes o que quiser guardar.</p>
+    <p class="legend">Para juntar todos os tablets: em cada um, exporte o "arquivo de respostas (CSV)" e importe aqui — respostas repetidas são ignoradas pelo id. O CSV consolidado tem uma linha por pessoa e é de uso restrito da área de Experiência do Cliente.</p>
+  </div></div>`;
+}
+function hashStr(s){ let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+function csvToResponses(text){   // lê o CSV exportado pelo próprio app (qualquer versão)
+  const rows = parseDelimited(text.replace(/^﻿/, ''));
+  if (rows.length < 2) return [];
+  const head = rows[0].map(h => h.toLowerCase().replace(/^﻿/, ''));
+  const ix = n => head.indexOf(n);
+  const iU = ix('unidade'), iM = ix('mes'), iD = ix('data'), iR = ix('rodada'), iId = ix('id'), iV = ix('versao'), iE = ix('escala'), iEn = ix('enps'), iC = ix('ces'), iA1 = ix('aberta1'), iA2 = ix('aberta2');
+  const iB = ITENS.map(it => ix('b' + it.n));
+  if (iU < 0 || iB.some(i => i < 0)) return null;
+  const num = v => { if (v === 'NA' || v === 'NP') return v; if (v == null || v === '') return null; const n = Number(v); return isNaN(n) ? null : n; };
+  const txt = v => String(v == null ? '' : v).replace(/^'/, '');
+  return rows.slice(1).filter(r => r.length >= 5 && r[iU]).map(r => ({
+    id: iId >= 0 && r[iId] ? r[iId] : 'imp-' + hashStr(r.join(';')),
+    versao: iV >= 0 ? r[iV] : '1.2', escala: iE >= 0 ? r[iE] : 'B5',
+    unidade: r[iU].trim().toUpperCase(), mes: iM >= 0 && r[iM] ? r[iM] : (iD >= 0 ? (r[iD] || '').slice(0, 7) : ''), data: iD >= 0 ? (r[iD] || '') : '', rodada: iR >= 0 && r[iR] ? r[iR] : 'R1',
+    r: iB.map(i => num(r[i])), enps: iEn >= 0 ? num(r[iEn]) : null, ces: iC >= 0 ? num(r[iC]) : null,
+    a1: iA1 >= 0 ? txt(r[iA1]) : '', a2: iA2 >= 0 ? txt(r[iA2]) : '',
+    c: ITENS.map(it => { const i = ix('cb' + it.n); return i >= 0 ? txt(r[i]) : ''; }), cEnps: ix('cenps') >= 0 ? txt(r[ix('cenps')]) : '', cCes: ix('cces') >= 0 ? txt(r[ix('cces')]) : '',
+    sent: true, importado: true
+  }));
+}
+async function importHist(files){
+  let novas = 0, repetidas = 0, ruins = 0;
+  const ids = new Set(allResponses().concat(histResponses()).map(r => r.id)); const hist = histResponses();
+  for (const file of files) {
+    try {
+      const rs = csvToResponses(await file.text());
+      if (rs === null) { ruins++; continue; }
+      rs.forEach(r => { if (ids.has(r.id)) { repetidas++; return; } ids.add(r.id); hist.push(r); novas++; garantirRodada(r.rodada); });
+    } catch(e) { ruins++; }
+  }
+  if (novas && !LS.set('mp_hist', hist)) { toast('Não foi possível gravar neste aparelho (memória cheia?).'); return; }
+  toast(`${novas} resposta(s) nova(s) importada(s)` + (repetidas ? `; ${repetidas} já existiam` : '') + (ruins ? `; ${ruins} arquivo(s) não são o CSV do app` : '') + '.');
+  render();
 }
 
 /* ---------------- importação da lista de unidades ---------------- */
@@ -675,7 +933,7 @@ async function sendPending(){
   let ok = 0;
   for (const r of pend) {
     try {
-      const payload = { app:'pesquisa-equipe-maxipark', versao:r.versao || '1.2', escala:r.escala || 'B5', id:r.id, unidade:r.unidade, mes:r.mes, data:r.data || '', respostas:r.r, enps:r.enps, ces:r.ces, aberta1:r.a1, aberta2:r.a2, recusas_unidade_mes:(LS.get('mp_recusas', {})[r.unidade + '|' + r.mes] || 0) };
+      const payload = { app:'pesquisa-equipe-maxipark', versao:r.versao || '1.2', escala:r.escala || 'B5', id:r.id, unidade:r.unidade, mes:r.mes, data:r.data || '', rodada:rodadaDe(r), respostas:r.r, enps:r.enps, ces:r.ces, aberta1:r.a1, aberta2:r.a2, comentarios:(r.c || []), comentario_enps:r.cEnps || '', comentario_ces:r.cCes || '', recusas_unidade_rodada:(LS.get('mp_recusas', {})[key(r.unidade, rodadaDe(r))] || 0) };
       await fetch(settings.webhook, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
       const list = allResponses(); const it = list.find(x => x.id === r.id); if (it) { it.sent = true; saveResponses(list); }
       ok++;
@@ -686,20 +944,21 @@ async function sendPending(){
   if (state.screen === 'admin') { toast(ok === pend.length ? 'Tudo enviado à matriz.' : `${ok} enviada(s); ${pend.length - ok} ainda pendente(s).`); render(); }
 }
 
-async function exportCsv(){
-  const list = currentResponses();
-  const name = `pesquisa_${settings.unidade}_${settings.mes}.csv`;
-  const text = csvText(list);
+async function shareOrDownload(name, text){
   try {
     if (navigator.share && navigator.canShare) {
       const file = new File([text], name, { type: 'text/csv' });
-      if (navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); markExported(); render(); return; }
+      if (navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return true; }
     }
-  } catch(e) { if (e && e.name === 'AbortError') return; }
+  } catch(e) { if (e && e.name === 'AbortError') return false; }
   const blob = new Blob([text], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
-  markExported(); render();
+  return true;
+}
+async function exportCsv(){
+  const ok = await shareOrDownload(`pesquisa_${settings.unidade}_${settings.rodada}_${settings.data || settings.mes}.csv`, csvText(currentResponses()));
+  if (ok) { markExported(); render(); }
 }
 async function copyText(text){
   try { await navigator.clipboard.writeText(text); toast('Contagens copiadas.'); markExported(); render(); }
@@ -730,7 +989,8 @@ function handle(action, el){
     case 'importpaste': { const t = document.getElementById('c-lista').value; if (saveUnidades(rowsToUnidades(parseDelimited(t)), 'lista colada')) go('settings'); break; }
     case 'resetlist': askConfirm('Voltar à lista padrão de unidades (Grande SP)? A lista importada será removida deste tablet.', () => { localStorage.removeItem('mp_unidades'); toast('Lista padrão restaurada.'); go('settings'); }); break;
     case 'install': if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; render(); } break;
-    case 'gosetpin': state.newPin = ''; state.newPinStage = 0; state.newPinFirst = ''; go('setpin'); break;
+    case 'gosetpin': state.newPin = ''; state.newPinStage = 0; state.newPinFirst = ''; state.setPinMode = 'pin'; go('setpin'); break;
+    case 'gosetzerar': state.newPin = ''; state.newPinStage = 0; state.newPinFirst = ''; state.setPinMode = 'zerar'; go('setpin'); break;
     case 'cancelsetpin': go(settings.pin ? 'settings' : 'setup'); break;
     case 'newpinkey': {
       const k = el.getAttribute('data-k');
@@ -741,7 +1001,13 @@ function handle(action, el){
           if (['1234','0000','1111','2222','123456','12345678'].includes(state.newPin)) { toast('PIN muito fácil. Escolha outro.'); state.newPin = ''; render(); return; }
           state.newPinFirst = state.newPin; state.newPin = ''; state.newPinStage = 1; render(); return;
         }
-        if (state.newPin !== state.newPinFirst) { toast('Os PINs não conferem. Comece de novo.'); state.newPin = ''; state.newPinFirst = ''; state.newPinStage = 0; render(); return; }
+        if (state.newPin !== state.newPinFirst) { toast('Os números não conferem. Comece de novo.'); state.newPin = ''; state.newPinFirst = ''; state.newPinStage = 0; render(); return; }
+        if (state.setPinMode === 'zerar') {
+          if (state.newPin === settings.pin) { toast('A senha de zerar não pode ser igual ao PIN do avaliador.'); state.newPin = ''; state.newPinFirst = ''; state.newPinStage = 0; render(); return; }
+          settings.senhaZerar = state.newPin; saveSettings(); state.newPin = ''; state.newPinFirst = ''; state.newPinStage = 0;
+          toast('Senha de zerar definida.'); go('settings'); return;
+        }
+        if (state.newPin === (settings.senhaZerar || SENHA_ZERAR_PADRAO)) { toast('O PIN não pode ser igual à senha de zerar.'); state.newPin = ''; state.newPinFirst = ''; state.newPinStage = 0; render(); return; }
         settings.pin = state.newPin; settings.pinFails = 0; settings.lockUntil = 0; saveSettings(); state.newPin = ''; state.newPinFirst = ''; state.newPinStage = 0;
         toast('PIN definido.'); go(settings.unidade && settings.mes ? 'settings' : 'setup'); return;
       } else if (state.newPin.length < 8) state.newPin += k;
@@ -757,9 +1023,9 @@ function handle(action, el){
       const raw = el.getAttribute('data-val');
       const v = (raw === 'NA' || raw === 'NP') ? raw : Number(raw);
       const screen = state.screen, q = state.q, token = ++answerToken;
+      captureObs();
       if (screen === 'q') current.r[q] = v; else if (screen === 'enps') current.enps = v; else if (screen === 'ces') current.ces = v; else return;
-      render(); armIdle();
-      setTimeout(() => { if (token === answerToken && state.screen === screen && state.q === q && current) advance(); }, 260);
+      render(); armIdle();   // sem avanço automático: a pessoa toca em "Próxima" quando terminar (inclusive o comentário)
       break;
     }
     case 'next': advance(); break;
@@ -773,7 +1039,8 @@ function handle(action, el){
       const k = el.getAttribute('data-k');
       if (k === '←') state.pin = state.pin.slice(0, -1);
       else if (k === 'OK') {
-        if (state.pin === settings.pin) { state.pin = ''; settings.pinFails = 0; saveSettings(); const had = !!current; current = null; go(state.pinTarget, { fin: state.pinFin, notice: had ? 'Uma pesquisa em andamento foi descartada sem gravar.' : '' }); }
+        const alvo = state.pinTarget === 'zerar' ? (settings.senhaZerar || SENHA_ZERAR_PADRAO) : settings.pin;
+        if (state.pin === alvo) { state.pin = ''; settings.pinFails = 0; saveSettings(); const had = !!current; current = null; if (state.pinTarget === 'zerar') { zerarHistorico(); state.cf = null; toast('Histórico zerado. Tablet pronto para começar do zero.'); go('setup'); return; } go(state.pinTarget, { fin: state.pinFin, notice: had ? 'Uma pesquisa em andamento foi descartada sem gravar.' : '' }); }
         else {
           state.pin = ''; settings.pinFails = (settings.pinFails || 0) + 1;
           if (settings.pinFails >= PIN_MAX_FAILS) { settings.lockUntil = Date.now() + PIN_LOCK_MS; settings.pinFails = 0; }
@@ -785,6 +1052,33 @@ function handle(action, el){
     }
     case 'admin': go('admin', { notice: '' }); break;
     case 'settings': go('settings'); break;
+    case 'consolidado': if (!state.cf) state.cf = cfDefault(); go('consolidado'); break;
+    case 'cfordem': if (state.cf) { state.cf.ordem = el.getAttribute('data-v') || 'melhores'; render(); } break;
+    case 'novarodada': {
+      const atual = rodadaNome(settings.rodada), n = allResponses().filter(r => rodadaDe(r) === settings.rodada).length;
+      askConfirm(`Encerrar "${atual}" (${n} resposta${n === 1 ? '' : 's'} neste tablet) e iniciar uma nova rodada? Nada é apagado: as respostas antigas ficam no Consolidado e podem ser comparadas. As contagens da coleta atual passam a zero para todas as unidades.`, () => {
+        const nova = novaRodada(); if (state.cf) { state.cf.rodada = nova.id; state.cf.comp = ''; state.cf.ano = ''; state.cf.mes = ''; state.cf.dia = ''; }
+        toast(`${nova.nome} iniciada.`); go('consolidado');
+      });
+      break;
+    }
+    case 'importhist': document.getElementById('file-hist').click(); break;
+    case 'csvcons': { const cf = state.cf || cfDefault(); const lst = filtrarPool(poolConsolidado().lista, cf, false); shareOrDownload(`consolidado_${cf.rodada || 'todas'}_${hojeISO()}.csv`, csvText(lst)); break; }
+    case 'copycons': {
+      const cf = state.cf || cfDefault(); const pool = poolConsolidado().lista; const filt = filtrarPool(pool, cf, false); const units = porUnidade(filt);
+      let compMap = null; if (cf.comp) { compMap = {}; porUnidade(pool.filter(r => rodadaDe(r) === cf.comp && (!cf.unidade || r.unidade === cf.unidade))).forEach(u => { compMap[u.unidade] = u; }); }
+      const ordem = { melhores: (a, b) => ((b.pctSim == null ? -1 : b.pctSim) - (a.pctSim == null ? -1 : a.pctSim)) || (b.n - a.n), piores: (a, b) => ((a.pctSim == null ? 101 : a.pctSim) - (b.pctSim == null ? 101 : b.pctSim)) || (b.n - a.n), respostas: (a, b) => b.n - a.n, nome: (a, b) => a.unidade.localeCompare(b.unidade) };
+      units.sort(ordem[cf.ordem] || ordem.melhores);
+      navigator.clipboard.writeText(rankingTexto(units, compMap)).then(() => toast('Ranking copiado.')).catch(() => go('text', { showText: rankingTexto(units, compMap) }));
+      break;
+    }
+    case 'zerartudo': {
+      const n = allResponses().length + histResponses().length;
+      // duas etapas: pergunta Sim/Não e, depois, o PIN do avaliador (pedido do gestor)
+      askConfirm(`Zerar TODO o histórico deste tablet? Somem ${n} resposta(s) de todas as unidades e rodadas, as recusas, as rodadas e as respostas importadas. O PIN e a lista de unidades ficam. Isso não tem volta. Se confirmar, o app ainda vai pedir a senha de zerar.`, () => { state.pin = ''; state.pinTarget = 'zerar'; state.pinFin = false; go('pin'); });
+      break;
+    }
+    case 'wipehist': askConfirm(`Apagar as ${histResponses().length} respostas importadas de outros tablets? As deste tablet não são afetadas.`, () => { LS.set('mp_hist', []); toast('Importadas apagadas.'); go('consolidado'); }); break;
     case 'tocollect': go(homeScreen()); break;
     case 'tosetup': go('setup'); break;
     case 'copy': copyText(tallyText(tally(list()))); break;
@@ -793,7 +1087,7 @@ function handle(action, el){
     case 'mail': {
       const t = tally(list());
       const restrito = t.identificavel || t.poucasDetalhe;   // poucas respostas: o e-mail carrega respostas quase individuais
-      const subject = (restrito ? 'RESTRITO Experiência do Cliente - ' : '') + `Pesquisa equipe Maxipark - ${settings.unidade} - ${mesLabel(settings.mes)}`;
+      const subject = (restrito ? 'RESTRITO Experiência do Cliente - ' : '') + `Pesquisa equipe Maxipark - ${settings.unidade} - ${rodadaNome(settings.rodada)} - ${settings.data ? dataLabel(settings.data) : mesLabel(settings.mes)}`;
       const body = (restrito ? 'USO RESTRITO da área de Experiência do Cliente: não encaminhe ao encarregado nem ao supervisor; não divulgue por unidade.\n\n' : '') + tallyText(t).replace(/\t/g, ' | ') + '\n\n(O arquivo com as respostas sai pelo botão "arquivo de respostas" no tablet.)';
       location.href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
       toast('Depois de enviar o e-mail, exporte também o arquivo de respostas.');
@@ -803,8 +1097,8 @@ function handle(action, el){
     case 'wipe': {
       const n = list().length;
       const aviso = settings.exported[key()] ? '' : ' ATENÇÃO: estas respostas ainda NÃO foram exportadas.';
-      askConfirm(`Apagar as ${n} respostas de ${settings.unidade} · ${mesLabel(settings.mes)} deste tablet?${aviso}`, () => {
-        saveResponses(allResponses().filter(r => !(r.unidade === settings.unidade && r.mes === settings.mes)));
+      askConfirm(`Apagar as ${n} respostas de ${settings.unidade} · ${rodadaNome(settings.rodada)} deste tablet?${aviso}`, () => {
+        saveResponses(allResponses().filter(r => !(r.unidade === settings.unidade && rodadaDe(r) === settings.rodada)));
         const m = LS.get('mp_recusas', {}); delete m[key()]; LS.set('mp_recusas', m);
         delete settings.exported[key()]; saveSettings();
         toast('Respostas apagadas.'); go('admin', { notice: '' });
@@ -812,8 +1106,8 @@ function handle(action, el){
       break;
     }
     case 'wipeothers': {
-      askConfirm('Apagar as respostas de OUTRAS unidades/meses guardadas neste tablet? Confirme que já foram exportadas.', () => {
-        saveResponses(allResponses().filter(r => r.unidade === settings.unidade && r.mes === settings.mes));
+      askConfirm('Apagar as respostas de OUTRAS unidades e rodadas guardadas neste tablet? Elas somem do Consolidado. Confirme que já foram exportadas.', () => {
+        saveResponses(allResponses().filter(r => r.unidade === settings.unidade && rodadaDe(r) === settings.rodada));
         const m = LS.get('mp_recusas', {}); Object.keys(m).forEach(k => { if (k !== key()) delete m[k]; }); LS.set('mp_recusas', m);
         toast('Outras respostas apagadas.'); go('admin', { notice: '' });
       });
@@ -832,6 +1126,7 @@ function handle(action, el){
 
 function advance(){
   if (!current) return;
+  captureObs();
   if (state.screen === 'q') {
     if (current.r[state.q] == null) return;
     if (state.q < ITENS.length - 1) go('q', { q: state.q + 1 }); else go('enps');
@@ -845,6 +1140,7 @@ function advance(){
 }
 function back(){
   if (!current) return;
+  captureObs();
   if (state.screen === 'q') { if (state.q > 0) go('q', { q: state.q - 1 }); }
   else if (state.screen === 'enps') go('q', { q: ITENS.length - 1 });
   else if (state.screen === 'ces') go('enps');
@@ -860,6 +1156,7 @@ document.addEventListener('click', e => {
   handle(el.getAttribute('data-action'), el);
 });
 document.addEventListener('input', e => {
+  if (e.target && e.target.id === 'f-obs') { captureObs(); return; }   // comentário da página: guarda enquanto digita, sem redesenhar
   if (e.target && e.target.id === 'u-filtro') {
     state.filtro = e.target.value;
     const pos = e.target.selectionStart; render();
@@ -867,10 +1164,21 @@ document.addEventListener('input', e => {
   }
 });
 document.getElementById('file-unidades').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f) importFile(f); e.target.value = ''; });
+document.getElementById('file-hist').addEventListener('change', e => { const fs = e.target.files ? [...e.target.files] : []; if (fs.length) importHist(fs); e.target.value = ''; });
+document.addEventListener('change', e => {   // filtros do Consolidado
+  const el = e.target && e.target.closest ? e.target.closest('[data-cf]') : null;
+  if (!el || !state.cf || state.screen !== 'consolidado') return;
+  const k = el.getAttribute('data-cf');
+  state.cf[k] = el.type === 'checkbox' ? el.checked : el.value;
+  if (k === 'rodada') { state.cf.ano = ''; state.cf.mes = ''; state.cf.dia = ''; if (state.cf.comp === state.cf.rodada) state.cf.comp = ''; }
+  if (k === 'ano') { state.cf.mes = ''; state.cf.dia = ''; }
+  if (k === 'mes') state.cf.dia = '';
+  render();
+});
 ['touchstart','keydown','input'].forEach(ev => document.addEventListener(ev, () => armIdle(), { passive: true }));
 // Botão/gesto "voltar" do Android: não sai do app; age como o "Voltar" da tela.
 history.pushState({ app: 1 }, '');
-window.addEventListener('popstate', () => { history.pushState({ app: 1 }, ''); if (SURVEY_SCREENS.includes(state.screen)) back(); });
+window.addEventListener('popstate', () => { history.pushState({ app: 1 }, ''); });   // gesto "voltar" do Android: não sai do app e não volta de página (sem botão Voltar)
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; if (state.screen === 'setup') render(); });
 if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) { navigator.serviceWorker.register('sw.js').catch(() => {}); }
 state.screen = homeScreen();
