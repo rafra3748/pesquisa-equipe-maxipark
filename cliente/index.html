@@ -94,7 +94,7 @@
    Modo quiosque: o cliente responde no tablet da unidade; as respostas ficam no tablet e são exportadas
    pela área de Experiência do Cliente (PIN), como no app da equipe. Opcional: envio automático (Power Automate).
    ========================================================= */
-const VERSAO = '1.0.1';
+const VERSAO = '1.0.2';
 const PIN_PADRAO = '2819';   // mesmo PIN do app da equipe; troca em Configurações. Atenção: este código é público.
 const IDLE_MS = 90000;       // cliente abandonou no meio: descarta e volta à tela inicial
 const OBRIGADO_MS = 7000;    // tela "Obrigado" volta sozinha ao início
@@ -209,8 +209,6 @@ function viewSetup(){
     <label>Unidade</label>
     <div class="espaco"><input type="text" id="s-unidade" value="${esc(u)}" placeholder="toque em Escolher" autocapitalize="characters" autocomplete="off" style="flex:1"><button class="btn ghost" data-action="pick">Escolher na lista</button></div>
     ${u ? `<p class="small muted" style="margin:6px 0 0">${esc(unidadeLabel(u))}</p>` : ''}
-    <label>Onde fica este tablet? (opcional — ajuda a ler as respostas)</label>
-    <select id="s-ponto">${PONTOS.map(p => `<option value="${p.c}" ${settings.ponto === p.c ? 'selected' : ''}>${esc(p.t)}</option>`).join('')}</select>
     ${currentResponses().length ? `<div class="bom">Este tablet já tem <b>${currentResponses().length}</b> resposta(s) da unidade ${esc(u)}${settings.exported[u] ? ' (exportadas)' : ' <b>(ainda não exportadas)</b>'}.</div>` : ''}
     <div class="linha"><button class="btn block" data-action="start">Iniciar atendimento</button></div>
     <div class="linha"><button class="btn ghost" data-action="admin">Área do avaliador (resultados e exportar)</button><button class="btn ghost" data-action="config">Configurações</button></div>
@@ -636,7 +634,7 @@ document.addEventListener('click', e => {
     case 'pick': state.busca = ''; go('pick'); break;
     case 'pickone': settings.unidade = el.dataset.cod; saveSettings(); go('setup'); break;
     case 'tosetup': go('setup'); break;
-    case 'start': { const u = (document.getElementById('s-unidade') || { value: settings.unidade }).value.trim().toUpperCase(); if (!u) { toast('Escolha a unidade primeiro.'); return; } settings.unidade = u; settings.ponto = (document.getElementById('s-ponto') || { value: settings.ponto }).value; saveSettings(); go('welcome'); break; }
+    case 'start': { const u = (document.getElementById('s-unidade') || { value: settings.unidade }).value.trim().toUpperCase(); if (!u) { toast('Escolha a unidade primeiro.'); return; } settings.unidade = u; saveSettings(); go('welcome'); break; }   // o "ponto" (onde fica o tablet) só vem do QR (&p=); a pergunta na tela foi retirada a pedido do gestor (10/09/2026)
     case 'begin': state.r = {}; state.i = 0; state.t0 = Date.now(); go('q'); break;
     case 'ans': { const q = perguntaAtual(); if (!q) return; const raw = el.dataset.v; state.r[q.codigo] = (q.tipo === 'escala5' || q.tipo === 'nps') ? (raw === 'NA' ? 'NA' : parseInt(raw, 10)) : raw; render();
       clearTimeout(autoT); if (settings.autoAvanca !== false) autoT = setTimeout(() => { if (state.screen === 'q' && perguntaAtual() === q) avancar(); }, 380); break; }   // avança sozinho (configurável)
