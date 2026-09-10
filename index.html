@@ -143,7 +143,7 @@
    Escala de 3 respostas por frase (Sim / resposta do meio / Não) + "Não se aplica" onde faz sentido.
    Valores gravados: 3 = Sim, 2 = resposta do meio, 1 = Não, 'NA' = não se aplica.
    ===================================================================== */
-const VERSAO = '1.6.1';
+const VERSAO = '1.6.2';
 // Logo Maxipark (PNG do site oficial, reduzido), embutido para funcionar sem internet
 const LOGO_B64 = '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';
 const ITENS_PADRAO = [
@@ -667,6 +667,8 @@ function viewAdmin(){
       <button class="btn light" data-action="showtext" ${t.nResp ? '' : 'disabled'}>Ver contagens como texto</button>
       <button class="btn light" data-action="csv" ${list.length ? '' : 'disabled'}>${navigator.share ? 'Compartilhar arquivo de respostas' : 'Baixar arquivo de respostas (CSV)'}</button>
       <button class="btn light" data-action="mail" ${t.nResp ? '' : 'disabled'}>Enviar contagens por e-mail</button>
+      <button class="btn" data-action="xlsxatual" ${t.nResp ? '' : 'disabled'}>${navigator.share ? 'Compartilhar' : 'Baixar'} Excel (esta unidade e rodada)</button>
+      <button class="btn" data-action="pdfatual" ${t.nResp ? '' : 'disabled'}>${navigator.share ? 'Compartilhar' : 'Baixar'} PDF (esta unidade e rodada)</button>
       ${settings.webhook ? `<button class="btn light" data-action="resend" ${unsent ? '' : 'disabled'}>Enviar à matriz agora (${unsent})</button>` : ''}
     </div>
     <h3>Gerenciar</h3>
@@ -838,10 +840,11 @@ function rankingLinhas(units, compMap){   // cabeçalho + linhas do ranking (usa
   return L;
 }
 // Tudo o que a tela Consolidado e as exportações (CSV, Excel, PDF) precisam, calculado uma vez a partir dos filtros
-function calcConsolidado(cf){
+function calcConsolidado(cf, apenasLocal){   // apenasLocal: só as respostas deste tablet (relatório da pesquisa atual), sem as importadas
   const rl = rodadas();
   if (cf.rodada && !rl.find(r => r.id === cf.rodada)) cf.rodada = settings.rodada;
-  const pool = poolConsolidado(); const todas = pool.lista;
+  const pool = apenasLocal ? { lista: allResponses().filter(r => r.escala === ESCALA), legado: allResponses().filter(r => r.escala !== ESCALA).length } : poolConsolidado();
+  const todas = pool.lista;
   const base = filtrarPool(todas, cf, true);                       // rodada + datas (sem unidade): serve à cobertura
   const filt = cf.unidade ? base.filter(r => r.unidade === cf.unidade) : base;
   const geral = agregar(filt);
@@ -1125,18 +1128,24 @@ async function loadJsPDF(){
 }
 const fmtPct = v => v == null ? '' : v + '%';
 const fmtEnps = v => v == null ? '' : (v > 0 ? '+' : '') + v;
-function dadosExport(){   // monta as tabelas (arrays) usadas no Excel e no PDF
-  const cf = state.cf || cfDefault(); const C = calcConsolidado(cf);
+function dadosExport(modo){   // monta as tabelas (arrays) usadas no Excel e no PDF. modo 'atual' = só esta unidade e rodada, só respostas deste tablet
+  const atual = modo === 'atual';
+  const cf = atual ? { rodada: settings.rodada, ano: '', mes: '', dia: '', unidade: settings.unidade, ordem: 'melhores', soPend: false, comp: '' } : (state.cf || cfDefault());
+  const C = calcConsolidado(cf, atual);
   const nomeU = c => (unidadePorCodigo(c) || {}).nome || '';
   const g = C.geral, cob = C.cad.length ? Math.round((C.cad.length - C.pendentes.length) / C.cad.length * 100) : 0;
   const indicadores = [
-    ['Respostas', g.n, g.identificavel ? 'IDENTIFICÁVEL: 1 ou 2 respostas — uso restrito' : ''], ['Unidades com respostas', C.units.length, ''],
+    ['Respostas', g.n, g.identificavel ? 'IDENTIFICÁVEL: 1 ou 2 respostas — uso restrito' : '']];
+  if (atual) indicadores.push(['Preferiram não responder', refusals(), '']); else indicadores.push(['Unidades com respostas', C.units.length, '']);
+  indicadores.push(
     ['% Sim nas 15 frases', fmtPct(g.pctSim), 'indicador principal'], ['% Sim ponderado pelos pesos', fmtPct(g.pctSimPond), 'pesos em Configurações → Perguntas'],
-    ['eNPS', fmtEnps(g.enpsVal), g.poucasDetalhe ? 'menos de ' + N_DIVULGA_DETALHE + ' respostas: não divulgar por unidade' : ''], ['% que acham fácil resolver com o escritório', fmtPct(g.cesFacil), g.cesPoucas ? 'menos de ' + N_DIVULGA_DETALHE + ' precisaram do escritório' : ''],
-    ['Unidades cadastradas', C.cad.length, ''], ['Unidades pesquisadas', C.cad.length - C.pendentes.length, cf.rodada ? 'na rodada filtrada' : ''], ['Unidades ainda sem pesquisa', C.pendentes.length, ''], ['Cobertura', cob + '%', '']];
+    ['eNPS', fmtEnps(g.enpsVal), g.poucasDetalhe ? 'menos de ' + N_DIVULGA_DETALHE + ' respostas: não divulgar por unidade' : ''], ['% que acham fácil resolver com o escritório', fmtPct(g.cesFacil), g.cesPoucas ? 'menos de ' + N_DIVULGA_DETALHE + ' precisaram do escritório' : '']);
+  if (!atual) indicadores.push(['Unidades cadastradas', C.cad.length, ''], ['Unidades pesquisadas', C.cad.length - C.pendentes.length, cf.rodada ? 'na rodada filtrada' : ''], ['Unidades ainda sem pesquisa', C.pendentes.length, ''], ['Cobertura', cob + '%', '']);
   if (C.pool.legado) indicadores.push(['Respostas de versão antiga (escala 1-5) fora das contas', C.pool.legado, 'não entram neste arquivo']);
   if (textosAlterados()) indicadores.push(['Perguntas/pesos', 'alterados neste tablet', 'ver aba Perguntas']);
-  const resumo = [['Pesquisa com a equipe Maxipark — Consolidado'], ['Gerado em', dataLabel(hojeISO())], ['Filtros', C.filtroTxt], ['Rodada atual deste tablet', rodadaNome(settings.rodada)], ['Versão do app', VERSAO], [],
+  const titulo = atual ? `Pesquisa com a equipe Maxipark — ${settings.unidade}${nomeU(settings.unidade) ? ' (' + nomeU(settings.unidade) + ')' : ''} · ${rodadaNome(settings.rodada)}` : 'Pesquisa com a equipe Maxipark — Consolidado';
+  const escopo = atual ? `${settings.unidade} - ${rodadaNome(settings.rodada)} - coleta em ${settings.data ? dataLabel(settings.data) : mesLabel(settings.mes)} - só respostas deste tablet` : `Filtros: ${C.filtroTxt}`;
+  const resumo = [[titulo], ['Gerado em', dataLabel(hojeISO())], atual ? ['Unidade · rodada · data', escopo] : ['Filtros', C.filtroTxt], ['Rodada atual deste tablet', rodadaNome(settings.rodada)], ['Versão do app', VERSAO], [],
     ['Indicador', 'Valor', 'Observação'], ...indicadores, [],
     ['Uso restrito da área de Experiência do Cliente. Regra de divulgação por unidade: menos de 3 respostas, nada; 3 a 4, Nota B e dimensões; 5 ou mais, tudo.']];
   const ranking = rankingLinhas(C.units, C.compMap);
@@ -1157,39 +1166,43 @@ function dadosExport(){   // monta as tabelas (arrays) usadas no Excel e no PDF
     .concat([['eNPS', 'Recomendação', ENPS_Q, '0 a 10 (0-6 detratores, 7-8 neutros, 9-10 promotores)', '', '', '', ''], ['CES', 'Escritório', CES_Q, CES_OPTS[0] + ' (=3)', CES_OPTS[1] + ' (=2)', CES_OPTS[2] + ' (=1)', 'Nunca precisei (NP)', ''], ['Aberta 1', '', ABERTAS[0], 'texto livre', '', '', '', ''], ['Aberta 2', '', ABERTAS[1], 'texto livre', '', '', '', '']]);
   const rodadasT = [['Rodada', 'Início', 'Fim', 'Respostas', 'Unidades']].concat(C.rl.map(r => { const l = C.todas.filter(x => rodadaDe(x) === r.id); return [r.nome + (r.id === settings.rodada ? ' (atual)' : ''), r.inicio ? dataLabel(r.inicio) : '', r.fim ? dataLabel(r.fim) : (r.id === settings.rodada ? 'em andamento' : ''), l.length, new Set(l.map(x => x.unidade)).size]; }));
   const legenda = [['Campo', 'Significado'], ['B1…B15', '3 = Resposta 1 (Sim), 2 = Resposta 2 (meio), 1 = Resposta 3 (Não), NA = não se aplica'], ['eNPS', 'nota de 0 a 10; eNPS = % promotores (9-10) − % detratores (0-6)'], ['CES', '3 = fácil, 2 = mais ou menos, 1 = difícil, NP = nunca precisei; % fácil = 3 ÷ (1+2+3)'], ['% Sim', 'Sim ÷ (Não + meio + Sim), sem os "Não se aplica"'], ['% Sim ponderado', 'mesma conta com o peso de cada frase'], ['escala', 'B3 = 3 respostas por frase (v1.3+); B5 = versão antiga, 1 a 5 (fora das contas)'], ['rodada', 'R1, R2… definida em cada tablet'], ['cB1…cB15, cENPS, cCES', 'comentário escrito na página da pergunta'], ['Anonimato', 'menos de 3 respostas identifica quem respondeu: uso restrito; eNPS/CES/comentários só se divulgam por unidade com 5+']];
-  return { C, cf, indicadores, resumo, ranking, cobertura, porFrase, respostas, comentarios, perguntas, rodadasT, legenda, nome: nomeExport(cf) };
+  const nome = atual ? `pesquisa_${String(settings.unidade).replace(/[^\w.-]+/g, '_')}_${settings.rodada}_${settings.data || settings.mes || hojeISO()}` : nomeExport(cf);
+  return { C, cf, atual, titulo, escopo, indicadores, resumo, ranking, cobertura, porFrase, respostas, comentarios, perguntas, rodadasT, legenda, nome };
 }
 function nomeExport(cf){   // nome do arquivo diz rodada, unidade e período filtrados
   const slug = s => String(s || '').replace(/[^\w.-]+/g, '_');
   const periodo = cf.ano ? cf.ano + (cf.mes ? '-' + cf.mes : '') + (cf.dia ? '-' + cf.dia : '') : 'todas-datas';
   return `consolidado_${cf.rodada || 'todas-rodadas'}_${cf.unidade ? slug(cf.unidade) : 'todas-unidades'}_${periodo}_${hojeISO()}`;
 }
-async function exportarExcel(){
+async function exportarExcel(modo){
   let XLSX; try { toast('Preparando o Excel…'); XLSX = await loadSheetJS(); } catch(e) { toast('Para gerar o Excel é preciso internet na primeira vez. Sem internet, use o CSV.'); return; }
   try {
-    const D = dadosExport(); const wb = XLSX.utils.book_new();
+    const D = dadosExport(modo); const wb = XLSX.utils.book_new();
     const add = (nome, aoa, larguras) => {
       const ws = XLSX.utils.aoa_to_sheet(aoa);
       Object.keys(ws).forEach(a => { const c = ws[a]; if (a[0] !== '!' && c && c.t === 's' && /^-?\d+%$/.test(c.v)) { c.t = 'n'; c.v = parseInt(c.v, 10); c.z = '0"%"'; } });   // '86%' vira número 86 exibido como 86%: dá para ordenar e fazer média
       if (larguras) ws['!cols'] = larguras.map(w => ({ wch: w }));
       XLSX.utils.book_append_sheet(wb, ws, nome);
     };
-    add('Resumo', D.resumo, [40, 18, 60]); add('Ranking', D.ranking, [4, 14, 22, 10, 8, 12, 8, 14, 44, 14, 12]); add('Cobertura', D.cobertura, [14, 22, 12, 10]);
+    add('Resumo', D.resumo, [40, 18, 60]);
+    if (!D.atual) { add('Ranking', D.ranking, [4, 14, 22, 10, 8, 12, 8, 14, 44, 14, 12]); add('Cobertura', D.cobertura, [14, 22, 12, 10]); }
     add('Por frase', D.porFrase, [7, 26, 60, 6, 6, 12, 16, 6, 12, 11, 8, 11]); add('Respostas', D.respostas, [7, 7, 14, 12, 18, 9, 11, 8].concat(ITENS.map(() => 5), [6, 6, 30, 30], ITENS.map(() => 20), [20, 20, 40]));
-    add('Comentários', D.comentarios, [50, 12, 12, 12, 80, 40]); add('Perguntas', D.perguntas, [9, 26, 70, 22, 22, 22, 30, 6]); add('Rodadas', D.rodadasT, [22, 12, 14, 10, 10]); add('Legenda', D.legenda, [24, 90]);
+    add('Comentários', D.comentarios, [50, 12, 12, 12, 80, 40]); add('Perguntas', D.perguntas, [9, 26, 70, 22, 22, 22, 30, 6]);
+    if (!D.atual) add('Rodadas', D.rodadasT, [22, 12, 14, 10, 10]);
+    add('Legenda', D.legenda, [24, 90]);
     const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
     const ok = await shareOrDownload(D.nome + '.xlsx', new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    if (ok) toast('Excel gerado.');
+    if (ok) { toast('Excel gerado.'); if (D.atual) { markExported(); if (state.screen === 'admin') render(); } }
   } catch(e) { console.error(e); toast('Não consegui gerar o Excel. Tente de novo; se continuar, use o CSV.'); }
 }
 // A fonte padrão do jsPDF (Helvetica) só tem Latin-1: símbolos e emojis (comuns nos comentários) viram texto ilegível — trocamos ou removemos
 const pdfTxt = s => String(s == null ? '' : s).replace(/⚠/g, '(!)').replace(/—/g, '-').replace(/–/g, '-').replace(/·/g, '-').replace(/●/g, '*').replace(/→/g, '->').replace(/←/g, '<-').replace(/…/g, '...').replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/×/g, 'x').replace(/÷/g, '/').replace(/−/g, '-').replace(/✓/g, 'v').replace(/⚙/g, '')
   .replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}\u{20E3}]/gu, '')   // emojis e pictogramas somem
   .replace(/[^\x09\x0A\x20-\x7E\xA0-\xFF]/g, '?');                                  // qualquer outro caractere fora do Latin-1 vira ? (acentos do português ficam)
-async function exportarPdf(){
+async function exportarPdf(modo){
   let jsPDF; try { toast('Preparando o PDF…'); jsPDF = await loadJsPDF(); } catch(e) { toast('Para gerar o PDF é preciso internet na primeira vez. Sem internet, use o CSV ou o texto das contagens.'); return; }
   try {
-    const D = dadosExport(); const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const D = dadosExport(modo); const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(); const cor = [40, 35, 157];
     const tabela = (titulo, aoa, opts) => {
       let y = doc.lastAutoTable && doc.lastAutoTable.finalY ? doc.lastAutoTable.finalY + 8 : 24;
@@ -1200,26 +1213,25 @@ async function exportarPdf(){
     };
     // capa / resumo (Helvetica renderiza os acentos do português; pdfTxt só troca símbolos)
     try { doc.addImage('data:image/png;base64,' + LOGO_B64, 'PNG', W - 12 - 40, 6, 40, 9.2); } catch(e) {}
-    doc.setFontSize(18); doc.setTextColor(cor[0], cor[1], cor[2]); doc.text('Pesquisa com a equipe Maxipark - Consolidado', 12, 16); doc.setTextColor(0, 0, 0);
-    doc.setFontSize(9.5); doc.text(pdfTxt(`Gerado em ${dataLabel(hojeISO())} - Filtros: ${D.C.filtroTxt} - Rodada atual do tablet: ${rodadaNome(settings.rodada)} - App v${VERSAO}`), 12, 22, { maxWidth: W - 60 });
+    doc.setFontSize(D.atual ? 15 : 18); doc.setTextColor(cor[0], cor[1], cor[2]); doc.text(pdfTxt(D.titulo), 12, 16, { maxWidth: W - 60 }); doc.setTextColor(0, 0, 0);
+    doc.setFontSize(9.5); doc.text(pdfTxt(`Gerado em ${dataLabel(hojeISO())} - ${D.escopo} - Rodada atual do tablet: ${rodadaNome(settings.rodada)} - App v${VERSAO}`), 12, 22, { maxWidth: W - 60 });
     doc.setFontSize(8.5); doc.setTextColor(155, 28, 28); doc.text(pdfTxt('USO RESTRITO da área de Experiência do Cliente. Com menos de 3 respostas a unidade fica identificável: não divulgar por unidade nem mostrar ao encarregado ou supervisor.'), 12, 29, { maxWidth: W - 24 }); doc.setTextColor(0, 0, 0);
     doc.lastAutoTable = { finalY: 26 };
     tabela('Resumo', [['Indicador', 'Valor', 'Observação']].concat(D.indicadores), { columnStyles: { 0: { cellWidth: 90 }, 1: { cellWidth: 40 } } });
-    tabela('Ranking das unidades (' + pdfTxt(D.C.ordTxt) + ')', D.ranking);
-    tabela('Por frase (todas as respostas do filtro)', D.porFrase, { columnStyles: { 2: { cellWidth: 80 } } });
-    tabela('Cobertura: unidades cadastradas x pesquisadas', D.cobertura);
-    tabela('Rodadas', D.rodadasT);
+    if (!D.atual) tabela('Ranking das unidades (' + pdfTxt(D.C.ordTxt) + ')', D.ranking);
+    tabela(D.atual ? 'Por frase (quantos colaboradores deram cada resposta)' : 'Por frase (todas as respostas do filtro)', D.porFrase, { columnStyles: { 2: { cellWidth: 80 } } });
+    if (!D.atual) { tabela('Cobertura: unidades cadastradas x pesquisadas', D.cobertura); tabela('Rodadas', D.rodadasT); }
     tabela('Perguntas, respostas e pesos em uso', D.perguntas, { columnStyles: { 2: { cellWidth: 90 } } });
     doc.addPage(); doc.lastAutoTable = { finalY: 10 };
     const nCol = D.respostas[0].length;   // última coluna = aviso por linha
     tabela('Respostas individuais (ordem embaralhada) — 3 = Sim, 2 = meio, 1 = Não, NA = não se aplica — USO RESTRITO', [['Unidade', 'Rodada', 'Data', ...ITENS.map(it => 'B' + it.n), 'eNPS', 'CES', '(!)']].concat(D.respostas.slice(1).map(r => [r[3], r[7], r[6] ? dataLabel(r[6]) : r[5], ...r.slice(8, 8 + ITENS.length + 2), r[nCol - 1] ? '(!)' : ''])), { styles: { fontSize: 7, cellPadding: 1 } });
     tabela('Comentários e respostas abertas (ordem embaralhada) — USO RESTRITO', D.comentarios, { columnStyles: { 0: { cellWidth: 62 }, 4: { cellWidth: 100 }, 5: { cellWidth: 40 } } });
     const total = doc.internal.getNumberOfPages();
-    const rodape = pdfTxt(`Pesquisa com a equipe Maxipark - Consolidado - ${D.C.filtroTxt} - gerado em ${dataLabel(hojeISO())} - USO RESTRITO da área de Experiência do Cliente`);
+    const rodape = pdfTxt(`${D.titulo} - ${D.escopo} - gerado em ${dataLabel(hojeISO())} - USO RESTRITO da área de Experiência do Cliente`);
     for (let p = 1; p <= total; p++) { doc.setPage(p); doc.setFontSize(7.5); doc.setTextColor(120, 120, 120); doc.text(rodape, 12, H - 6, { maxWidth: W - 60 }); doc.text(pdfTxt(`página ${p} de ${total}`), W - 12, H - 6, { align: 'right' }); }
     const blob = doc.output('blob');
     const ok = await shareOrDownload(D.nome + '.pdf', blob, 'application/pdf');
-    if (ok) toast('PDF gerado.');
+    if (ok) { toast('PDF gerado.'); if (D.atual) { markExported(); if (state.screen === 'admin') render(); } }
   } catch(e) { console.error(e); toast('Não consegui gerar o PDF. Tente de novo; se continuar, use o CSV ou o texto das contagens.'); }
 }
 async function exportCsv(){
@@ -1326,6 +1338,8 @@ function handle(action, el){
     case 'resetpergs': askConfirm('Voltar às perguntas, respostas e pesos padrão do app? As respostas já gravadas não mudam.', () => { localStorage.removeItem('mp_itens'); aplicarTextos(); toast('Padrão restaurado.'); go('perguntas'); }); break;
     case 'xlsxcons': exportarExcel(); break;
     case 'pdfcons': exportarPdf(); break;
+    case 'xlsxatual': exportarExcel('atual'); break;
+    case 'pdfatual': exportarPdf('atual'); break;
     case 'exportpergs': shareOrDownload(`perguntas_pesquisa_maxipark_${hojeISO()}.json`, JSON.stringify({ app: 'pesquisa-equipe-maxipark', versao: VERSAO, perguntas: perguntasAtuais() }, null, 1), 'application/json'); break;
     case 'importpergs': document.getElementById('file-pergs').click(); break;
     case 'cfordem': if (state.cf) { state.cf.ordem = el.getAttribute('data-v') || 'melhores'; render(); } break;
