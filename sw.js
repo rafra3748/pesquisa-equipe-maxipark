@@ -1,5 +1,5 @@
 // Service worker: o app abre sem internet e recebe atualizações quando houver rede.
-const VERSAO = '1.5';
+const VERSAO = '1.5.1';
 const CACHE = 'pesquisa-maxipark-' + VERSAO;
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 

@@ -111,6 +111,7 @@
   .check input{width:22px;height:22px}
   .obslist{padding-left:18px;font-size:15px} .obslist > li{margin:8px 0} .obslist ul{padding-left:18px;margin:4px 0}
   @media (max-width:560px){ .statement{font-size:23px} .scale{grid-template-columns:repeat(6,1fr)} h1{font-size:25px} .opt{font-size:19px} }
+  @media (max-height:600px) and (orientation:landscape){ textarea.obs{min-height:44px;margin-top:8px;padding:6px 10px} .spread{margin-top:8px} .statement{font-size:20px;margin:2px 0 8px} .opt{min-height:50px} .wrap{padding:8px 16px 56px} }
   @media (max-height:820px) and (orientation:landscape){
     .wrap{padding:10px 16px 60px} .card{padding:14px 18px} .statement{font-size:22px;margin:2px 0 10px}
     .opts{gap:8px} .opt{min-height:54px;padding:6px 14px;font-size:19px} .opt .num{flex-basis:38px;height:38px;font-size:17px}
@@ -131,7 +132,7 @@
    Escala de 3 respostas por frase (Sim / resposta do meio / Não) + "Não se aplica" onde faz sentido.
    Valores gravados: 3 = Sim, 2 = resposta do meio, 1 = Não, 'NA' = não se aplica.
    ===================================================================== */
-const VERSAO = '1.5';
+const VERSAO = '1.5.1';
 const ITENS = [
   {n:1,  dim:'Condições no posto', t:'Os equipamentos que uso no posto (cancela, máquina de cartão, sistema, rádio) funcionam bem.', opts:['Sim','Às vezes','Não']},
   {n:2,  dim:'Condições no posto', t:'Consigo parar para comer durante o meu turno.', opts:['Sim','Às vezes','Não']},
@@ -211,7 +212,7 @@ function zerarHistorico(){
 }
 // Pedido do gestor (09/09/2026): ao atualizar para esta versão, cada tablet começa do zero (uma única vez, controlado pela marca abaixo).
 const ZERAR_MARCA = 'zerar-2026-09-09';
-if (settings.zeradoEm !== ZERAR_MARCA) { zerarHistorico(); settings.zeradoEm = ZERAR_MARCA; saveSettings(); }
+if (settings.zeradoEm !== ZERAR_MARCA) { const tinha = allResponses().length + (LS.get('mp_hist', []) || []).length; zerarHistorico(); settings.zeradoEm = ZERAR_MARCA; settings.avisoZerado = tinha ? `${tinha} resposta(s), recusas, rodadas e importadas` : true; saveSettings(); }
 function allResponses(){ return LS.get('mp_respostas', []); }
 function saveResponses(list){ return LS.set('mp_respostas', list); }
 /* Rodadas: cada "pesquisa" é uma rodada (R1, R2…). Uma nova rodada zera as contagens da coleta sem apagar nada; o histórico fica no Consolidado. */
@@ -243,7 +244,7 @@ if (!settings.rodada) { settings.rodada = 'R1'; saveSettings(); }
   Object.keys(rec).forEach(k => { const nk = re.test(k) ? k.replace(re, '|R1') : k; if (nk !== k) mudou = true; novo[nk] = (novo[nk] || 0) + (rec[k] || 0); });
   if (mudou) LS.set('mp_recusas', novo);
   const ex = settings.exported || {}; let m2 = false; const ne = {};
-  Object.keys(ex).forEach(k => { const nk = re.test(k) ? k.replace(re, '|R1') : k; if (nk !== k) m2 = true; ne[nk] = ne[nk] || ex[k]; });
+  Object.keys(ex).forEach(k => { const nk = re.test(k) ? k.replace(re, '|R1') : k; if (nk !== k) m2 = true; ne[nk] = (nk in ne) ? (ne[nk] && ex[k]) : ex[k]; });   // só conta como exportado se TODOS os meses fundidos foram
   if (m2) { settings.exported = ne; saveSettings(); }
 })();
 function key(u, r){ return (u || settings.unidade) + '|' + (r || settings.rodada); }
@@ -268,7 +269,7 @@ let thanksTimer = null, idleTimer = null, deferredInstall = null, busy = false, 
 
 function novaResposta(){ if (settings.data !== hojeISO()) { fixarData(); saveSettings(); } return { id: uid(), versao: VERSAO, escala: ESCALA, unidade: settings.unidade, mes: settings.mes, data: settings.data, rodada: settings.rodada, r: Array(ITENS.length).fill(null), c: Array(ITENS.length).fill(''), enps: null, cEnps: '', ces: null, cCes: '', a1: '', a2: '', sent: false }; }
 // comentário opcional em cada página da pesquisa (pedido do gestor): c[i] por frase, cEnps e cCes
-function obsField(val){ return `<textarea id="f-obs" class="obs" maxlength="300" rows="2" placeholder="Comentário (opcional) — não escreva nomes">${esc(val || '')}</textarea>`; }
+function obsField(val){ return `<textarea id="f-obs" class="obs" maxlength="300" rows="2" placeholder="Comentário (opcional) — sem nomes, seu ou de colegas">${esc(val || '')}</textarea>`; }
 function captureObs(){
   const ta = document.getElementById('f-obs'); if (!ta || !current) return;
   const v = ta.value.trim().slice(0, 300);
@@ -336,7 +337,8 @@ function viewSetup(){
     ${pinOk ? '' : '<div class="warn">Primeiro uso: defina o <b>PIN do avaliador</b>. Ele protege as contagens e as configurações.</div>'}
     ${unitField('f', 'setup')}
     <label>Data da coleta (preenchida automaticamente)</label>
-    <div class="datefield">${dataLabel(hojeISO())} <span class="small muted">· mês de referência ${mesLabel(hojeISO().slice(0, 7))}</span></div>
+    <div class="datefield">${dataLabel(hojeISO())} <span class="small muted">· mês de referência ${mesLabel(hojeISO().slice(0, 7))} · <b>${esc(rodadaNome(settings.rodada))}</b></span></div>
+    ${settings.avisoZerado ? `<div class="warn">Ao atualizar para a versão ${VERSAO}, o histórico deste tablet foi zerado (${settings.avisoZerado === true ? 'respostas, recusas, rodadas e importadas' : esc(settings.avisoZerado)}), a pedido do gestor. O PIN e a lista de unidades foram mantidos. <button class="btn link" data-action="okzerado">OK, entendi</button></div>` : ''}
     <div class="row">
       ${pinOk ? '<button class="btn block" data-action="start">Iniciar coleta com a equipe</button>' : '<button class="btn block" data-action="gosetpin">Definir PIN do avaliador</button>'}
     </div>
@@ -344,7 +346,7 @@ function viewSetup(){
       <button class="btn ghost" data-action="pin" data-target="admin" ${pinOk ? '' : 'disabled'}>Área do avaliador (contagens e exportar)</button>
       ${deferredInstall ? '<button class="btn light" data-action="install">Instalar como app no tablet</button>' : ''}
     </div>
-    <p class="small muted" style="margin-top:18px">Versão ${VERSAO} · funciona sem internet · <b>exporte e apague as respostas no fim de cada visita</b>.</p>
+    <p class="small muted" style="margin-top:18px">Versão ${VERSAO} · funciona sem internet · <b>exporte as respostas no fim de cada visita</b> e apague-as depois de conferir que o CSV chegou à área de Experiência do Cliente — o histórico para comparar rodadas fica nos CSVs e no aparelho onde eles são importados.</p>
   </div></div>`;
 }
 
@@ -392,7 +394,7 @@ function viewWelcome(){
       <li><b>Sem nome.</b> Suas respostas vão só para a área de Experiência do Cliente.</li>
       <li><b>Ninguém é obrigado</b> a responder.</li>
       <li>Seu chefe direto (encarregado ou supervisor) <b>não vê</b> suas respostas.</li>
-      <li>15 frases para marcar <b>Sim</b>, <b>Não</b> ou uma resposta do meio, uma nota de 0 a 10, uma pergunta sobre o escritório e duas perguntas para escrever se quiser. Uns 4 minutos.</li>
+      <li>15 frases para marcar <b>Sim</b>, <b>Não</b> ou uma resposta do meio, uma nota de 0 a 10, uma pergunta sobre o escritório e duas perguntas para escrever se quiser. Em cada página há uma caixa para comentar, se quiser — sem nomes. Uns 4 minutos.</li>
     </ul>
     <details><summary>Ler o aviso completo e o que significam as palavras</summary>
       <div class="notice">${AVISO}</div>
@@ -544,7 +546,7 @@ function tallyText(t){
   const L = [];
   L.push(`Pesquisa equipe Maxipark v${VERSAO} (escala ${ESCALA}: 3 respostas por frase)\tUnidade: ${settings.unidade}\t${rodadaNome(settings.rodada)}\tMês: ${mesLabel(settings.mes)}\tData da coleta: ${settings.data ? dataLabel(settings.data) : '-'}\tRespostas: ${t.nResp}\tPreferiram não responder: ${refusals()}`);
   if (t.legado) L.push(`Atenção: ${t.legado} resposta(s) de versão anterior do app (escala 1-5) não entram nestas contagens — só no arquivo de respostas.`);
-  if (!t.nResp) { L.push('Ainda não há respostas desta unidade e mês.'); return L.join('\n'); }
+  if (!t.nResp) { L.push('Ainda não há respostas desta unidade nesta rodada.'); return L.join('\n'); }
   if (t.identificavel) L.push(`ATENÇÃO: só ${t.nResp} resposta${t.nResp > 1 ? 's' : ''} — as contagens abaixo são as respostas de ${t.nResp === 1 ? 'uma pessoa' : 'duas pessoas'}. Uso restrito à área de Experiência do Cliente: digitar na ficha, sim; divulgar por unidade ou mostrar ao encarregado, não.`);
   else if (t.poucasDetalhe) L.push(`${t.nResp} respostas: pode digitar na ficha e divulgar Nota B e dimensões; eNPS, CES e comentários só se divulgam por unidade com ${N_DIVULGA_DETALHE} ou mais.`);
   L.push('Frase\tNão\tResposta do meio (rótulo)\tSim\tNão se aplica\tResponderam (sem N/A)\t% Sim');
@@ -561,7 +563,8 @@ function csvText(list){
   // escala B3: B1-B15 → 3 = Sim, 2 = resposta do meio, 1 = Não, NA = não se aplica; CES → 3 = fácil, 2 = mais ou menos, 1 = difícil, NP = nunca precisei.
   // Linhas sem carimbo (escala B5) vêm da v1.2, com notas de 1 a 5. Sem linha de legenda: o arquivo é só dados, uma pessoa por linha.
   const head = ['versao','escala','id','unidade','mes','data','rodada', ...ITENS.map(it => 'B' + it.n), 'eNPS', 'CES', 'aberta1', 'aberta2', ...ITENS.map(it => 'cB' + it.n), 'cENPS', 'cCES'];   // data = dia da coleta; rodada = R1, R2…; cB1… = comentário escrito na página da frase
-  const q = v => { let s = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
+  // quebras de linha viram espaço: o arquivo fica com uma pessoa por linha e importa sem perder campos
+  const q = v => { let s = String(v == null ? '' : v).replace(/\s*\r?\n\s*/g, ' '); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
   const rows = shuffle(list).map(r => [r.versao || '1.2', r.escala || 'B5', r.id, r.unidade, r.mes, r.data || '', rodadaDe(r), ...r.r.map(v => v == null ? '' : v), r.enps == null ? '' : r.enps, r.ces == null ? '' : r.ces, r.a1, r.a2, ...ITENS.map((it, i) => (r.c || [])[i] || ''), r.cEnps || '', r.cCes || ''].map(q).join(';'));
   return '﻿' + head.join(';') + '\n' + rows.join('\n') + '\n';
 }
@@ -576,7 +579,7 @@ function viewAdmin(){
   const obs = refusals() ? 'Como houve quem preferiu não responder, quem viu a fila sabe quem respondeu: redobre o cuidado.' : 'Se a unidade tem só 1 ou 2 colaboradores, isso é esperado.';
   if (t.identificavel) aviso = `<div class="bad"><b>Só ${t.nResp} resposta${t.nResp > 1 ? 's' : ''}: as contagens abaixo são as respostas de ${t.nResp === 1 ? 'uma pessoa' : 'duas pessoas'}.</b> Servem para preencher a ficha, mas são de uso restrito da área de Experiência do Cliente: não divulgue por unidade e não mostre esta tela ao encarregado nem ao supervisor. ${obs} A devolutiva vem junto com outras unidades da região.</div>`;
   else if (t.poucasDetalhe) aviso = `<div class="warn"><b>${t.nResp} respostas.</b> Pode digitar na ficha e divulgar Nota B e dimensões por unidade; eNPS, CES e comentários só se divulgam por unidade com ${N_DIVULGA_DETALHE} ou mais respostas.</div>`;
-  if (t.nResp === 0) tabela = '<p class="muted">Ainda não há respostas para esta unidade e mês.</p>';
+  if (t.nResp === 0) tabela = '<p class="muted">Ainda não há respostas para esta unidade nesta rodada.</p>';
   else {
     const rows = t.items.map((it, i) => `<tr><td class="l"><b>B${i+1}</b> <span class="small muted">${esc(ITENS[i].t)}</span></td><td>${it.c[0]}</td><td>${it.c[1]} <span class="small muted">${esc(ITENS[i].opts[1])}</span></td><td>${it.c[2]}</td><td>${ITENS[i].na ? it.na : '—'}</td><td><b>${it.n}</b></td><td><b>${it.pctSim == null ? '—' : it.pctSim + '%'}</b>${it.poucas ? ' *' : ''}</td></tr>`).join('');
     const poucas = t.items.some(it => it.poucas) ? `<p class="legend">* = menos de ${N_DIVULGA_FRASE} colaboradores responderam a essa frase (os outros marcaram "Não se aplica"): o % é frágil e não deve ser divulgado por unidade.</p>` : '';
@@ -601,7 +604,7 @@ function viewAdmin(){
     <h1>Contagens · ${esc(settings.unidade || '—')} · ${esc(rodadaNome(settings.rodada))}${settings.data ? ` <span class="small muted">· coleta em ${dataLabel(settings.data)}</span>` : ''}</h1>
     <div class="row"><button class="btn ghost" data-action="tosetup">← Tela inicial (Preparar a coleta)</button><button class="btn ghost" data-action="tocollect">Voltar à coleta com a equipe</button></div>
     ${state.notice ? `<div class="warn">${esc(state.notice)}</div>` : ''}
-    ${t.legado ? `<div class="warn"><b>${t.legado} resposta(s) de versão anterior do app</b> (escala de 1 a 5) estão guardadas para esta unidade e mês. Elas não entram nas contagens abaixo; saem no arquivo de respostas com a coluna <i>escala</i> = B5. Exporte e apague antes de continuar.</div>` : ''}
+    ${t.legado ? `<div class="warn"><b>${t.legado} resposta(s) de versão anterior do app</b> (escala de 1 a 5) estão guardadas para esta unidade e rodada. Elas não entram nas contagens abaixo; saem no arquivo de respostas com a coluna <i>escala</i> = B5. Exporte e apague antes de continuar.</div>` : ''}
     ${aviso}
     <div class="kpi">
       <div><b>${t.nResp}</b><span>${t.nResp === 1 ? 'resposta completa' : 'respostas completas'}</span></div>
@@ -643,6 +646,10 @@ function viewSettings(){
     <h1>Configurações</h1>
     ${unitField('s', 'settings')}
     <label>Data da coleta (preenchida automaticamente)</label><div class="datefield">${dataLabel(hojeISO())} <span class="small muted">· mês de referência ${mesLabel(hojeISO().slice(0, 7))}</span></div>
+    <h3>Rodada da coleta</h3>
+    <label>Rodada atual deste tablet</label>
+    <select id="s-rodada">${rodadas().map(r => `<option value="${esc(r.id)}" ${r.id === settings.rodada ? 'selected' : ''}>${esc(r.nome)}${r.fim ? ' (encerrada em ' + dataLabel(r.fim) + ')' : ''}</option>`).join('')}</select>
+    <p class="small muted">A rodada é definida em cada tablet. Só mude aqui se este tablet ficou numa rodada diferente dos outros; cada resposta leva a rodada que estava ativa na hora. Para abrir uma rodada nova, use o Consolidado.</p>
     <h3>Lista de unidades</h3>
     <p class="small muted">${esc(unidadesInfo())}. Importe a lista completa da empresa a partir do Excel: colunas <b>Código</b> (obrigatória), Nome/Cliente, Endereço, Bairro/Cidade, Região — a primeira linha pode ser o cabeçalho. Aceita .xlsx (precisa de internet na primeira vez) ou .csv.</p>
     <div class="row">
@@ -667,7 +674,7 @@ function viewText(){
   return header('Contagens como texto', 0) + `<div class="wrap"><div class="card">
     <p class="small muted">Toque e segure para selecionar e copiar. Está separado por tabulação: cola direto na planilha.</p>
     <pre id="txt">${esc(state.showText)}</pre>
-    <div class="row"><button class="btn" data-action="admin">Voltar</button></div>
+    <div class="row"><button class="btn" data-action="${state.textReturn === 'consolidado' ? 'consolidado' : 'admin'}">Voltar</button></div>
   </div></div>`;
 }
 
@@ -687,9 +694,12 @@ function agregar(list){   // um grupo de respostas (uma unidade ou todas)
     if (r.ces === 1 || r.ces === 2 || r.ces === 3) { a.ces.n++; if (r.ces === 3) a.ces.sim++; }
   });
   a.pctSim = a.totN ? Math.round(a.totSim / a.totN * 100) : null;
-  a.enpsVal = a.enps.n >= N_DIVULGA_DETALHE ? Math.round((a.enps.pro - a.enps.det) / a.enps.n * 100) : null;
-  a.cesFacil = a.ces.n >= N_DIVULGA_DETALHE ? Math.round(a.ces.sim / a.ces.n * 100) : null;
+  // mesmo critério da Área do avaliador: calcula a partir de 1 resposta e sinaliza quando há poucas (regra de divulgação)
+  a.enpsVal = a.enps.n ? Math.round((a.enps.pro - a.enps.det) / a.enps.n * 100) : null;
+  a.cesFacil = a.ces.n ? Math.round(a.ces.sim / a.ces.n * 100) : null;
   a.identificavel = a.n > 0 && a.n < N_DIVULGA_FRASE;
+  a.poucasDetalhe = a.n > 0 && a.n < N_DIVULGA_DETALHE;
+  a.cesPoucas = a.ces.n > 0 && a.ces.n < N_DIVULGA_DETALHE;
   return a;
 }
 function porUnidade(list){ const m = {}; list.forEach(r => { (m[r.unidade] = m[r.unidade] || []).push(r); }); return Object.keys(m).map(u => Object.assign({ unidade: u }, agregar(m[u]))); }
@@ -705,9 +715,10 @@ function filtrarPool(lista, cf, semUnidade){
   });
 }
 function cfDefault(){ return { rodada: settings.rodada, ano:'', mes:'', dia:'', unidade:'', ordem:'melhores', soPend:false, comp:'' }; }
+function avisoUnidade(u){ return u.identificavel ? 'IDENTIFICÁVEL (1-2 respostas): uso restrito, não comparar' : (u.poucasDetalhe ? 'menos de 5 respostas: eNPS e CES não divulgar por unidade' : ''); }
 function rankingTexto(units, compMap){
-  const L = [['#','Unidade','Nome','Respostas','% Sim','eNPS','% fácil (CES)'].concat(compMap ? ['% Sim (comparação)','Diferença (pts)'] : []).join('\t')];
-  units.forEach((u, i) => { const c = compMap ? compMap[u.unidade] : null; L.push([i+1, u.unidade, (unidadePorCodigo(u.unidade) || {}).nome || '', u.n, u.pctSim == null ? '' : u.pctSim + '%', u.enpsVal == null ? '' : u.enpsVal, u.cesFacil == null ? '' : u.cesFacil + '%'].concat(compMap ? [c && c.pctSim != null ? c.pctSim + '%' : '', (c && u.pctSim != null && c.pctSim != null) ? (u.pctSim - c.pctSim) : ''] : []).join('\t')); });
+  const L = [['#','Unidade','Nome','Respostas','% Sim','eNPS','% fácil c/ escritório','Aviso'].concat(compMap ? ['% Sim (comparação)','Diferença (pts)'] : []).join('\t')];
+  units.forEach((u, i) => { const c = compMap ? compMap[u.unidade] : null; L.push([i+1, u.unidade, (unidadePorCodigo(u.unidade) || {}).nome || '', u.n, u.pctSim == null ? '' : u.pctSim + '%', u.enpsVal == null ? '' : u.enpsVal, u.cesFacil == null ? '' : u.cesFacil + '%', avisoUnidade(u)].concat(compMap ? [c && c.pctSim != null ? c.pctSim + '%' : '', (c && u.pctSim != null && c.pctSim != null) ? (u.pctSim - c.pctSim) : ''] : []).join('\t')); });
   return L.join('\n');
 }
 function viewConsolidado(){
@@ -744,19 +755,23 @@ function viewConsolidado(){
     + (cf.soPend ? '' : naoCad.map(c => `<tr><td class="l"><b>${esc(c)}</b> <span class="small muted">fora da lista de unidades</span></td><td><span class="tag ok">pesquisada</span></td><td>${nBase[c]}</td></tr>`).join(''));
   const fmtDelta = (a, b) => (a == null || b == null) ? '—' : ((a - b > 0 ? '+' : '') + (a - b) + ' pts');
   const unitRows = units.map((u, i) => { const c = compMap ? compMap[u.unidade] : null; const d = (c && u.pctSim != null && c.pctSim != null) ? u.pctSim - c.pctSim : null;
-    return `<tr><td>${i+1}</td><td class="l"><b>${esc(u.unidade)}</b> <span class="small muted">${esc((unidadePorCodigo(u.unidade) || {}).nome || '')}</span>${u.identificavel ? ` <span class="tag pend" title="1 ou 2 respostas: identificável">⚠ ${u.n}</span>` : ''}</td><td>${u.n}</td><td><b>${u.pctSim == null ? '—' : u.pctSim + '%'}</b></td><td>${u.enpsVal == null ? '—' : (u.enpsVal > 0 ? '+' : '') + u.enpsVal}</td><td>${u.cesFacil == null ? '—' : u.cesFacil + '%'}</td>${compMap ? `<td>${c && c.pctSim != null ? c.pctSim + '%' : '—'} <span class="small muted">(${c ? c.n : 0})</span></td><td class="${d == null ? '' : (d >= 0 ? 'up' : 'down')}">${fmtDelta(u.pctSim, c ? c.pctSim : null)}</td>` : ''}</tr>`; }).join('');
+    const pd = u.poucasDetalhe ? ' <span class="tag pend" title="menos de 5 respostas">⚠</span>' : '';
+    return `<tr><td>${i+1}</td><td class="l"><b>${esc(u.unidade)}</b> <span class="small muted">${esc((unidadePorCodigo(u.unidade) || {}).nome || '')}</span>${u.identificavel ? ` <span class="tag pend">⚠ ${u.n === 1 ? '1 pessoa' : '2 pessoas'} — identificável</span>` : ''}</td><td>${u.n}</td><td><b>${u.pctSim == null ? '—' : u.pctSim + '%'}</b></td><td>${u.enpsVal == null ? '—' : (u.enpsVal > 0 ? '+' : '') + u.enpsVal}${u.enpsVal == null ? '' : pd}</td><td>${u.cesFacil == null ? '—' : u.cesFacil + '%'}${u.cesFacil == null ? '' : (u.cesPoucas ? ' <span class="tag pend" title="menos de 5 precisaram do escritório">⚠</span>' : '')}</td>${compMap ? `<td>${c && c.pctSim != null ? c.pctSim + '%' : '—'} <span class="small muted">(${c ? c.n : 0})</span></td><td class="${d == null ? '' : (d >= 0 ? 'up' : 'down')}">${fmtDelta(u.pctSim, c ? c.pctSim : null)}</td>` : ''}</tr>`; }).join('');
   const obsPorFrase = ITENS.map(() => []); const obsOutros = { enps: [], ces: [] };
   filt.forEach(r => { (r.c || []).forEach((txt, i) => { if (txt && obsPorFrase[i]) obsPorFrase[i].push(txt); }); if (r.cEnps) obsOutros.enps.push(r.cEnps); if (r.cCes) obsOutros.ces.push(r.cCes); });
   const fraseRows = geral.itens.map((it, i) => `<tr><td class="l"><b>B${i+1}</b> <span class="small muted">${esc(ITENS[i].t)}</span></td><td>${it.c[0]}</td><td>${it.c[1]} <span class="small muted">${esc(ITENS[i].opts[1])}</span></td><td>${it.c[2]}</td><td>${ITENS[i].na ? it.na : '—'}</td><td>${it.n}</td><td><b>${it.n ? Math.round(it.c[2] / it.n * 100) + '%' : '—'}</b></td><td>${obsPorFrase[i].length}</td></tr>`).join('');
   const nObs = obsPorFrase.reduce((a, l) => a + l.length, 0) + obsOutros.enps.length + obsOutros.ces.length;
   const obsHtml = nObs ? `<details><summary>Ler os ${nObs} comentários escritos nas páginas (ordem embaralhada)</summary><ul class="obslist">${obsPorFrase.map((l, i) => l.length ? `<li><b>B${i+1}</b> <span class="small muted">${esc(ITENS[i].t)}</span><ul>${shuffle(l).map(c => `<li>${esc(c)}</li>`).join('')}</ul></li>` : '').join('')}${obsOutros.enps.length ? `<li><b>Nota de 0 a 10</b><ul>${shuffle(obsOutros.enps).map(c => `<li>${esc(c)}</li>`).join('')}</ul></li>` : ''}${obsOutros.ces.length ? `<li><b>Escritório (CES)</b><ul>${shuffle(obsOutros.ces).map(c => `<li>${esc(c)}</li>`).join('')}</ul></li>` : ''}</ul><p class="legend">Registre só os temas; nunca copie frases. Comentários são de uso restrito da área de Experiência do Cliente.</p></details>` : '';
   const rodRows = rl.map(r => { const lst = todas.filter(x => rodadaDe(x) === r.id); return `<tr class="${r.id === settings.rodada ? 'cur' : ''}"><td class="l"><b>${esc(r.nome)}</b>${r.id === settings.rodada ? ' <span class="tag ok">atual</span>' : ''}</td><td>${r.inicio ? dataLabel(r.inicio) : '—'}</td><td>${r.fim ? dataLabel(r.fim) : (r.id === settings.rodada ? 'em andamento' : '—')}</td><td>${lst.length}</td><td>${new Set(lst.map(x => x.unidade)).size}</td></tr>`; }).join('');
-  const nIdent = units.filter(u => u.identificavel).length;
-  const filtroTxt = [cf.rodada ? rodadaNome(cf.rodada) : 'todas as rodadas', cf.ano || 'todos os anos', cf.mes ? MESES[+cf.mes - 1] : 'todos os meses', cf.dia ? 'dia ' + cf.dia : 'todos os dias', cf.unidade || 'todas as unidades'].join(' · ');
+  const ativos = [cf.rodada ? rodadaNome(cf.rodada) : 'todas as rodadas'];
+  if (cf.ano || cf.mes || cf.dia) ativos.push([cf.dia ? 'dia ' + cf.dia : '', cf.mes ? (MESES[+cf.mes - 1] || cf.mes) : '', cf.ano].filter(Boolean).join(' de ')); else ativos.push('todas as datas');
+  ativos.push(cf.unidade ? unidadeLabel(cf.unidade) : 'todas as unidades');
+  const filtroTxt = ativos.join(' · ');
+  const ordTxt = { melhores: 'Do maior para o menor % de "Sim" nas 15 frases', piores: 'Do menor para o maior % de "Sim" nas 15 frases', respostas: 'Por número de respostas', nome: 'Em ordem alfabética' }[cf.ordem] || '';
   return header('Consolidado', 0) + `<div class="wrap"><div class="card" style="max-width:1100px">
     <h1>Consolidado de todas as unidades</h1>
     <div class="row" style="margin-top:6px"><button class="btn ghost" data-action="admin">← Área do avaliador</button><button class="btn ghost" data-action="tosetup">Tela inicial (Preparar a coleta)</button></div>
-    <p class="small muted">Junta as respostas deste tablet com as importadas de outros tablets (arquivo CSV do app). Rodada atual da coleta: <b>${esc(rodadaNome(settings.rodada))}</b>.${pool.legado ? ` ${pool.legado} resposta(s) de versão antiga do app (escala 1-5) ficam fora das contas.` : ''}${histResponses().length ? ` ${histResponses().length} resposta(s) importada(s) de outros tablets.` : ''}</p>
+    <p class="small muted">Junta as respostas deste tablet com as importadas de outros tablets (arquivo CSV do app). Rodada atual da coleta: <b>${esc(rodadaNome(settings.rodada))}</b>.${pool.legado ? ` ${pool.legado} resposta(s) de versão antiga do app (escala 1-5) ficam fora das contas.` : ''}${histResponses().length ? ` ${histResponses().length} resposta(s) importada(s) de outros tablets.` : ' <b>Ainda não há respostas importadas de outros tablets</b> — o que está abaixo é só deste aparelho. Para juntar, use "Importar respostas de outro tablet" no fim da tela.'}</p>
     <h3>Filtros</h3>
     <div class="filters">
       <div><label>Rodada (pesquisa)</label><select data-cf="rodada"><option value="" ${cf.rodada ? '' : 'selected'}>Todas</option>${opt(rl.map(r => r.id), cf.rodada, id => rodadaNome(id))}</select></div>
@@ -767,12 +782,13 @@ function viewConsolidado(){
       <div><label>Comparar com a rodada</label><select data-cf="comp"><option value="">— sem comparação —</option>${opt(rl.map(r => r.id).filter(id => id !== cf.rodada), cf.comp, id => rodadaNome(id))}</select></div>
     </div>
     <p class="legend">Mostrando: ${esc(filtroTxt)}.</p>
+    ${cf.unidade && geral.identificavel ? `<div class="bad"><b>Só ${geral.n} resposta${geral.n > 1 ? 's' : ''} em ${esc(cf.unidade)}:</b> as contagens e os comentários abaixo são as respostas de ${geral.n === 1 ? 'uma pessoa' : 'duas pessoas'}. Uso restrito da área de Experiência do Cliente — não divulgue por unidade nem mostre esta tela ao encarregado ou ao supervisor.</div>` : ''}
     <div class="kpi">
       <div><b>${geral.n}</b><span>respostas</span></div>
       <div><b>${units.length}</b><span>unidades com respostas</span></div>
       <div><b>${geral.pctSim == null ? '—' : geral.pctSim + '%'}</b><span>% de "Sim" nas 15 frases</span></div>
-      <div><b>${geral.enpsVal == null ? '—' : (geral.enpsVal > 0 ? '+' : '') + geral.enpsVal}</b><span>eNPS (${N_DIVULGA_DETALHE}+ respostas)</span></div>
-      <div><b>${geral.cesFacil == null ? '—' : geral.cesFacil + '%'}</b><span>acham fácil resolver com o escritório</span></div>
+      <div><b>${geral.enpsVal == null ? '—' : (geral.enpsVal > 0 ? '+' : '') + geral.enpsVal}</b><span>eNPS${geral.poucasDetalhe ? ' ⚠ menos de ' + N_DIVULGA_DETALHE + ' respostas' : ''}</span></div>
+      <div><b>${geral.cesFacil == null ? '—' : geral.cesFacil + '%'}</b><span>acham fácil resolver com o escritório${geral.cesPoucas ? ' ⚠ menos de ' + N_DIVULGA_DETALHE + ' precisaram' : ''}</span></div>
     </div>
     <h3>Ranking das unidades</h3>
     <div class="row" style="margin-top:6px">
@@ -782,8 +798,8 @@ function viewConsolidado(){
       <button class="btn ${cf.ordem === 'nome' ? '' : 'light'}" data-action="cfordem" data-v="nome">A–Z</button>
     </div>
     ${units.length ? `<div style="overflow:auto"><table>
-      <tr><th>#</th><th class="l">Unidade</th><th>Respostas</th><th>% Sim</th><th>eNPS</th><th>% fácil (CES)</th>${compMap ? `<th>% Sim em ${esc(rodadaNome(cf.comp))}</th><th>Diferença</th>` : ''}</tr>${unitRows}</table></div>
-      <p class="legend">Ordenado por % de "Sim" nas 15 frases (indicador principal). eNPS e CES só aparecem com ${N_DIVULGA_DETALHE}+ respostas na unidade.${nIdent ? ` ⚠ = unidade com 1 ou 2 respostas: o resultado identifica quem respondeu — uso restrito da área de Experiência do Cliente, não divulgar por unidade.` : ''}${compMap ? ' Diferença = pontos percentuais de % Sim em relação à rodada comparada (mesma unidade).' : ''}</p>` : '<p class="muted">Nenhuma resposta nos filtros escolhidos.</p>'}
+      <tr><th>#</th><th class="l">Unidade</th><th>Respostas</th><th>% Sim</th><th>eNPS</th><th>% fácil c/ escritório</th>${compMap ? `<th>% Sim em ${esc(rodadaNome(cf.comp))}</th><th>Diferença</th>` : ''}</tr>${unitRows}</table></div>
+      <p class="legend">${esc(ordTxt)} (indicador principal: % de "Sim"). Com 1 ou 2 respostas, o % Sim é a opinião de uma ou duas pessoas — o resultado identifica quem respondeu, é de uso restrito da área de Experiência do Cliente e não deve ser comparado com as outras unidades nem usado para "melhor/pior". ⚠ ao lado do eNPS ou do % fácil = menos de ${N_DIVULGA_DETALHE} respostas: não divulgar por unidade.${compMap ? ' Diferença = pontos percentuais de % Sim em relação à rodada comparada (mesma unidade).' : ''}</p>` : '<p class="muted">Nenhuma resposta nos filtros escolhidos.</p>'}
     <h3>Cobertura: unidades cadastradas × pesquisadas</h3>
     <div class="kpi">
       <div><b>${cad.length}</b><span>unidades cadastradas</span></div>
@@ -800,7 +816,7 @@ function viewConsolidado(){
     <h3>Rodadas (histórico das pesquisas)</h3>
     <div style="overflow:auto"><table><tr><th class="l">Rodada</th><th>Início</th><th>Fim</th><th>Respostas</th><th>Unidades</th></tr>${rodRows}</table></div>
     <div class="row"><button class="btn" data-action="novarodada">Iniciar nova rodada (guarda o histórico)</button></div>
-    <p class="legend">Uma nova rodada zera a coleta de todas as unidades sem apagar nada: as respostas antigas continuam aqui, e você compara rodadas pelo filtro "Comparar com a rodada".</p>
+    <p class="legend">A rodada é definida em cada tablet: "Iniciar nova rodada" muda a rodada de todas as unidades deste aparelho, e só dele — repita nos outros tablets antes da próxima visita, senão as respostas deles continuam marcadas como a rodada anterior. Nada é apagado: as respostas antigas ficam aqui (e nos CSVs exportados) e você compara rodadas pelo filtro "Comparar com a rodada". Se um tablet ficou na rodada errada, corrija em Configurações → Rodada da coleta.</p>
     <h3>Juntar tablets e exportar</h3>
     <div class="row">
       <button class="btn light" data-action="importhist">Importar respostas de outro tablet (CSV do app)</button>
@@ -808,10 +824,10 @@ function viewConsolidado(){
       <button class="btn light" data-action="copycons" ${units.length ? '' : 'disabled'}>Copiar ranking (para o Excel)</button>
       ${histResponses().length ? '<button class="btn link" data-action="wipehist">Apagar as respostas importadas</button>' : ''}
     </div>
-    <h3>Zerar</h3>
+    <p class="legend">Para juntar todos os tablets: em cada um, exporte o "arquivo de respostas (CSV)" e importe aqui — respostas repetidas são ignoradas pelo id. Use o arquivo como saiu do tablet (não abra e salve no Excel antes de importar). O CSV consolidado tem uma linha por pessoa e é de uso restrito da área de Experiência do Cliente.</p>
+    <h3>Zerar (só para testes)</h3>
     <div class="row"><button class="btn danger" data-action="zerartudo">Zerar todo o histórico deste tablet</button></div>
     <p class="legend">Apaga todas as respostas (de todas as unidades e rodadas), recusas, rodadas e respostas importadas deste aparelho, e volta à Rodada 1. Mantém o PIN e a lista de unidades. Pede confirmação e depois a <b>senha de zerar</b> (diferente do PIN; troca em Configurações). Use para começar um teste do zero — exporte antes o que quiser guardar.</p>
-    <p class="legend">Para juntar todos os tablets: em cada um, exporte o "arquivo de respostas (CSV)" e importe aqui — respostas repetidas são ignoradas pelo id. O CSV consolidado tem uma linha por pessoa e é de uso restrito da área de Experiência do Cliente.</p>
   </div></div>`;
 }
 function hashStr(s){ let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
@@ -825,15 +841,18 @@ function csvToResponses(text){   // lê o CSV exportado pelo próprio app (qualq
   if (iU < 0 || iB.some(i => i < 0)) return null;
   const num = v => { if (v === 'NA' || v === 'NP') return v; if (v == null || v === '') return null; const n = Number(v); return isNaN(n) ? null : n; };
   const txt = v => String(v == null ? '' : v).replace(/^'/, '');
-  return rows.slice(1).filter(r => r.length >= 5 && r[iU]).map(r => ({
+  // datas que passaram pelo Excel (09/09/2026, 09/2026) voltam ao formato do app; o que não for data fica vazio
+  const normData = s => { s = String(s || '').trim(); let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/); if (m) return `${m[1]}-${m[2]}-${m[3]}`; m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`; return ''; };
+  const normMes = (s, data) => { s = String(s || '').trim(); let m = s.match(/^(\d{4})-(\d{2})/); if (m) return `${m[1]}-${m[2]}`; m = s.match(/^(\d{1,2})\/(\d{4})$/); if (m) return `${m[2]}-${m[1].padStart(2, '0')}`; return (data || '').slice(0, 7); };
+  return rows.slice(1).filter(r => r.length >= 5 && r[iU]).map(r => { const dataN = normData(iD >= 0 ? r[iD] : ''); return {
     id: iId >= 0 && r[iId] ? r[iId] : 'imp-' + hashStr(r.join(';')),
     versao: iV >= 0 ? r[iV] : '1.2', escala: iE >= 0 ? r[iE] : 'B5',
-    unidade: r[iU].trim().toUpperCase(), mes: iM >= 0 && r[iM] ? r[iM] : (iD >= 0 ? (r[iD] || '').slice(0, 7) : ''), data: iD >= 0 ? (r[iD] || '') : '', rodada: iR >= 0 && r[iR] ? r[iR] : 'R1',
+    unidade: r[iU].trim().toUpperCase(), mes: normMes(iM >= 0 ? r[iM] : '', dataN), data: dataN, rodada: iR >= 0 && /^R\d+$/.test(r[iR] || '') ? r[iR] : 'R1',
     r: iB.map(i => num(r[i])), enps: iEn >= 0 ? num(r[iEn]) : null, ces: iC >= 0 ? num(r[iC]) : null,
     a1: iA1 >= 0 ? txt(r[iA1]) : '', a2: iA2 >= 0 ? txt(r[iA2]) : '',
     c: ITENS.map(it => { const i = ix('cb' + it.n); return i >= 0 ? txt(r[i]) : ''; }), cEnps: ix('cenps') >= 0 ? txt(r[ix('cenps')]) : '', cCes: ix('cces') >= 0 ? txt(r[ix('cces')]) : '',
     sent: true, importado: true
-  }));
+  }; });
 }
 async function importHist(files){
   let novas = 0, repetidas = 0, ruins = 0;
@@ -846,17 +865,32 @@ async function importHist(files){
     } catch(e) { ruins++; }
   }
   if (novas && !LS.set('mp_hist', hist)) { toast('Não foi possível gravar neste aparelho (memória cheia?).'); return; }
-  toast(`${novas} resposta(s) nova(s) importada(s)` + (repetidas ? `; ${repetidas} já existiam` : '') + (ruins ? `; ${ruins} arquivo(s) não são o CSV do app` : '') + '.');
+  let extra = '';
+  if (novas && state.cf && state.cf.rodada) {   // importadas de outra rodada ficariam escondidas pelo filtro: abre o filtro e avisa
+    const rodImp = new Set(hist.slice(hist.length - novas).map(r => r.rodada || 'R1'));
+    if (!rodImp.has(state.cf.rodada)) { state.cf.rodada = ''; state.cf.comp = ''; extra = ` As importadas são de outra rodada (${[...rodImp].map(rodadaNome).join(', ')}) — o filtro de rodada foi aberto para "Todas".`; }
+  }
+  toast(`${novas} resposta(s) nova(s) importada(s)` + (repetidas ? `; ${repetidas} já existiam` : '') + (ruins ? `; ${ruins} arquivo(s) não são o CSV do app` : '') + '.' + extra);
   render();
 }
 
 /* ---------------- importação da lista de unidades ---------------- */
+// Leitor de CSV/TSV no padrão RFC 4180: respeita aspas, aspas duplas ("") e quebras de linha dentro de um campo.
 function parseDelimited(text){
-  const lines = text.replace(/\r/g, '').split('\n').map(l => l.trim()).filter(Boolean);
-  if (!lines.length) return [];
-  const delim = (lines[0].match(/\t/g) || []).length ? '\t' : ((lines[0].match(/;/g) || []).length >= (lines[0].match(/,/g) || []).length ? ';' : ',');
-  const split = l => { const out = []; let cur = '', inQ = false; for (const ch of l) { if (ch === '"') inQ = !inQ; else if (ch === delim && !inQ) { out.push(cur); cur = ''; } else cur += ch; } out.push(cur); return out.map(s => s.trim()); };
-  return lines.map(split);
+  text = String(text || '').replace(/^﻿/, '').replace(/\r\n?/g, '\n');
+  const first = text.split('\n').find(l => l.trim()) || '';
+  const delim = (first.match(/\t/g) || []).length ? '\t' : ((first.match(/;/g) || []).length >= (first.match(/,/g) || []).length ? ';' : ',');
+  const rows = []; let row = [], cur = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQ) { if (ch === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else inQ = false; } else cur += ch; }
+    else if (ch === '"') inQ = true;
+    else if (ch === delim) { row.push(cur); cur = ''; }
+    else if (ch === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+    else cur += ch;
+  }
+  if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+  return rows.map(r => r.map(s => s.trim())).filter(r => r.some(Boolean));
 }
 function rowsToUnidades(rows){
   if (!rows.length) return [];
@@ -962,7 +996,7 @@ async function exportCsv(){
 }
 async function copyText(text){
   try { await navigator.clipboard.writeText(text); toast('Contagens copiadas.'); markExported(); render(); }
-  catch(e) { go('text', { showText: text }); toast('Toque e segure no texto para copiar.'); markExported(); }
+  catch(e) { go('text', { showText: text, textReturn: 'admin' }); toast('Toque e segure no texto para copiar.'); markExported(); }
 }
 function readUnitInput(prefix){ const el = document.getElementById(prefix + '-unidade'); return el ? el.value.trim().toUpperCase() : settings.unidade; }
 
@@ -1044,7 +1078,7 @@ function handle(action, el){
         else {
           state.pin = ''; settings.pinFails = (settings.pinFails || 0) + 1;
           if (settings.pinFails >= PIN_MAX_FAILS) { settings.lockUntil = Date.now() + PIN_LOCK_MS; settings.pinFails = 0; }
-          saveSettings(); toast('PIN incorreto.'); render();
+          saveSettings(); toast(state.pinTarget === 'zerar' ? 'Senha de zerar incorreta.' : 'PIN incorreto.'); render();
         }
         return;
       } else if (state.pin.length < 8) state.pin += k;
@@ -1053,10 +1087,11 @@ function handle(action, el){
     case 'admin': go('admin', { notice: '' }); break;
     case 'settings': go('settings'); break;
     case 'consolidado': if (!state.cf) state.cf = cfDefault(); go('consolidado'); break;
+    case 'okzerado': delete settings.avisoZerado; saveSettings(); render(); break;
     case 'cfordem': if (state.cf) { state.cf.ordem = el.getAttribute('data-v') || 'melhores'; render(); } break;
     case 'novarodada': {
       const atual = rodadaNome(settings.rodada), n = allResponses().filter(r => rodadaDe(r) === settings.rodada).length;
-      askConfirm(`Encerrar "${atual}" (${n} resposta${n === 1 ? '' : 's'} neste tablet) e iniciar uma nova rodada? Nada é apagado: as respostas antigas ficam no Consolidado e podem ser comparadas. As contagens da coleta atual passam a zero para todas as unidades.`, () => {
+      askConfirm(`Encerrar "${atual}" (${n} resposta${n === 1 ? '' : 's'} neste tablet) e iniciar uma nova rodada NESTE TABLET? Vale para todas as unidades deste aparelho — e só dele: os outros tablets continuam na "${atual}" até você iniciar a nova rodada neles também (faça em todos no mesmo dia). Nada é apagado: as respostas antigas que ainda estiverem neste aparelho continuam no Consolidado; as já exportadas e apagadas voltam pela importação dos CSVs.`, () => {
         const nova = novaRodada(); if (state.cf) { state.cf.rodada = nova.id; state.cf.comp = ''; state.cf.ano = ''; state.cf.mes = ''; state.cf.dia = ''; }
         toast(`${nova.nome} iniciada.`); go('consolidado');
       });
@@ -1069,7 +1104,8 @@ function handle(action, el){
       let compMap = null; if (cf.comp) { compMap = {}; porUnidade(pool.filter(r => rodadaDe(r) === cf.comp && (!cf.unidade || r.unidade === cf.unidade))).forEach(u => { compMap[u.unidade] = u; }); }
       const ordem = { melhores: (a, b) => ((b.pctSim == null ? -1 : b.pctSim) - (a.pctSim == null ? -1 : a.pctSim)) || (b.n - a.n), piores: (a, b) => ((a.pctSim == null ? 101 : a.pctSim) - (b.pctSim == null ? 101 : b.pctSim)) || (b.n - a.n), respostas: (a, b) => b.n - a.n, nome: (a, b) => a.unidade.localeCompare(b.unidade) };
       units.sort(ordem[cf.ordem] || ordem.melhores);
-      navigator.clipboard.writeText(rankingTexto(units, compMap)).then(() => toast('Ranking copiado.')).catch(() => go('text', { showText: rankingTexto(units, compMap) }));
+      const txt = rankingTexto(units, compMap);
+      (async () => { try { await navigator.clipboard.writeText(txt); toast('Ranking copiado.'); } catch(e) { go('text', { showText: txt, textReturn: 'consolidado' }); toast('Toque e segure no texto para copiar.'); } })();
       break;
     }
     case 'zerartudo': {
@@ -1082,7 +1118,7 @@ function handle(action, el){
     case 'tocollect': go(homeScreen()); break;
     case 'tosetup': go('setup'); break;
     case 'copy': copyText(tallyText(tally(list()))); break;
-    case 'showtext': go('text', { showText: tallyText(tally(list())) }); break;
+    case 'showtext': go('text', { showText: tallyText(tally(list())), textReturn: 'admin' }); break;
     case 'csv': exportCsv(); break;
     case 'mail': {
       const t = tally(list());
@@ -1106,9 +1142,13 @@ function handle(action, el){
       break;
     }
     case 'wipeothers': {
-      askConfirm('Apagar as respostas de OUTRAS unidades e rodadas guardadas neste tablet? Elas somem do Consolidado. Confirme que já foram exportadas.', () => {
+      const others = otherKeys();
+      const naoExp = Object.keys(others).filter(k => !settings.exported[k]);
+      const aviso = naoExp.length ? ` ATENÇÃO: ainda NÃO exportadas: ${naoExp.map(keyLabel).join(', ')}.` : '';
+      askConfirm(`Apagar as respostas de OUTRAS unidades e rodadas deste tablet (${Object.keys(others).map(keyLabel).join(', ')})? Elas somem do Consolidado deste aparelho.${aviso}`, () => {
         saveResponses(allResponses().filter(r => r.unidade === settings.unidade && rodadaDe(r) === settings.rodada));
         const m = LS.get('mp_recusas', {}); Object.keys(m).forEach(k => { if (k !== key()) delete m[k]; }); LS.set('mp_recusas', m);
+        Object.keys(settings.exported).forEach(k => { if (k !== key()) delete settings.exported[k]; }); saveSettings();
         toast('Outras respostas apagadas.'); go('admin', { notice: '' });
       });
       break;
@@ -1118,6 +1158,8 @@ function handle(action, el){
       const w = document.getElementById('s-webhook').value.trim();
       if (!u) { toast('Escolha a unidade.'); return; }
       if (w && !/^https:\/\//i.test(w)) { toast('A URL de envio deve começar com https://'); return; }
+      const rd = document.getElementById('s-rodada');
+      if (rd && rd.value && rd.value !== settings.rodada) { const l = rodadas(); const alvo = l.find(r => r.id === rd.value); if (alvo) { alvo.fim = ''; saveRodadas(l); settings.rodada = alvo.id; if (state.cf) state.cf.rodada = alvo.id; } }
       settings.unidade = u; fixarData(); settings.webhook = w; saveSettings();
       toast('Configurações salvas.'); go('admin', { notice: '' }); break;
     }
