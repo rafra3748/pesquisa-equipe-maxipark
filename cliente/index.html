@@ -57,6 +57,7 @@
   label{display:block;font-weight:600;margin:14px 0 6px}
   .check{display:flex;gap:12px;align-items:flex-start;font-weight:500;margin:12px 0 4px;font-size:16px} .check input{width:26px;height:26px;margin-top:2px;flex:none}
   .logo-hero{display:flex;justify-content:center;margin:2px 0 14px} .logo-hero img{height:64px;width:auto;max-width:80%}
+  a.home{display:inline-flex;align-items:center;border-radius:8px} a.home:active{opacity:.7}
   .boasvindas{text-align:center;padding:26px 22px}
   .boasvindas h1{font-size:36px;margin:12px 0 10px}
   .boasvindas p{font-size:20px;color:var(--cinza)}
@@ -93,7 +94,7 @@
    Modo quiosque: o cliente responde no tablet da unidade; as respostas ficam no tablet e são exportadas
    pela área de Experiência do Cliente (PIN), como no app da equipe. Opcional: envio automático (Power Automate).
    ========================================================= */
-const VERSAO = '1.0.0';
+const VERSAO = '1.0.1';
 const PIN_PADRAO = '2819';   // mesmo PIN do app da equipe; troca em Configurações. Atenção: este código é público.
 const IDLE_MS = 90000;       // cliente abandonou no meio: descarta e volta à tela inicial
 const OBRIGADO_MS = 7000;    // tela "Obrigado" volta sozinha ao início
@@ -195,9 +196,10 @@ function visiveis(){ return QUESTOES.filter(q => !q.cond || q.cond(state.r)); }
 function perguntaAtual(){ return visiveis()[state.i] || null; }
 
 /* ---------------- telas ---------------- */
-function header(passo){ return `<div class="top"><div class="marca"><img src="data:image/png;base64,${LOGO_B64}" alt="Maxipark"><span>Pesquisa com clientes</span></div><div class="passo">${esc(passo || '')}</div></div>`; }
+// o logo Maxipark (topo e telas de início) leva à página inicial, onde se escolhe a pesquisa (pedido do gestor, 10/09/2026)
+function header(passo){ return `<div class="top"><div class="marca"><a href="../" class="home" title="Página inicial: escolher a pesquisa" aria-label="Página inicial: escolher a pesquisa"><img src="data:image/png;base64,${LOGO_B64}" alt="Maxipark"></a><span>Pesquisa com clientes</span></div><div class="passo">${esc(passo || '')}</div></div>`; }
 function barra(p){ return `<div class="barra"><div style="width:${p}%"></div></div>`; }
-function logoHero(){ return `<div class="logo-hero"><img src="data:image/png;base64,${LOGO_B64}" alt="Maxipark"></div>`; }
+function logoHero(){ return `<div class="logo-hero"><a href="../" class="home" title="Página inicial: escolher a pesquisa"><img src="data:image/png;base64,${LOGO_B64}" alt="Maxipark"></a></div>`; }
 
 function viewSetup(){
   const u = settings.unidade;
