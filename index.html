@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Pesquisa Equipe Maxipark</title>
-<meta name="theme-color" content="#1F6E6E">
+<meta name="theme-color" content="#28239D">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Pesquisa Equipe">
@@ -13,8 +13,9 @@
 <link rel="icon" href="icon-192.png">
 <style>
   :root{
-    --teal:#1F6E6E; --teal-dark:#155252; --teal-soft:#D6ECEC; --bg:#F1F5F5; --card:#FFFFFF;
-    --text:#1B1F1F; --muted:#5A6B6B; --line:#D5DEDE; --sel:#FFD54F; --sel-text:#3A2E00;
+    /* Paleta Maxipark: índigo do letreiro (#28239D) e violeta do símbolo (#9935F4), tiradas do logo oficial */
+    --teal:#28239D; --teal-dark:#1B1770; --teal-soft:#ECEAF9; --accent:#9935F4; --bg:#F3F3FA; --card:#FFFFFF;
+    --text:#1C1B2E; --muted:#5B5B78; --line:#DCDBEA; --sel:#FFD54F; --sel-text:#3A2E00;
     --danger:#B23A3A; --ok:#2E7D32; --radius:18px;
     color-scheme: light;   /* o app é sempre claro: evita texto claro do modo escuro do aparelho em botões e campos */
   }
@@ -90,6 +91,8 @@
   .pinpad button{min-height:62px;font-size:26px;border-radius:14px;border:2px solid var(--line);background:#fff;cursor:pointer;color:var(--text)}
   .pinpad button.ok{background:var(--teal);border-color:var(--teal);color:#fff;font-size:20px;font-weight:700}
   .pinshow{text-align:center;font-size:34px;letter-spacing:12px;min-height:48px;margin:6px 0}
+  .pininput{display:block;max-width:320px;margin:8px auto 0;text-align:center;font-size:20px;letter-spacing:6px}
+  .pininput::placeholder{letter-spacing:0;font-size:15px}
   .thanks{text-align:center;padding:36px 10px}
   .thanks .check{width:96px;height:96px;border-radius:50%;background:var(--ok);color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:12px 18px;border-radius:12px;font-size:16px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;z-index:9}
@@ -110,6 +113,17 @@
   .check{display:flex;gap:10px;align-items:center;font-weight:500;margin:10px 0 4px;font-size:16px}
   .check input{width:22px;height:22px}
   .obslist{padding-left:18px;font-size:15px} .obslist > li{margin:8px 0} .obslist ul{padding-left:18px;margin:4px 0}
+  .pergunta{border:1px solid var(--line);border-radius:12px;padding:10px 14px 14px;margin:10px 0;background:#FAFBFB}
+  .pergunta label{font-size:14px;margin:8px 0 4px} .pergunta input,.pergunta textarea,.pergunta select{font-size:16px;padding:8px 10px} .pergunta textarea{min-height:0}
+  /* identidade Maxipark: barra branca com o logo, barra de progresso violeta → índigo */
+  .top{background:#fff;color:var(--teal-dark);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;color:var(--muted)}
+  .brand .logo{height:30px;width:auto;display:block}
+  .step{color:var(--teal-dark);font-weight:600}
+  .progress{background:var(--teal-soft)}
+  .progress div{background:linear-gradient(90deg,var(--accent),var(--teal))}
+  .thanks .check{background:linear-gradient(135deg,var(--accent),var(--teal))}
+  @media (max-width:560px){ .brand span{display:none} .brand .logo{height:26px} }
   @media (max-width:560px){ .statement{font-size:23px} .scale{grid-template-columns:repeat(6,1fr)} h1{font-size:25px} .opt{font-size:19px} }
   @media (max-height:600px) and (orientation:landscape){ textarea.obs{min-height:44px;margin-top:8px;padding:6px 10px} .spread{margin-top:8px} .statement{font-size:20px;margin:2px 0 8px} .opt{min-height:50px} .wrap{padding:8px 16px 56px} }
   @media (max-height:820px) and (orientation:landscape){
@@ -132,8 +146,10 @@
    Escala de 3 respostas por frase (Sim / resposta do meio / Não) + "Não se aplica" onde faz sentido.
    Valores gravados: 3 = Sim, 2 = resposta do meio, 1 = Não, 'NA' = não se aplica.
    ===================================================================== */
-const VERSAO = '1.5.1';
-const ITENS = [
+const VERSAO = '1.6';
+// Logo Maxipark (PNG do site oficial, reduzido), embutido para funcionar sem internet
+const LOGO_B64 = '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';
+const ITENS_PADRAO = [
   {n:1,  dim:'Condições no posto', t:'Os equipamentos que uso no posto (cancela, máquina de cartão, sistema, rádio) funcionam bem.', opts:['Sim','Às vezes','Não']},
   {n:2,  dim:'Condições no posto', t:'Consigo parar para comer durante o meu turno.', opts:['Sim','Às vezes','Não']},
   {n:3,  dim:'Condições no posto', t:'No meu turno tem gente suficiente para atender bem.', opts:['Sim','Às vezes','Não']},
@@ -152,10 +168,32 @@ const ITENS = [
 ];
 const VALOR = [3, 2, 1];   // opts[0] = Sim → 3, opts[1] = meio → 2, opts[2] = Não → 1
 const ESCALA = 'B3';       // carimbo gravado em cada resposta e no CSV: 3 respostas por frase (v1.3+). Respostas sem carimbo são da escala 1-5 (v1.2)
-const ENPS_Q = 'De 0 a 10, quanto você recomendaria a Maxipark a um amigo como um bom lugar para trabalhar?';
-const CES_Q = 'Pense na última vez que você precisou resolver algo seu com o escritório da Maxipark (holerite, ponto, uniforme, sistema). Foi fácil resolver?';
-const CES_OPTS = ['Sim, foi fácil', 'Mais ou menos', 'Não, foi difícil'];
-const ABERTAS = ['O que mais atrapalha seu dia de trabalho nesta unidade hoje?', 'Se você pudesse mudar uma coisa na Maxipark, o que seria?'];
+const ENPS_Q_PADRAO = 'De 0 a 10, quanto você recomendaria a Maxipark a um amigo como um bom lugar para trabalhar?';
+const CES_Q_PADRAO = 'Pense na última vez que você precisou resolver algo seu com o escritório da Maxipark (holerite, ponto, uniforme, sistema). Foi fácil resolver?';
+const CES_OPTS_PADRAO = ['Sim, foi fácil', 'Mais ou menos', 'Não, foi difícil'];
+const ABERTAS_PADRAO = ['O que mais atrapalha seu dia de trabalho nesta unidade hoje?', 'Se você pudesse mudar uma coisa na Maxipark, o que seria?'];
+// Pesos padrão das 15 frases (os mesmos da ficha em Excel; somam 34). O gestor pode alterar em Configurações → Perguntas, respostas e pesos.
+const PESOS_PADRAO = [3, 2, 2, 2, 3, 3, 2, 2, 3, 2, 2, 2, 3, 2, 1];
+ITENS_PADRAO.forEach((it, i) => { it.peso = PESOS_PADRAO[i] || 2; });
+// Textos em uso (padrão + alterações do gestor gravadas em mp_itens). A estrutura (15 frases B1…B15, 3 respostas, eNPS, CES, 2 abertas) é fixa;
+// mudam só os textos, os rótulos das respostas, o "Não se aplica" e os pesos.
+let ITENS = [], ENPS_Q = ENPS_Q_PADRAO, CES_Q = CES_Q_PADRAO, CES_OPTS = CES_OPTS_PADRAO.slice(), ABERTAS = ABERTAS_PADRAO.slice();
+function aplicarTextos(){
+  const o = LS.get('mp_itens', null) || {};
+  ITENS = ITENS_PADRAO.map((d, i) => {
+    const s = (o.itens && o.itens[i]) || {};
+    const opts = (Array.isArray(s.opts) && s.opts.length === 3 && s.opts.every(x => x && String(x).trim())) ? s.opts.map(x => String(x).trim()) : d.opts.slice();
+    const it = { n: d.n, dim: (s.dim && String(s.dim).trim()) || d.dim, t: (s.t && String(s.t).trim()) || d.t, opts, peso: [1, 2, 3].includes(+s.peso) ? +s.peso : d.peso };
+    const na = s.na !== undefined ? String(s.na || '').trim() : (d.na || '');
+    if (na) it.na = na;
+    return it;
+  });
+  ENPS_Q = (o.enpsQ && String(o.enpsQ).trim()) || ENPS_Q_PADRAO;
+  CES_Q = (o.cesQ && String(o.cesQ).trim()) || CES_Q_PADRAO;
+  CES_OPTS = (Array.isArray(o.cesOpts) && o.cesOpts.length === 3 && o.cesOpts.every(x => x && String(x).trim())) ? o.cesOpts.map(x => String(x).trim()) : CES_OPTS_PADRAO.slice();
+  ABERTAS = (Array.isArray(o.abertas) && o.abertas.length === 2 && o.abertas.every(x => x && String(x).trim())) ? o.abertas.map(x => String(x).trim()) : ABERTAS_PADRAO.slice();
+}
+function textosAlterados(){ return !!LS.get('mp_itens', null); }
 const AVISO = '<b>Sem nome.</b> O app não grava seu nome, cargo nem horário — só o código da unidade e o dia da visita, que é o mesmo para toda a equipe.<br><b>Quem vê suas respostas:</b> só a área de Experiência do Cliente da Maxipark, que aplica esta pesquisa. Seu chefe direto (encarregado ou supervisor) <b>não vê</b> o que você marcou, a nota de 0 a 10 nem o que você escreveu — ele recebe só um resumo, e junto com outras unidades quando a equipe é pequena.<br><b>Unidade com 1 ou 2 colaboradores:</b> como seria fácil saber quem respondeu, o resultado da sua unidade não é mostrado a ninguém fora dessa área. O retorno vem junto com as outras unidades da região.<br><b>Comentários:</b> a área de Experiência do Cliente lê o que você escreveu; para o encarregado e para a equipe vai só o assunto, nunca a frase.<br><b>Ninguém é obrigado</b> a responder.<br><b>Caso grave</b> (assédio, ameaça, acidente): use o canal de denúncia, que consegue voltar a falar com você; esta pesquisa não consegue.';
 const GLOSSARIO = '<b>Chefe direto</b> = o encarregado da sua unidade (se não tem encarregado, é o supervisor regional). <b>Maxipark / empresa</b> = a Maxipark inteira: seu chefe direto, o supervisor e o escritório. <b>Escritório da Maxipark</b> = o pessoal de RH, pagamento, uniforme e sistemas, que fica fora do posto.';
 // As contagens são geradas a partir de 1 resposta (há unidades com 1 só colaborador). Os limites abaixo valem para DIVULGAÇÃO, não para o cálculo.
@@ -201,6 +239,7 @@ const LS = {
 const DEFAULT_SETTINGS = { pin:'', unidade:'', mes:'', data:'', rodada:'R1', webhook:'', exported:{}, pinFails:0, lockUntil:0 };   // sem nome do avaliador (pedido do gestor): o app não guarda nome de ninguém
 let settings = Object.assign({}, DEFAULT_SETTINGS, LS.get('mp_settings', {}));
 function saveSettings(){ LS.set('mp_settings', settings); }
+aplicarTextos();   // perguntas, respostas e pesos: padrão ou alterados pelo gestor
 if ('avaliador' in settings) { delete settings.avaliador; saveSettings(); }   // apaga o nome do avaliador gravado por versões anteriores
 // PIN programado: aplica o PIN padrão uma única vez (também em tablets que já tinham outro PIN de teste); depois disso, um PIN trocado em Configurações é respeitado.
 if (settings.pinPadraoAplicado !== PIN_PADRAO_MARCA) { settings.pin = PIN_PADRAO; settings.pinFails = 0; settings.lockUntil = 0; settings.pinPadraoAplicado = PIN_PADRAO_MARCA; saveSettings(); }
@@ -304,11 +343,11 @@ function startThanks(){ go('thanks'); clearTimeout(thanksTimer); thanksTimer = s
 
 /* ---------------- telas ---------------- */
 function render(){
-  const views = { setup:viewSetup, setpin:viewSetPin, welcome:viewWelcome, q:viewQuestion, enps:viewEnps, ces:viewCes, open:viewOpen, thanks:viewThanks, pin:viewPin, admin:viewAdmin, settings:viewSettings, text:viewText, saveerror:viewSaveError, confirm:viewConfirm, unidades:viewUnidades, colar:viewColar, consolidado:viewConsolidado };
+  const views = { setup:viewSetup, setpin:viewSetPin, welcome:viewWelcome, q:viewQuestion, enps:viewEnps, ces:viewCes, open:viewOpen, thanks:viewThanks, pin:viewPin, admin:viewAdmin, settings:viewSettings, text:viewText, saveerror:viewSaveError, confirm:viewConfirm, unidades:viewUnidades, colar:viewColar, consolidado:viewConsolidado, perguntas:viewPerguntas };
   document.getElementById('app').innerHTML = (views[state.screen] || viewSetup)();
 }
 function header(step, pct){
-  return `<div class="top"><div class="brand">Pesquisa com a equipe Maxipark</div><div class="step">${esc(step || '')}</div></div>
+  return `<div class="top"><div class="brand"><img class="logo" src="data:image/png;base64,${LOGO_B64}" alt="Maxipark"><span>Pesquisa com a equipe</span></div><div class="step">${esc(step || '')}</div></div>
           <div class="progress"><div style="width:${pct || 0}%"></div></div>`;
 }
 function cornerBtn(){ return `<button class="corner" data-action="pin" data-target="admin" aria-label="Área do avaliador (com PIN)">⚙ Avaliador</button>`; }
@@ -381,6 +420,7 @@ function viewSetPin(){
   return header(zerar ? 'Senha de zerar' : 'Definir PIN', 0) + `<div class="wrap"><div class="card" style="max-width:520px">
     <h2 style="text-align:center">${repeat ? (zerar ? 'Digite a senha de novo para confirmar' : 'Digite o PIN de novo para confirmar') : (zerar ? 'Nova senha para zerar o histórico' : (settings.pin ? 'Novo PIN do avaliador' : 'Crie o PIN do avaliador'))}</h2>
     <p class="small muted" style="text-align:center">${repeat ? 'Repita os mesmos números e toque em OK.' : '4 a 8 números. Não use 1234, 0000 ou datas fáceis. Digite e toque em <b>OK</b>.'}${zerar ? ' Esta senha só serve para apagar todo o histórico do tablet; é diferente do PIN do avaliador.' : ''}</p>
+    <input type="password" id="newpin-input" class="pininput" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="toque aqui para usar o teclado" value="${esc(state.newPin)}">
     <div class="pinshow">${dots || '&nbsp;'}</div>
     <div class="pinpad">${keys.map(k => `<button class="${k === 'OK' ? 'ok' : ''}" data-action="newpinkey" data-k="${k}">${k}</button>`).join('')}</div>
     <div class="row"><button class="btn link block" data-action="cancelsetpin">Cancelar</button></div>
@@ -496,6 +536,7 @@ function viewPin(){
   const keys = ['1','2','3','4','5','6','7','8','9','←','0','OK'];
   return header('Área do avaliador', 0) + `<div class="wrap"><div class="card" style="max-width:520px">
     <h2 style="text-align:center">${state.pinTarget === 'zerar' ? 'Confirmação final: digite a senha de zerar' : 'Digite o PIN do avaliador'}</h2>
+    <input type="password" id="pin-input" class="pininput" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="one-time-code" placeholder="toque aqui para usar o teclado" value="${esc(state.pin)}">
     ${state.pinTarget === 'zerar' ? '<div class="bad">A senha de zerar é diferente do PIN do avaliador (troca em Configurações). Ao confirmar, todas as respostas, recusas, rodadas e importadas deste tablet são apagadas. Isso não tem volta.</div>' : ''}
     ${current ? '<div class="warn">Há uma pesquisa em andamento. Ao entrar, ela será descartada sem gravar.</div>' : ''}
     ${locked ? `<div class="bad">Muitas tentativas erradas. Aguarde ${Math.ceil((settings.lockUntil - Date.now())/1000)} s.</div>` : ''}
@@ -536,10 +577,12 @@ function tally(list){
   const cesFacil = ces.n ? Math.round(ces.sim / ces.n * 100) : null;
   const totSim = items.reduce((a, it) => a + it.c[2], 0), totN = items.reduce((a, it) => a + it.n, 0);
   const pctSimGeral = totN ? Math.round(totSim / totN * 100) : null;
+  let pSim = 0, pN = 0; items.forEach((it, i) => { const p = (ITENS[i] && ITENS[i].peso) || 1; pSim += p * it.c[2]; pN += p * it.n; });
+  const pctSimPond = pN ? Math.round(pSim / pN * 100) : null;   // ponderado pelos pesos das frases
   const identificavel = nResp > 0 && nResp < N_DIVULGA_FRASE;          // 1 ou 2 pessoas: as contagens são as respostas delas
   const poucasDetalhe = nResp > 0 && nResp < N_DIVULGA_DETALHE;        // eNPS, CES e comentários: não divulgar por unidade
   const cesPoucas = ces.n > 0 && ces.n < N_DIVULGA_DETALHE;            // poucos precisaram do escritório
-  return { items, enps, ces, coments, obsItens, obsEnps, obsCes, nResp, legado, enpsVal, cesFacil, pctSimGeral, identificavel, poucasDetalhe, cesPoucas };
+  return { items, enps, ces, coments, obsItens, obsEnps, obsCes, nResp, legado, enpsVal, cesFacil, pctSimGeral, pctSimPond, identificavel, poucasDetalhe, cesPoucas };
 }
 
 function tallyText(t){
@@ -610,6 +653,7 @@ function viewAdmin(){
       <div><b>${t.nResp}</b><span>${t.nResp === 1 ? 'resposta completa' : 'respostas completas'}</span></div>
       <div><b>${refusals()}</b><span>preferiram não responder</span></div>
       <div><b>${t.pctSimGeral != null ? t.pctSimGeral + '%' : '—'}</b><span>% de "Sim" (todas as respostas às 15 frases)</span></div>
+      <div><b>${t.pctSimPond != null ? t.pctSimPond + '%' : '—'}</b><span>% de "Sim" ponderado pelos pesos das frases</span></div>
       <div><b>${t.enpsVal == null ? '—' : (t.enpsVal > 0 ? '+' : '') + t.enpsVal}</b><span>eNPS</span></div>
       <div><b>${t.cesFacil == null ? '—' : t.cesFacil + '%'}</b><span>acham fácil resolver com o escritório</span></div>
       ${settings.webhook ? `<div><b>${unsent}</b><span>ainda não enviadas à matriz</span></div>` : ''}
@@ -650,6 +694,9 @@ function viewSettings(){
     <label>Rodada atual deste tablet</label>
     <select id="s-rodada">${rodadas().map(r => `<option value="${esc(r.id)}" ${r.id === settings.rodada ? 'selected' : ''}>${esc(r.nome)}${r.fim ? ' (encerrada em ' + dataLabel(r.fim) + ')' : ''}</option>`).join('')}</select>
     <p class="small muted">A rodada é definida em cada tablet. Só mude aqui se este tablet ficou numa rodada diferente dos outros; cada resposta leva a rodada que estava ativa na hora. Para abrir uma rodada nova, use o Consolidado.</p>
+    <h3>Perguntas, respostas e pesos</h3>
+    <p class="small muted">${textosAlterados() ? 'Perguntas alteradas neste tablet.' : 'Perguntas padrão em uso.'} Você pode mudar o texto das frases, os rótulos das respostas, o "Não se aplica" e o peso de cada frase.</p>
+    <div class="row"><button class="btn light" data-action="perguntas">Editar perguntas, respostas e pesos</button></div>
     <h3>Lista de unidades</h3>
     <p class="small muted">${esc(unidadesInfo())}. Importe a lista completa da empresa a partir do Excel: colunas <b>Código</b> (obrigatória), Nome/Cliente, Endereço, Bairro/Cidade, Região — a primeira linha pode ser o cabeçalho. Aceita .xlsx (precisa de internet na primeira vez) ou .csv.</p>
     <div class="row">
@@ -668,6 +715,57 @@ function viewSettings(){
       <button class="btn ghost" data-action="admin">Cancelar</button>
     </div>
   </div></div>`;
+}
+
+/* ---------------- perguntas, respostas e pesos (editáveis pelo gestor) ---------------- */
+function viewPerguntas(){
+  const o = LS.get('mp_itens', null) || {};
+  const rows = ITENS.map((it, i) => `<div class="pergunta">
+      <div class="spread" style="margin:0 0 6px"><b>B${it.n}</b><span class="small muted">peso atual: ${it.peso}</span></div>
+      <label>Dimensão (grupo da frase)</label><input type="text" id="p-dim-${i}" value="${esc(it.dim)}" maxlength="60">
+      <label>Frase</label><textarea id="p-t-${i}" maxlength="240" rows="2">${esc(it.t)}</textarea>
+      <div class="filters">
+        <div><label>Resposta 1 (vale 3 = Sim)</label><input type="text" id="p-o0-${i}" value="${esc(it.opts[0])}" maxlength="40"></div>
+        <div><label>Resposta 2 (vale 2 = meio)</label><input type="text" id="p-o1-${i}" value="${esc(it.opts[1])}" maxlength="40"></div>
+        <div><label>Resposta 3 (vale 1 = Não)</label><input type="text" id="p-o2-${i}" value="${esc(it.opts[2])}" maxlength="40"></div>
+        <div><label>"Não se aplica" (vazio = não mostra)</label><input type="text" id="p-na-${i}" value="${esc(it.na || '')}" maxlength="60" placeholder="ex.: Não se aplica — nunca precisei"></div>
+        <div><label>Peso da frase</label><select id="p-peso-${i}">${[1, 2, 3].map(p => `<option value="${p}" ${p === it.peso ? 'selected' : ''}>${p}${p === 1 ? ' (menor)' : p === 3 ? ' (maior)' : ''}</option>`).join('')}</select></div>
+      </div>
+    </div>`).join('');
+  return header('Perguntas, respostas e pesos', 0) + `<div class="wrap"><div class="card" style="max-width:980px">
+    <h1>Perguntas, respostas e pesos</h1>
+    <p class="small muted">Você pode mudar o texto das 15 frases, os rótulos das 3 respostas, o "Não se aplica" e o peso de cada frase, além da pergunta de 0 a 10, da pergunta do escritório e das duas perguntas abertas. A estrutura não muda: continuam 15 frases (B1…B15) com 3 respostas, gravadas como 3 = Resposta 1, 2 = Resposta 2, 1 = Resposta 3.${textosAlterados() ? ' <b>Há alterações salvas neste tablet.</b>' : ' Textos padrão em uso.'}</p>
+    <div class="warn">Mudar o texto de uma frase <b>não muda as respostas já gravadas</b>: elas continuam valendo para a frase antiga. Para uma pergunta realmente nova, faça a alteração e inicie uma <b>nova rodada</b> no Consolidado. Os pesos valem para o "% Sim ponderado" (tela e relatórios) e podem ser trocados a qualquer hora. As alterações valem só neste tablet — repita nos outros (ou combine a rodada).</div>
+    ${rows}
+    <h3>Outras perguntas</h3>
+    <label>Pergunta da nota de 0 a 10 (eNPS)</label><textarea id="p-enps" maxlength="240" rows="2">${esc(ENPS_Q)}</textarea>
+    <label>Pergunta sobre o escritório (CES)</label><textarea id="p-ces" maxlength="300" rows="2">${esc(CES_Q)}</textarea>
+    <div class="filters">
+      <div><label>CES — resposta 1 (vale 3 = fácil)</label><input type="text" id="p-ceso0" value="${esc(CES_OPTS[0])}" maxlength="40"></div>
+      <div><label>CES — resposta 2 (vale 2)</label><input type="text" id="p-ceso1" value="${esc(CES_OPTS[1])}" maxlength="40"></div>
+      <div><label>CES — resposta 3 (vale 1 = difícil)</label><input type="text" id="p-ceso2" value="${esc(CES_OPTS[2])}" maxlength="40"></div>
+    </div>
+    <label>Pergunta aberta 1</label><textarea id="p-a0" maxlength="240" rows="2">${esc(ABERTAS[0])}</textarea>
+    <label>Pergunta aberta 2</label><textarea id="p-a1" maxlength="240" rows="2">${esc(ABERTAS[1])}</textarea>
+    <div class="row">
+      <button class="btn" data-action="savepergs">Salvar perguntas e pesos</button>
+      <button class="btn light" data-action="resetpergs" ${textosAlterados() ? '' : 'disabled'}>Voltar ao padrão</button>
+      <button class="btn ghost" data-action="settings">Cancelar</button>
+    </div>
+  </div></div>`;
+}
+function lerPerguntas(){   // lê o formulário; devolve {ok, msg, o}
+  const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const o = { itens: [], enpsQ: g('p-enps'), cesQ: g('p-ces'), cesOpts: [g('p-ceso0'), g('p-ceso1'), g('p-ceso2')], abertas: [g('p-a0'), g('p-a1')] };
+  for (let i = 0; i < ITENS_PADRAO.length; i++) {
+    const it = { dim: g('p-dim-' + i), t: g('p-t-' + i), opts: [g('p-o0-' + i), g('p-o1-' + i), g('p-o2-' + i)], na: g('p-na-' + i), peso: +g('p-peso-' + i) || 2 };
+    if (!it.t) return { ok: false, msg: `A frase B${i + 1} está vazia.` };
+    if (it.opts.some(x => !x)) return { ok: false, msg: `A frase B${i + 1} precisa das 3 respostas.` };
+    if (new Set(it.opts.map(x => x.toLowerCase())).size < 3) return { ok: false, msg: `As 3 respostas da frase B${i + 1} precisam ser diferentes.` };
+    o.itens.push(it);
+  }
+  if (!o.enpsQ || !o.cesQ || o.cesOpts.some(x => !x) || o.abertas.some(x => !x)) return { ok: false, msg: 'Preencha todas as perguntas e respostas.' };
+  return { ok: true, o };
 }
 
 function viewText(){
@@ -694,6 +792,9 @@ function agregar(list){   // um grupo de respostas (uma unidade ou todas)
     if (r.ces === 1 || r.ces === 2 || r.ces === 3) { a.ces.n++; if (r.ces === 3) a.ces.sim++; }
   });
   a.pctSim = a.totN ? Math.round(a.totSim / a.totN * 100) : null;
+  // % Sim ponderado pelos pesos das frases (pesos em Configurações → Perguntas, respostas e pesos)
+  let pSim = 0, pN = 0; a.itens.forEach((it, i) => { const p = (ITENS[i] && ITENS[i].peso) || 1; pSim += p * it.c[2]; pN += p * it.n; });
+  a.pctSimPond = pN ? Math.round(pSim / pN * 100) : null;
   // mesmo critério da Área do avaliador: calcula a partir de 1 resposta e sinaliza quando há poucas (regra de divulgação)
   a.enpsVal = a.enps.n ? Math.round((a.enps.pro - a.enps.det) / a.enps.n * 100) : null;
   a.cesFacil = a.ces.n ? Math.round(a.ces.sim / a.ces.n * 100) : null;
@@ -717,13 +818,16 @@ function filtrarPool(lista, cf, semUnidade){
 function cfDefault(){ return { rodada: settings.rodada, ano:'', mes:'', dia:'', unidade:'', ordem:'melhores', soPend:false, comp:'' }; }
 function avisoUnidade(u){ return u.identificavel ? 'IDENTIFICÁVEL (1-2 respostas): uso restrito, não comparar' : (u.poucasDetalhe ? 'menos de 5 respostas: eNPS e CES não divulgar por unidade' : ''); }
 function rankingTexto(units, compMap){
-  const L = [['#','Unidade','Nome','Respostas','% Sim','eNPS','% fácil c/ escritório','Aviso'].concat(compMap ? ['% Sim (comparação)','Diferença (pts)'] : []).join('\t')];
-  units.forEach((u, i) => { const c = compMap ? compMap[u.unidade] : null; L.push([i+1, u.unidade, (unidadePorCodigo(u.unidade) || {}).nome || '', u.n, u.pctSim == null ? '' : u.pctSim + '%', u.enpsVal == null ? '' : u.enpsVal, u.cesFacil == null ? '' : u.cesFacil + '%', avisoUnidade(u)].concat(compMap ? [c && c.pctSim != null ? c.pctSim + '%' : '', (c && u.pctSim != null && c.pctSim != null) ? (u.pctSim - c.pctSim) : ''] : []).join('\t')); });
-  return L.join('\n');
+  return rankingLinhas(units, compMap).map(l => l.join('\t')).join('\n');
 }
-function viewConsolidado(){
-  if (!state.cf) state.cf = cfDefault();
-  const cf = state.cf; const rl = rodadas();
+function rankingLinhas(units, compMap){   // cabeçalho + linhas do ranking (usado no copiar, no Excel e no PDF)
+  const L = [['#','Unidade','Nome','Respostas','% Sim','% Sim ponderado','eNPS','% fácil c/ escritório','Aviso'].concat(compMap ? ['% Sim (comparação)','Diferença (pts)'] : [])];
+  units.forEach((u, i) => { const c = compMap ? compMap[u.unidade] : null; L.push([i+1, u.unidade, (unidadePorCodigo(u.unidade) || {}).nome || '', u.n, u.pctSim == null ? '' : u.pctSim + '%', u.pctSimPond == null ? '' : u.pctSimPond + '%', u.enpsVal == null ? '' : u.enpsVal, u.cesFacil == null ? '' : u.cesFacil + '%', avisoUnidade(u)].concat(compMap ? [c && c.pctSim != null ? c.pctSim + '%' : '', (c && u.pctSim != null && c.pctSim != null) ? (u.pctSim - c.pctSim) : ''] : [])); });
+  return L;
+}
+// Tudo o que a tela Consolidado e as exportações (CSV, Excel, PDF) precisam, calculado uma vez a partir dos filtros
+function calcConsolidado(cf){
+  const rl = rodadas();
   if (cf.rodada && !rl.find(r => r.id === cf.rodada)) cf.rodada = settings.rodada;
   const pool = poolConsolidado(); const todas = pool.lista;
   const base = filtrarPool(todas, cf, true);                       // rodada + datas (sem unidade): serve à cobertura
@@ -739,7 +843,6 @@ function viewConsolidado(){
     nome: (a, b) => a.unidade.localeCompare(b.unidade)
   };
   units.sort(ord[cf.ordem] || ord.melhores);
-  const opt = (arr, sel, fmt) => arr.map(v => `<option value="${esc(v)}" ${v === sel ? 'selected' : ''}>${esc(fmt ? fmt(v) : v)}</option>`).join('');
   const naRodada = todas.filter(r => !cf.rodada || rodadaDe(r) === cf.rodada);
   const mesDe = r => r.mes || (r.data || '').slice(0, 7);
   const anos = [...new Set(naRodada.map(r => mesDe(r).slice(0, 4)).filter(Boolean))].sort();
@@ -751,23 +854,30 @@ function viewConsolidado(){
   const pendentes = cad.filter(u => !pesq.has(u.codigo));
   const naoCad = [...pesq].filter(c => !cad.find(u => u.codigo === c)).sort();
   const nBase = {}; base.forEach(r => { nBase[r.unidade] = (nBase[r.unidade] || 0) + 1; });
-  const covRows = (cf.soPend ? pendentes : cad).map(u => `<tr><td class="l"><b>${esc(u.codigo)}</b>${u.nome ? ' <span class="small muted">' + esc(u.nome) + '</span>' : ''}</td><td>${pesq.has(u.codigo) ? '<span class="tag ok">pesquisada</span>' : '<span class="tag pend">pendente</span>'}</td><td>${nBase[u.codigo] || 0}</td></tr>`).join('')
-    + (cf.soPend ? '' : naoCad.map(c => `<tr><td class="l"><b>${esc(c)}</b> <span class="small muted">fora da lista de unidades</span></td><td><span class="tag ok">pesquisada</span></td><td>${nBase[c]}</td></tr>`).join(''));
-  const fmtDelta = (a, b) => (a == null || b == null) ? '—' : ((a - b > 0 ? '+' : '') + (a - b) + ' pts');
-  const unitRows = units.map((u, i) => { const c = compMap ? compMap[u.unidade] : null; const d = (c && u.pctSim != null && c.pctSim != null) ? u.pctSim - c.pctSim : null;
-    const pd = u.poucasDetalhe ? ' <span class="tag pend" title="menos de 5 respostas">⚠</span>' : '';
-    return `<tr><td>${i+1}</td><td class="l"><b>${esc(u.unidade)}</b> <span class="small muted">${esc((unidadePorCodigo(u.unidade) || {}).nome || '')}</span>${u.identificavel ? ` <span class="tag pend">⚠ ${u.n === 1 ? '1 pessoa' : '2 pessoas'} — identificável</span>` : ''}</td><td>${u.n}</td><td><b>${u.pctSim == null ? '—' : u.pctSim + '%'}</b></td><td>${u.enpsVal == null ? '—' : (u.enpsVal > 0 ? '+' : '') + u.enpsVal}${u.enpsVal == null ? '' : pd}</td><td>${u.cesFacil == null ? '—' : u.cesFacil + '%'}${u.cesFacil == null ? '' : (u.cesPoucas ? ' <span class="tag pend" title="menos de 5 precisaram do escritório">⚠</span>' : '')}</td>${compMap ? `<td>${c && c.pctSim != null ? c.pctSim + '%' : '—'} <span class="small muted">(${c ? c.n : 0})</span></td><td class="${d == null ? '' : (d >= 0 ? 'up' : 'down')}">${fmtDelta(u.pctSim, c ? c.pctSim : null)}</td>` : ''}</tr>`; }).join('');
   const obsPorFrase = ITENS.map(() => []); const obsOutros = { enps: [], ces: [] };
   filt.forEach(r => { (r.c || []).forEach((txt, i) => { if (txt && obsPorFrase[i]) obsPorFrase[i].push(txt); }); if (r.cEnps) obsOutros.enps.push(r.cEnps); if (r.cCes) obsOutros.ces.push(r.cCes); });
-  const fraseRows = geral.itens.map((it, i) => `<tr><td class="l"><b>B${i+1}</b> <span class="small muted">${esc(ITENS[i].t)}</span></td><td>${it.c[0]}</td><td>${it.c[1]} <span class="small muted">${esc(ITENS[i].opts[1])}</span></td><td>${it.c[2]}</td><td>${ITENS[i].na ? it.na : '—'}</td><td>${it.n}</td><td><b>${it.n ? Math.round(it.c[2] / it.n * 100) + '%' : '—'}</b></td><td>${obsPorFrase[i].length}</td></tr>`).join('');
-  const nObs = obsPorFrase.reduce((a, l) => a + l.length, 0) + obsOutros.enps.length + obsOutros.ces.length;
-  const obsHtml = nObs ? `<details><summary>Ler os ${nObs} comentários escritos nas páginas (ordem embaralhada)</summary><ul class="obslist">${obsPorFrase.map((l, i) => l.length ? `<li><b>B${i+1}</b> <span class="small muted">${esc(ITENS[i].t)}</span><ul>${shuffle(l).map(c => `<li>${esc(c)}</li>`).join('')}</ul></li>` : '').join('')}${obsOutros.enps.length ? `<li><b>Nota de 0 a 10</b><ul>${shuffle(obsOutros.enps).map(c => `<li>${esc(c)}</li>`).join('')}</ul></li>` : ''}${obsOutros.ces.length ? `<li><b>Escritório (CES)</b><ul>${shuffle(obsOutros.ces).map(c => `<li>${esc(c)}</li>`).join('')}</ul></li>` : ''}</ul><p class="legend">Registre só os temas; nunca copie frases. Comentários são de uso restrito da área de Experiência do Cliente.</p></details>` : '';
-  const rodRows = rl.map(r => { const lst = todas.filter(x => rodadaDe(x) === r.id); return `<tr class="${r.id === settings.rodada ? 'cur' : ''}"><td class="l"><b>${esc(r.nome)}</b>${r.id === settings.rodada ? ' <span class="tag ok">atual</span>' : ''}</td><td>${r.inicio ? dataLabel(r.inicio) : '—'}</td><td>${r.fim ? dataLabel(r.fim) : (r.id === settings.rodada ? 'em andamento' : '—')}</td><td>${lst.length}</td><td>${new Set(lst.map(x => x.unidade)).size}</td></tr>`; }).join('');
   const ativos = [cf.rodada ? rodadaNome(cf.rodada) : 'todas as rodadas'];
   if (cf.ano || cf.mes || cf.dia) ativos.push([cf.dia ? 'dia ' + cf.dia : '', cf.mes ? (MESES[+cf.mes - 1] || cf.mes) : '', cf.ano].filter(Boolean).join(' de ')); else ativos.push('todas as datas');
   ativos.push(cf.unidade ? unidadeLabel(cf.unidade) : 'todas as unidades');
   const filtroTxt = ativos.join(' · ');
   const ordTxt = { melhores: 'Do maior para o menor % de "Sim" nas 15 frases', piores: 'Do menor para o maior % de "Sim" nas 15 frases', respostas: 'Por número de respostas', nome: 'Em ordem alfabética' }[cf.ordem] || '';
+  return { cf, rl, pool, todas, base, filt, geral, units, compMap, anos, meses, dias, unidadesOpt, cad, pesq, pendentes, naoCad, nBase, obsPorFrase, obsOutros, filtroTxt, ordTxt };
+}
+function viewConsolidado(){
+  if (!state.cf) state.cf = cfDefault();
+  const C = calcConsolidado(state.cf);
+  const { cf, rl, pool, todas, base, filt, geral, units, compMap, anos, meses, dias, unidadesOpt, cad, pesq, pendentes, naoCad, nBase, obsPorFrase, obsOutros, filtroTxt, ordTxt } = C;
+  const opt = (arr, sel, fmt) => arr.map(v => `<option value="${esc(v)}" ${v === sel ? 'selected' : ''}>${esc(fmt ? fmt(v) : v)}</option>`).join('');
+  const covRows = (cf.soPend ? pendentes : cad).map(u => `<tr><td class="l"><b>${esc(u.codigo)}</b>${u.nome ? ' <span class="small muted">' + esc(u.nome) + '</span>' : ''}</td><td>${pesq.has(u.codigo) ? '<span class="tag ok">pesquisada</span>' : '<span class="tag pend">pendente</span>'}</td><td>${nBase[u.codigo] || 0}</td></tr>`).join('')
+    + (cf.soPend ? '' : naoCad.map(c => `<tr><td class="l"><b>${esc(c)}</b> <span class="small muted">fora da lista de unidades</span></td><td><span class="tag ok">pesquisada</span></td><td>${nBase[c]}</td></tr>`).join(''));
+  const fmtDelta = (a, b) => (a == null || b == null) ? '—' : ((a - b > 0 ? '+' : '') + (a - b) + ' pts');
+  const unitRows = units.map((u, i) => { const c = compMap ? compMap[u.unidade] : null; const d = (c && u.pctSim != null && c.pctSim != null) ? u.pctSim - c.pctSim : null;
+    const pd = u.poucasDetalhe ? ' <span class="tag pend" title="menos de 5 respostas">⚠</span>' : '';
+    return `<tr><td>${i+1}</td><td class="l"><b>${esc(u.unidade)}</b> <span class="small muted">${esc((unidadePorCodigo(u.unidade) || {}).nome || '')}</span>${u.identificavel ? ` <span class="tag pend">⚠ ${u.n === 1 ? '1 pessoa' : '2 pessoas'} — identificável</span>` : ''}</td><td>${u.n}</td><td><b>${u.pctSim == null ? '—' : u.pctSim + '%'}</b></td><td>${u.pctSimPond == null ? '—' : u.pctSimPond + '%'}</td><td>${u.enpsVal == null ? '—' : (u.enpsVal > 0 ? '+' : '') + u.enpsVal}${u.enpsVal == null ? '' : pd}</td><td>${u.cesFacil == null ? '—' : u.cesFacil + '%'}${u.cesFacil == null ? '' : (u.cesPoucas ? ' <span class="tag pend" title="menos de 5 precisaram do escritório">⚠</span>' : '')}</td>${compMap ? `<td>${c && c.pctSim != null ? c.pctSim + '%' : '—'} <span class="small muted">(${c ? c.n : 0})</span></td><td class="${d == null ? '' : (d >= 0 ? 'up' : 'down')}">${fmtDelta(u.pctSim, c ? c.pctSim : null)}</td>` : ''}</tr>`; }).join('');
+  const fraseRows = geral.itens.map((it, i) => `<tr><td class="l"><b>B${i+1}</b> <span class="small muted">${esc(ITENS[i].t)}</span></td><td>${it.c[0]}</td><td>${it.c[1]} <span class="small muted">${esc(ITENS[i].opts[1])}</span></td><td>${it.c[2]}</td><td>${ITENS[i].na ? it.na : '—'}</td><td>${it.n}</td><td><b>${it.n ? Math.round(it.c[2] / it.n * 100) + '%' : '—'}</b></td><td>${obsPorFrase[i].length}</td></tr>`).join('');
+  const nObs = obsPorFrase.reduce((a, l) => a + l.length, 0) + obsOutros.enps.length + obsOutros.ces.length;
+  const obsHtml = nObs ? `<details><summary>Ler os ${nObs} comentários escritos nas páginas (ordem embaralhada)</summary><ul class="obslist">${obsPorFrase.map((l, i) => l.length ? `<li><b>B${i+1}</b> <span class="small muted">${esc(ITENS[i].t)}</span><ul>${shuffle(l).map(c => `<li>${esc(c)}</li>`).join('')}</ul></li>` : '').join('')}${obsOutros.enps.length ? `<li><b>Nota de 0 a 10</b><ul>${shuffle(obsOutros.enps).map(c => `<li>${esc(c)}</li>`).join('')}</ul></li>` : ''}${obsOutros.ces.length ? `<li><b>Escritório (CES)</b><ul>${shuffle(obsOutros.ces).map(c => `<li>${esc(c)}</li>`).join('')}</ul></li>` : ''}</ul><p class="legend">Registre só os temas; nunca copie frases. Comentários são de uso restrito da área de Experiência do Cliente.</p></details>` : '';
+  const rodRows = rl.map(r => { const lst = todas.filter(x => rodadaDe(x) === r.id); return `<tr class="${r.id === settings.rodada ? 'cur' : ''}"><td class="l"><b>${esc(r.nome)}</b>${r.id === settings.rodada ? ' <span class="tag ok">atual</span>' : ''}</td><td>${r.inicio ? dataLabel(r.inicio) : '—'}</td><td>${r.fim ? dataLabel(r.fim) : (r.id === settings.rodada ? 'em andamento' : '—')}</td><td>${lst.length}</td><td>${new Set(lst.map(x => x.unidade)).size}</td></tr>`; }).join('');
   return header('Consolidado', 0) + `<div class="wrap"><div class="card" style="max-width:1100px">
     <h1>Consolidado de todas as unidades</h1>
     <div class="row" style="margin-top:6px"><button class="btn ghost" data-action="admin">← Área do avaliador</button><button class="btn ghost" data-action="tosetup">Tela inicial (Preparar a coleta)</button></div>
@@ -787,6 +897,7 @@ function viewConsolidado(){
       <div><b>${geral.n}</b><span>respostas</span></div>
       <div><b>${units.length}</b><span>unidades com respostas</span></div>
       <div><b>${geral.pctSim == null ? '—' : geral.pctSim + '%'}</b><span>% de "Sim" nas 15 frases</span></div>
+      <div><b>${geral.pctSimPond == null ? '—' : geral.pctSimPond + '%'}</b><span>% de "Sim" ponderado pelos pesos</span></div>
       <div><b>${geral.enpsVal == null ? '—' : (geral.enpsVal > 0 ? '+' : '') + geral.enpsVal}</b><span>eNPS${geral.poucasDetalhe ? ' ⚠ menos de ' + N_DIVULGA_DETALHE + ' respostas' : ''}</span></div>
       <div><b>${geral.cesFacil == null ? '—' : geral.cesFacil + '%'}</b><span>acham fácil resolver com o escritório${geral.cesPoucas ? ' ⚠ menos de ' + N_DIVULGA_DETALHE + ' precisaram' : ''}</span></div>
     </div>
@@ -798,7 +909,7 @@ function viewConsolidado(){
       <button class="btn ${cf.ordem === 'nome' ? '' : 'light'}" data-action="cfordem" data-v="nome">A–Z</button>
     </div>
     ${units.length ? `<div style="overflow:auto"><table>
-      <tr><th>#</th><th class="l">Unidade</th><th>Respostas</th><th>% Sim</th><th>eNPS</th><th>% fácil c/ escritório</th>${compMap ? `<th>% Sim em ${esc(rodadaNome(cf.comp))}</th><th>Diferença</th>` : ''}</tr>${unitRows}</table></div>
+      <tr><th>#</th><th class="l">Unidade</th><th>Respostas</th><th>% Sim</th><th>% Sim ponderado</th><th>eNPS</th><th>% fácil c/ escritório</th>${compMap ? `<th>% Sim em ${esc(rodadaNome(cf.comp))}</th><th>Diferença</th>` : ''}</tr>${unitRows}</table></div>
       <p class="legend">${esc(ordTxt)} (indicador principal: % de "Sim"). Com 1 ou 2 respostas, o % Sim é a opinião de uma ou duas pessoas — o resultado identifica quem respondeu, é de uso restrito da área de Experiência do Cliente e não deve ser comparado com as outras unidades nem usado para "melhor/pior". ⚠ ao lado do eNPS ou do % fácil = menos de ${N_DIVULGA_DETALHE} respostas: não divulgar por unidade.${compMap ? ' Diferença = pontos percentuais de % Sim em relação à rodada comparada (mesma unidade).' : ''}</p>` : '<p class="muted">Nenhuma resposta nos filtros escolhidos.</p>'}
     <h3>Cobertura: unidades cadastradas × pesquisadas</h3>
     <div class="kpi">
@@ -820,11 +931,13 @@ function viewConsolidado(){
     <h3>Juntar tablets e exportar</h3>
     <div class="row">
       <button class="btn light" data-action="importhist">Importar respostas de outro tablet (CSV do app)</button>
+      <button class="btn" data-action="xlsxcons" ${filt.length ? '' : 'disabled'}>Baixar Excel (tudo, filtro atual)</button>
+      <button class="btn" data-action="pdfcons" ${filt.length ? '' : 'disabled'}>Baixar PDF (relatório, filtro atual)</button>
       <button class="btn light" data-action="csvcons" ${filt.length ? '' : 'disabled'}>Baixar CSV consolidado (filtro atual)</button>
       <button class="btn light" data-action="copycons" ${units.length ? '' : 'disabled'}>Copiar ranking (para o Excel)</button>
       ${histResponses().length ? '<button class="btn link" data-action="wipehist">Apagar as respostas importadas</button>' : ''}
     </div>
-    <p class="legend">Para juntar todos os tablets: em cada um, exporte o "arquivo de respostas (CSV)" e importe aqui — respostas repetidas são ignoradas pelo id. Use o arquivo como saiu do tablet (não abra e salve no Excel antes de importar). O CSV consolidado tem uma linha por pessoa e é de uso restrito da área de Experiência do Cliente.</p>
+    <p class="legend">O <b>Excel</b> traz abas com resumo, ranking, cobertura, por frase, todas as respostas, comentários, perguntas e rodadas; o <b>PDF</b> é o relatório pronto para ler ou imprimir — os dois respeitam os filtros escolhidos acima. Precisam de internet na primeira vez (baixam o gerador de arquivo); sem internet, use o CSV. Para juntar todos os tablets: em cada um, exporte o "arquivo de respostas (CSV)" e importe aqui — respostas repetidas são ignoradas pelo id. Use o arquivo como saiu do tablet (não abra e salve no Excel antes de importar). Tudo isto tem uma linha por pessoa e é de uso restrito da área de Experiência do Cliente.</p>
     <h3>Zerar (só para testes)</h3>
     <div class="row"><button class="btn danger" data-action="zerartudo">Zerar todo o histórico deste tablet</button></div>
     <p class="legend">Apaga todas as respostas (de todas as unidades e rodadas), recusas, rodadas e respostas importadas deste aparelho, e volta à Rodada 1. Mantém o PIN e a lista de unidades. Pede confirmação e depois a <b>senha de zerar</b> (diferente do PIN; troca em Configurações). Use para começar um teste do zero — exporte antes o que quiser guardar.</p>
@@ -978,17 +1091,103 @@ async function sendPending(){
   if (state.screen === 'admin') { toast(ok === pend.length ? 'Tudo enviado à matriz.' : `${ok} enviada(s); ${pend.length - ok} ainda pendente(s).`); render(); }
 }
 
-async function shareOrDownload(name, text){
+async function shareOrDownload(name, data, mime){
+  mime = mime || 'text/csv;charset=utf-8';
   try {
     if (navigator.share && navigator.canShare) {
-      const file = new File([text], name, { type: 'text/csv' });
+      const file = new File([data], name, { type: mime.split(';')[0] });
       if (navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return true; }
     }
   } catch(e) { if (e && e.name === 'AbortError') return false; }
-  const blob = new Blob([text], { type: 'text/csv;charset=utf-8' });
+  const blob = data instanceof Blob ? data : new Blob([data], { type: mime });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
   return true;
+}
+/* ---------------- Excel e PDF do Consolidado (respeitam os filtros) ---------------- */
+function loadScript(src){ return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('sem internet')); document.head.appendChild(s); }); }
+async function loadJsPDF(){
+  if (!(window.jspdf && window.jspdf.jsPDF)) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  if (!(window.jspdf.jsPDF.API && window.jspdf.jsPDF.API.autoTable)) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
+  return window.jspdf.jsPDF;
+}
+const fmtPct = v => v == null ? '' : v + '%';
+const fmtEnps = v => v == null ? '' : (v > 0 ? '+' : '') + v;
+function dadosExport(){   // monta as tabelas (arrays) usadas no Excel e no PDF
+  const cf = state.cf || cfDefault(); const C = calcConsolidado(cf);
+  const nomeU = c => (unidadePorCodigo(c) || {}).nome || '';
+  const g = C.geral, cob = C.cad.length ? Math.round((C.cad.length - C.pendentes.length) / C.cad.length * 100) : 0;
+  const resumo = [['Pesquisa com a equipe Maxipark — Consolidado'], ['Gerado em', dataLabel(hojeISO())], ['Filtros', C.filtroTxt], ['Rodada atual deste tablet', rodadaNome(settings.rodada)], ['Versão do app', VERSAO], [],
+    ['Indicador', 'Valor', 'Observação'],
+    ['Respostas', g.n, g.identificavel ? 'IDENTIFICÁVEL: 1 ou 2 respostas — uso restrito' : ''], ['Unidades com respostas', C.units.length, ''],
+    ['% Sim nas 15 frases', fmtPct(g.pctSim), 'indicador principal'], ['% Sim ponderado pelos pesos', fmtPct(g.pctSimPond), 'pesos em Configurações → Perguntas'],
+    ['eNPS', fmtEnps(g.enpsVal), g.poucasDetalhe ? 'menos de ' + N_DIVULGA_DETALHE + ' respostas: não divulgar por unidade' : ''], ['% que acham fácil resolver com o escritório', fmtPct(g.cesFacil), g.cesPoucas ? 'menos de ' + N_DIVULGA_DETALHE + ' precisaram do escritório' : ''],
+    ['Unidades cadastradas', C.cad.length, ''], ['Unidades pesquisadas', C.cad.length - C.pendentes.length, cf.rodada ? 'na rodada filtrada' : ''], ['Unidades ainda sem pesquisa', C.pendentes.length, ''], ['Cobertura', cob + '%', ''], [],
+    ['Uso restrito da área de Experiência do Cliente. Regra de divulgação por unidade: menos de 3 respostas, nada; 3 a 4, Nota B e dimensões; 5 ou mais, tudo.']];
+  const ranking = rankingLinhas(C.units, C.compMap);
+  const cobertura = [['Unidade', 'Nome', 'Situação', 'Respostas']].concat(C.cad.map(u => [u.codigo, u.nome || '', C.pesq.has(u.codigo) ? 'pesquisada' : 'pendente', C.nBase[u.codigo] || 0])).concat(C.naoCad.map(c => [c, '(fora da lista de unidades)', 'pesquisada', C.nBase[c] || 0]));
+  const porFrase = [['Frase', 'Dimensão', 'Texto', 'Peso', 'Não', 'Resposta do meio', 'Rótulo do meio', 'Sim', 'Não se aplica', 'Responderam', '% Sim', 'Comentários']].concat(g.itens.map((it, i) => ['B' + (i + 1), ITENS[i].dim, ITENS[i].t, ITENS[i].peso, it.c[0], it.c[1], ITENS[i].opts[1], it.c[2], ITENS[i].na ? it.na : '', it.n, it.n ? Math.round(it.c[2] / it.n * 100) + '%' : '', C.obsPorFrase[i].length]));
+  const emb = shuffle(C.filt);
+  const respostas = [['versao', 'escala', 'id', 'unidade', 'nome da unidade', 'mes', 'data', 'rodada', ...ITENS.map(it => 'B' + it.n), 'eNPS', 'CES', 'aberta1', 'aberta2', ...ITENS.map(it => 'cB' + it.n), 'cENPS', 'cCES']]
+    .concat(emb.map(r => [r.versao || '1.2', r.escala || 'B5', r.id, r.unidade, nomeU(r.unidade), r.mes || '', r.data || '', rodadaDe(r), ...(r.r || []).map(v => v == null ? '' : v), r.enps == null ? '' : r.enps, r.ces == null ? '' : r.ces, r.a1 || '', r.a2 || '', ...ITENS.map((it, i) => (r.c || [])[i] || ''), r.cEnps || '', r.cCes || '']));
+  const comentarios = [['Onde', 'Unidade', 'Rodada', 'Data', 'Texto']];
+  emb.forEach(r => { const base = [r.unidade, rodadaNome(rodadaDe(r)), r.data ? dataLabel(r.data) : (r.mes || '')];
+    if (r.a1) comentarios.push(['Aberta 1: ' + ABERTAS[0], ...base, r.a1]); if (r.a2) comentarios.push(['Aberta 2: ' + ABERTAS[1], ...base, r.a2]);
+    (r.c || []).forEach((txt, i) => { if (txt && ITENS[i]) comentarios.push(['B' + (i + 1) + ': ' + ITENS[i].t, ...base, txt]); });
+    if (r.cEnps) comentarios.push(['Nota de 0 a 10', ...base, r.cEnps]); if (r.cCes) comentarios.push(['Escritório (CES)', ...base, r.cCes]); });
+  const perguntas = [['Código', 'Dimensão', 'Pergunta / frase', 'Resposta 1 (=3)', 'Resposta 2 (=2)', 'Resposta 3 (=1)', 'Não se aplica', 'Peso']]
+    .concat(ITENS.map(it => ['B' + it.n, it.dim, it.t, it.opts[0], it.opts[1], it.opts[2], it.na || '', it.peso]))
+    .concat([['eNPS', 'Recomendação', ENPS_Q, '0 a 10 (0-6 detratores, 7-8 neutros, 9-10 promotores)', '', '', '', ''], ['CES', 'Escritório', CES_Q, CES_OPTS[0] + ' (=3)', CES_OPTS[1] + ' (=2)', CES_OPTS[2] + ' (=1)', 'Nunca precisei (NP)', ''], ['Aberta 1', '', ABERTAS[0], 'texto livre', '', '', '', ''], ['Aberta 2', '', ABERTAS[1], 'texto livre', '', '', '', '']]);
+  const rodadasT = [['Rodada', 'Início', 'Fim', 'Respostas', 'Unidades']].concat(C.rl.map(r => { const l = C.todas.filter(x => rodadaDe(x) === r.id); return [r.nome + (r.id === settings.rodada ? ' (atual)' : ''), r.inicio ? dataLabel(r.inicio) : '', r.fim ? dataLabel(r.fim) : (r.id === settings.rodada ? 'em andamento' : ''), l.length, new Set(l.map(x => x.unidade)).size]; }));
+  const legenda = [['Campo', 'Significado'], ['B1…B15', '3 = Resposta 1 (Sim), 2 = Resposta 2 (meio), 1 = Resposta 3 (Não), NA = não se aplica'], ['eNPS', 'nota de 0 a 10; eNPS = % promotores (9-10) − % detratores (0-6)'], ['CES', '3 = fácil, 2 = mais ou menos, 1 = difícil, NP = nunca precisei; % fácil = 3 ÷ (1+2+3)'], ['% Sim', 'Sim ÷ (Não + meio + Sim), sem os "Não se aplica"'], ['% Sim ponderado', 'mesma conta com o peso de cada frase'], ['escala', 'B3 = 3 respostas por frase (v1.3+); B5 = versão antiga, 1 a 5 (fora das contas)'], ['rodada', 'R1, R2… definida em cada tablet'], ['cB1…cB15, cENPS, cCES', 'comentário escrito na página da pergunta'], ['Anonimato', 'menos de 3 respostas identifica quem respondeu: uso restrito; eNPS/CES/comentários só se divulgam por unidade com 5+']];
+  return { C, cf, resumo, ranking, cobertura, porFrase, respostas, comentarios, perguntas, rodadasT, legenda, nome: `consolidado_${cf.rodada || 'todas'}_${cf.unidade || 'unidades'}_${hojeISO()}` };
+}
+async function exportarExcel(){
+  let XLSX; try { toast('Preparando o Excel…'); XLSX = await loadSheetJS(); } catch(e) { toast('Para gerar o Excel é preciso internet na primeira vez. Sem internet, use o CSV.'); return; }
+  try {
+    const D = dadosExport(); const wb = XLSX.utils.book_new();
+    const add = (nome, aoa, larguras) => { const ws = XLSX.utils.aoa_to_sheet(aoa); if (larguras) ws['!cols'] = larguras.map(w => ({ wch: w })); XLSX.utils.book_append_sheet(wb, ws, nome); };
+    add('Resumo', D.resumo, [40, 18, 60]); add('Ranking', D.ranking, [4, 14, 22, 10, 8, 12, 8, 14, 44, 14, 12]); add('Cobertura', D.cobertura, [14, 22, 12, 10]);
+    add('Por frase', D.porFrase, [7, 26, 60, 6, 6, 12, 16, 6, 12, 11, 8, 11]); add('Respostas', D.respostas, [7, 7, 14, 12, 18, 9, 11, 8].concat(ITENS.map(() => 5), [6, 6, 30, 30], ITENS.map(() => 20), [20, 20]));
+    add('Comentários', D.comentarios, [50, 12, 12, 12, 80]); add('Perguntas', D.perguntas, [9, 26, 70, 22, 22, 22, 30, 6]); add('Rodadas', D.rodadasT, [22, 12, 14, 10, 10]); add('Legenda', D.legenda, [24, 90]);
+    const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const ok = await shareOrDownload(D.nome + '.xlsx', new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    if (ok) toast('Excel gerado.');
+  } catch(e) { toast('Não consegui gerar o Excel: ' + (e && e.message ? e.message : e)); }
+}
+const pdfTxt = s => String(s == null ? '' : s).replace(/⚠/g, '(!)').replace(/—/g, '-').replace(/–/g, '-').replace(/·/g, '-').replace(/●/g, '*').replace(/→/g, '->').replace(/…/g, '...').replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/×/g, 'x').replace(/÷/g, '/').replace(/−/g, '-');
+async function exportarPdf(){
+  let jsPDF; try { toast('Preparando o PDF…'); jsPDF = await loadJsPDF(); } catch(e) { toast('Para gerar o PDF é preciso internet na primeira vez. Sem internet, use o CSV ou o texto das contagens.'); return; }
+  try {
+    const D = dadosExport(); const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(); const cor = [40, 35, 157];
+    const tabela = (titulo, aoa, opts) => {
+      let y = doc.lastAutoTable && doc.lastAutoTable.finalY ? doc.lastAutoTable.finalY + 8 : 24;
+      if (y > H - 40) { doc.addPage(); y = 18; }
+      doc.setFontSize(12); doc.setTextColor(cor[0], cor[1], cor[2]); doc.text(pdfTxt(titulo), 12, y); doc.setTextColor(0, 0, 0);
+      const linhas = aoa.slice(1).map(r => r.map(pdfTxt));
+      doc.autoTable(Object.assign({ head: [aoa[0].map(pdfTxt)], body: linhas.length ? linhas : [['(sem dados)']], startY: y + 3, margin: { left: 12, right: 12 }, styles: { fontSize: 7.5, cellPadding: 1.4, overflow: 'linebreak' }, headStyles: { fillColor: cor, textColor: 255, fontSize: 7.5 }, alternateRowStyles: { fillColor: [244, 243, 252] } }, opts || {}));
+    };
+    // capa / resumo
+    doc.setFontSize(18); doc.setTextColor(cor[0], cor[1], cor[2]); doc.text('Pesquisa com a equipe Maxipark - Consolidado', 12, 16); doc.setTextColor(0, 0, 0);
+    doc.setFontSize(9.5); doc.text(pdfTxt(`Gerado em ${dataLabel(hojeISO())} - Filtros: ${D.C.filtroTxt} - Rodada atual do tablet: ${rodadaNome(settings.rodada)} - App v${VERSAO}`), 12, 22, { maxWidth: W - 24 });
+    doc.setFontSize(8.5); doc.setTextColor(155, 28, 28); doc.text('USO RESTRITO da area de Experiencia do Cliente. Com menos de 3 respostas a unidade fica identificavel: nao divulgar por unidade nem mostrar ao encarregado ou supervisor.', 12, 29, { maxWidth: W - 24 }); doc.setTextColor(0, 0, 0);
+    doc.lastAutoTable = { finalY: 26 };
+    tabela('Resumo', [['Indicador', 'Valor', 'Observacao']].concat(D.resumo.slice(7, 18).filter(r => r.length === 3)), { columnStyles: { 0: { cellWidth: 90 }, 1: { cellWidth: 40 } } });
+    tabela('Ranking das unidades (' + pdfTxt(D.C.ordTxt) + ')', D.ranking);
+    tabela('Por frase (todas as respostas do filtro)', D.porFrase, { columnStyles: { 2: { cellWidth: 80 } } });
+    tabela('Cobertura: unidades cadastradas x pesquisadas', D.cobertura);
+    tabela('Rodadas', D.rodadasT);
+    tabela('Perguntas, respostas e pesos em uso', D.perguntas, { columnStyles: { 2: { cellWidth: 90 } } });
+    doc.addPage(); doc.lastAutoTable = { finalY: 10 };
+    tabela('Respostas individuais (ordem embaralhada) - 3 = Sim, 2 = meio, 1 = Nao, NA = nao se aplica', [['Unidade', 'Rodada', 'Data', ...ITENS.map(it => 'B' + it.n), 'eNPS', 'CES']].concat(D.respostas.slice(1).map(r => [r[3], r[7], r[6] ? dataLabel(r[6]) : r[5], ...r.slice(8, 8 + ITENS.length + 2)])), { styles: { fontSize: 7, cellPadding: 1 } });
+    tabela('Comentarios e respostas abertas (ordem embaralhada)', D.comentarios, { columnStyles: { 0: { cellWidth: 70 }, 4: { cellWidth: 120 } } });
+    const total = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= total; p++) { doc.setPage(p); doc.setFontSize(7.5); doc.setTextColor(120, 120, 120); doc.text(`Pesquisa com a equipe Maxipark - Consolidado - ${dataLabel(hojeISO())} - uso restrito - pagina ${p} de ${total}`, 12, H - 6); }
+    const blob = doc.output('blob');
+    const ok = await shareOrDownload(D.nome + '.pdf', blob, 'application/pdf');
+    if (ok) toast('PDF gerado.');
+  } catch(e) { toast('Não consegui gerar o PDF: ' + (e && e.message ? e.message : e)); }
 }
 async function exportCsv(){
   const ok = await shareOrDownload(`pesquisa_${settings.unidade}_${settings.rodada}_${settings.data || settings.mes}.csv`, csvText(currentResponses()));
@@ -1088,6 +1287,11 @@ function handle(action, el){
     case 'settings': go('settings'); break;
     case 'consolidado': if (!state.cf) state.cf = cfDefault(); go('consolidado'); break;
     case 'okzerado': delete settings.avisoZerado; saveSettings(); render(); break;
+    case 'perguntas': go('perguntas'); break;
+    case 'savepergs': { const r = lerPerguntas(); if (!r.ok) { toast(r.msg); return; } if (!LS.set('mp_itens', r.o)) { toast('Não foi possível gravar neste aparelho.'); return; } aplicarTextos(); toast('Perguntas e pesos salvos.'); go('settings'); break; }
+    case 'resetpergs': askConfirm('Voltar às perguntas, respostas e pesos padrão do app? As respostas já gravadas não mudam.', () => { localStorage.removeItem('mp_itens'); aplicarTextos(); toast('Padrão restaurado.'); go('perguntas'); }); break;
+    case 'xlsxcons': exportarExcel(); break;
+    case 'pdfcons': exportarPdf(); break;
     case 'cfordem': if (state.cf) { state.cf.ordem = el.getAttribute('data-v') || 'melhores'; render(); } break;
     case 'novarodada': {
       const atual = rodadaNome(settings.rodada), n = allResponses().filter(r => rodadaDe(r) === settings.rodada).length;
@@ -1197,7 +1401,24 @@ document.addEventListener('click', e => {
   if (!el || el.disabled) return;
   handle(el.getAttribute('data-action'), el);
 });
+// PIN e senhas: além do teclado da tela, dá para digitar num campo (teclado do tablet ou físico); Enter = OK
+function stubKey(k){ return { getAttribute: () => k }; }
+document.addEventListener('keydown', e => {
+  if (state.screen !== 'pin' && state.screen !== 'setpin') return;
+  const action = state.screen === 'pin' ? 'pinkey' : 'newpinkey';
+  const noCampo = e.target && (e.target.id === 'pin-input' || e.target.id === 'newpin-input');
+  if (e.key === 'Enter') { e.preventDefault(); handle(action, stubKey('OK')); return; }
+  if (noCampo) return;   // dígitos digitados no campo entram pelo evento 'input'
+  if (/^[0-9]$/.test(e.key)) { e.preventDefault(); handle(action, stubKey(e.key)); }
+  else if (e.key === 'Backspace') { e.preventDefault(); handle(action, stubKey('←')); }
+});
 document.addEventListener('input', e => {
+  if (e.target && (e.target.id === 'pin-input' || e.target.id === 'newpin-input')) {
+    const v = e.target.value.replace(/\D/g, '').slice(0, 8); e.target.value = v;
+    if (e.target.id === 'pin-input') state.pin = v; else state.newPin = v;
+    const d = document.querySelector('.pinshow'); if (d) d.innerHTML = '●'.repeat(v.length) || '&nbsp;';
+    return;
+  }
   if (e.target && e.target.id === 'f-obs') { captureObs(); return; }   // comentário da página: guarda enquanto digita, sem redesenhar
   if (e.target && e.target.id === 'u-filtro') {
     state.filtro = e.target.value;
