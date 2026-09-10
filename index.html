@@ -144,7 +144,7 @@
    Escala de 3 respostas por frase (Sim / resposta do meio / Não) + "Não se aplica" onde faz sentido.
    Valores gravados: 3 = Sim, 2 = resposta do meio, 1 = Não, 'NA' = não se aplica.
    ===================================================================== */
-const VERSAO = '1.6.3';
+const VERSAO = '1.6.4';
 // Logo Maxipark (PNG do site oficial, reduzido), embutido para funcionar sem internet
 const LOGO_B64 = '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';
 const ITENS_PADRAO = [
@@ -901,7 +901,7 @@ function viewConsolidado(){
   const rodRows = rl.map(r => { const lst = todas.filter(x => rodadaDe(x) === r.id); return `<tr class="${r.id === settings.rodada ? 'cur' : ''}"><td class="l"><b>${esc(r.nome)}</b>${r.id === settings.rodada ? ' <span class="tag ok">atual</span>' : ''}</td><td>${r.inicio ? dataLabel(r.inicio) : '—'}</td><td>${r.fim ? dataLabel(r.fim) : (r.id === settings.rodada ? 'em andamento' : '—')}</td><td>${lst.length}</td><td>${new Set(lst.map(x => x.unidade)).size}</td></tr>`; }).join('');
   return header('Consolidado', 0) + `<div class="wrap"><div class="card" style="max-width:1100px">
     <h1>Consolidado de todas as unidades</h1>
-    <div class="row" style="margin-top:6px"><button class="btn ghost" data-action="admin">← Área do avaliador</button><button class="btn ghost" data-action="tosetup">Tela inicial (Preparar a coleta)</button></div>
+    <div class="row" style="margin-top:6px"><button class="btn" data-action="admin">← Voltar (Área do avaliador)</button><button class="btn ghost" data-action="tosetup">Tela inicial (Preparar a coleta)</button></div>
     <p class="small muted">Junta as respostas deste tablet com as importadas de outros tablets (arquivo CSV do app). Rodada atual da coleta: <b>${esc(rodadaNome(settings.rodada))}</b>.${pool.legado ? ` ${pool.legado} resposta(s) de versão antiga do app (escala 1-5) ficam fora das contas.` : ''}${histResponses().length ? ` ${histResponses().length} resposta(s) importada(s) de outros tablets.` : ' <b>Ainda não há respostas importadas de outros tablets</b> — o que está abaixo é só deste aparelho. Para juntar, use "Importar respostas de outro tablet" no fim da tela.'}</p>
     <h3>Filtros</h3>
     <div class="filters">
@@ -962,6 +962,7 @@ function viewConsolidado(){
     <h3>Zerar (só para testes)</h3>
     <div class="row"><button class="btn danger" data-action="zerartudo">Zerar todo o histórico deste tablet</button></div>
     <p class="legend">Apaga todas as respostas (de todas as unidades e rodadas), recusas, rodadas e respostas importadas deste aparelho, e volta à Rodada 1. Mantém o PIN e a lista de unidades. Pede confirmação e depois a <b>senha de zerar</b> (diferente do PIN; troca em Configurações). Use para começar um teste do zero — exporte antes o que quiser guardar.</p>
+    <div class="row"><button class="btn" data-action="admin">← Voltar (Área do avaliador)</button><button class="btn ghost" data-action="tosetup">Tela inicial (Preparar a coleta)</button></div>
   </div></div>`;
 }
 function hashStr(s){ let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
@@ -1126,7 +1127,13 @@ async function shareOrDownload(name, data, mime){
   return true;
 }
 /* ---------------- Excel e PDF do Consolidado (respeitam os filtros) ---------------- */
-function loadScript(src){ return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('sem internet')); document.head.appendChild(s); }); }
+const _scriptP = {};   // uma promessa por URL: dois toques seguidos não baixam o gerador duas vezes; se falhar, o próximo toque tenta de novo
+function loadScript(src){
+  if (!_scriptP[src]) _scriptP[src] = new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('sem internet')); document.head.appendChild(s); }).catch(e => { delete _scriptP[src]; throw e; });
+  return _scriptP[src];
+}
+let exportando = false;   // evita gerar dois arquivos com um duplo toque no botão
+async function loadExcelJS(){ if (!window.ExcelJS) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js'); return window.ExcelJS; }
 async function loadJsPDF(){
   if (!(window.jspdf && window.jspdf.jsPDF)) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
   if (!(window.jspdf.jsPDF.API && window.jspdf.jsPDF.API.autoTable)) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
@@ -1180,25 +1187,81 @@ function nomeExport(cf){   // nome do arquivo diz rodada, unidade e período fil
   const periodo = cf.ano ? cf.ano + (cf.mes ? '-' + cf.mes : '') + (cf.dia ? '-' + cf.dia : '') : 'todas-datas';
   return `consolidado_${cf.rodada || 'todas-rodadas'}_${cf.unidade ? slug(cf.unidade) : 'todas-unidades'}_${periodo}_${hojeISO()}`;
 }
+const PCT_RE = /^-?\d+%$/;   // '86%' vira número 86 exibido como 86%: dá para ordenar e fazer média
+function folhasExcel(D){   // abas do Excel: nome, tabela (array de linhas) e larguras das colunas. semCab = a aba Resumo não tem linha de cabeçalho no topo
+  const f = [{ nome: 'Resumo', aoa: D.resumo, larguras: [40, 18, 60], semCab: true }];
+  if (!D.atual) f.push({ nome: 'Ranking', aoa: D.ranking, larguras: [4, 14, 22, 10, 8, 12, 8, 14, 44, 14, 12] }, { nome: 'Cobertura', aoa: D.cobertura, larguras: [14, 22, 12, 10] });
+  f.push({ nome: 'Por frase', aoa: D.porFrase, larguras: [7, 26, 60, 6, 6, 12, 16, 6, 12, 11, 8, 11] },
+    { nome: 'Respostas', aoa: D.respostas, larguras: [7, 7, 14, 12, 18, 9, 11, 8].concat(ITENS.map(() => 5), [6, 6, 30, 30], ITENS.map(() => 20), [20, 20, 40]) },
+    { nome: 'Comentários', aoa: D.comentarios, larguras: [50, 12, 12, 12, 80, 40] }, { nome: 'Perguntas', aoa: D.perguntas, larguras: [9, 26, 70, 22, 22, 22, 30, 6] });
+  if (!D.atual) f.push({ nome: 'Rodadas', aoa: D.rodadasT, larguras: [22, 12, 14, 10, 10] });
+  f.push({ nome: 'Legenda', aoa: D.legenda, larguras: [24, 90] });
+  return f;
+}
+async function excelComLogo(EJ, D, folhas){   // Excel no padrão Maxipark (ExcelJS): logo em destaque no topo de todas as abas, título roxo, cabeçalho branco sobre roxo, linhas alternadas
+  const wb = new EJ.Workbook(); wb.creator = 'Maxipark - Experiência do Cliente'; wb.created = new Date();
+  const img = wb.addImage({ base64: LOGO_B64, extension: 'png' });
+  const ROXO = 'FF6B4A98', ZEBRA = 'FFF4F1F8', BRANCO = 'FFFFFFFF', CINZA = 'FF5E5670', VERMELHO = 'FF9B1C1C';
+  const fill = argb => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } });
+  const sub = `Gerado em ${dataLabel(hojeISO())} - ${D.escopo} - Rodada atual do tablet: ${rodadaNome(settings.rodada)} - App v${VERSAO}`;
+  const aviso = 'USO RESTRITO da área de Experiência do Cliente. Com menos de 3 respostas a unidade fica identificável: não divulgar por unidade nem mostrar ao encarregado ou supervisor.';
+  folhas.forEach(f => {
+    let aoa = f.aoa; if (f.semCab && aoa.length && aoa[0].length === 1 && aoa[0][0] === D.titulo) aoa = aoa.slice(1);   // o título já vai no topo da aba
+    const ncol = Math.max(3, ...aoa.map(r => r.length)); const larg = aoa.length ? aoa[0].length : ncol;
+    const ws = wb.addWorksheet(f.nome);
+    (f.larguras || []).forEach((w, i) => { ws.getColumn(i + 1).width = w; });
+    ws.getRow(1).height = 26; ws.getRow(2).height = 26; ws.getRow(3).height = 8;   // 2 linhas altas = ~70 px para o logo
+    ws.addImage(img, { tl: { col: 0.1, row: 0.15 }, ext: { width: 268, height: 62 } });
+    const mc = 10;   // título, subtítulo e aviso ocupam sempre 10 colunas (≥ 84 caracteres de largura), mesmo nas abas estreitas
+    const wch = Array.from({ length: mc }, (_, i) => (f.larguras && f.larguras[i]) || 8.43).reduce((a, b) => a + b, 0);   // largura da faixa em caracteres
+    const linha = (r, txt, font, h) => { ws.mergeCells(r, 1, r, mc); const c = ws.getCell(r, 1); c.value = txt; c.font = font; c.alignment = { vertical: 'middle', wrapText: true };
+      const nLin = Math.max(1, Math.ceil(String(txt).length * font.size / 11 / wch)); ws.getRow(r).height = Math.max(h, nLin * font.size * 1.35 + 6); };   // altura cresce com o nº de linhas (o Excel não ajusta célula mesclada)
+    linha(4, D.titulo, { name: 'Calibri', size: 15, bold: true, color: { argb: ROXO } }, 24);
+    linha(5, sub, { name: 'Calibri', size: 9, italic: true, color: { argb: CINZA } }, 16);
+    linha(6, aviso, { name: 'Calibri', size: 9, bold: true, color: { argb: VERMELHO } }, 30);
+    ws.getRow(7).height = 5; for (let c = 1; c <= Math.max(ncol, mc); c++) ws.getCell(7, c).fill = fill(ROXO);   // faixa roxa fina
+    let r = 8, zebra = 0;
+    aoa.forEach((row, ri) => {
+      const isCab = f.semCab ? row[0] === 'Indicador' : ri === 0; const xr = ws.getRow(r);
+      if (!isCab && !f.semCab && row.length && zebra % 2 === 1) for (let c = 1; c <= larg; c++) xr.getCell(c).fill = fill(ZEBRA);
+      row.forEach((v, ci) => {
+        if (v === undefined || v === null) return; const c = xr.getCell(ci + 1);
+        if (typeof v === 'string' && PCT_RE.test(v)) { c.value = parseInt(v, 10); c.numFmt = '0"%"'; } else c.value = v;
+        if (isCab) { c.font = { name: 'Calibri', size: 11, bold: true, color: { argb: BRANCO } }; c.fill = fill(ROXO); c.alignment = { vertical: 'middle', wrapText: true }; }
+      });
+      if (isCab) { xr.height = 30; zebra = 0; if (!f.semCab && ri === 0) ws.autoFilter = { from: { row: r, column: 1 }, to: { row: r, column: row.length } }; } else if (row.length) zebra++;
+      r++;
+    });
+  });
+  return await wb.xlsx.writeBuffer();
+}
+function excelSimples(XLSX, folhas){   // reserva (SheetJS, sem logo) caso o gerador com logo não carregue
+  const wb = XLSX.utils.book_new();
+  folhas.forEach(f => {
+    const ws = XLSX.utils.aoa_to_sheet(f.aoa);
+    Object.keys(ws).forEach(a => { const c = ws[a]; if (a[0] !== '!' && c && c.t === 's' && PCT_RE.test(c.v)) { c.t = 'n'; c.v = parseInt(c.v, 10); c.z = '0"%"'; } });
+    if (f.larguras) ws['!cols'] = f.larguras.map(w => ({ wch: w }));
+    XLSX.utils.book_append_sheet(wb, ws, f.nome);
+  });
+  return XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+}
 async function exportarExcel(modo){
-  let XLSX; try { toast('Preparando o Excel…'); XLSX = await loadSheetJS(); } catch(e) { toast('Para gerar o Excel é preciso internet na primeira vez. Sem internet, use o CSV.'); return; }
+  if (exportando) return; exportando = true;
+  try { await _exportarExcel(modo); } finally { exportando = false; }
+}
+async function _exportarExcel(modo){
+  const MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  let D, folhas; try { D = dadosExport(modo); folhas = folhasExcel(D); } catch(e) { console.error(e); toast('Não consegui montar os dados do Excel. Tente de novo; se continuar, use o CSV.'); return; }
+  toast('Preparando o Excel…');
+  let out = null, comLogo = false;
+  try { const EJ = await loadExcelJS(); out = await excelComLogo(EJ, D, folhas); comLogo = true; } catch(e) { console.warn('Excel com logo indisponível, gerando a versão simples', e); }
+  if (!out) {
+    let XLSX; try { XLSX = await loadSheetJS(); } catch(e) { toast('Para gerar o Excel é preciso internet na primeira vez. Sem internet, use o CSV.'); return; }
+    try { out = excelSimples(XLSX, folhas); } catch(e) { console.error(e); toast('Não consegui gerar o Excel. Tente de novo; se continuar, use o CSV.'); return; }
+  }
   try {
-    const D = dadosExport(modo); const wb = XLSX.utils.book_new();
-    const add = (nome, aoa, larguras) => {
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      Object.keys(ws).forEach(a => { const c = ws[a]; if (a[0] !== '!' && c && c.t === 's' && /^-?\d+%$/.test(c.v)) { c.t = 'n'; c.v = parseInt(c.v, 10); c.z = '0"%"'; } });   // '86%' vira número 86 exibido como 86%: dá para ordenar e fazer média
-      if (larguras) ws['!cols'] = larguras.map(w => ({ wch: w }));
-      XLSX.utils.book_append_sheet(wb, ws, nome);
-    };
-    add('Resumo', D.resumo, [40, 18, 60]);
-    if (!D.atual) { add('Ranking', D.ranking, [4, 14, 22, 10, 8, 12, 8, 14, 44, 14, 12]); add('Cobertura', D.cobertura, [14, 22, 12, 10]); }
-    add('Por frase', D.porFrase, [7, 26, 60, 6, 6, 12, 16, 6, 12, 11, 8, 11]); add('Respostas', D.respostas, [7, 7, 14, 12, 18, 9, 11, 8].concat(ITENS.map(() => 5), [6, 6, 30, 30], ITENS.map(() => 20), [20, 20, 40]));
-    add('Comentários', D.comentarios, [50, 12, 12, 12, 80, 40]); add('Perguntas', D.perguntas, [9, 26, 70, 22, 22, 22, 30, 6]);
-    if (!D.atual) add('Rodadas', D.rodadasT, [22, 12, 14, 10, 10]);
-    add('Legenda', D.legenda, [24, 90]);
-    const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const ok = await shareOrDownload(D.nome + '.xlsx', new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    if (ok) { toast('Excel gerado.'); if (D.atual) { markExported(); if (state.screen === 'admin') render(); } }
+    const ok = await shareOrDownload(D.nome + '.xlsx', new Blob([out], { type: MIME }), MIME);
+    if (ok) { toast(comLogo ? 'Excel gerado.' : 'Excel gerado (versão simples, sem logo).'); if (D.atual) { markExported(); if (state.screen === 'admin') render(); } }
   } catch(e) { console.error(e); toast('Não consegui gerar o Excel. Tente de novo; se continuar, use o CSV.'); }
 }
 // A fonte padrão do jsPDF (Helvetica) só tem Latin-1: símbolos e emojis (comuns nos comentários) viram texto ilegível — trocamos ou removemos
@@ -1206,35 +1269,44 @@ const pdfTxt = s => String(s == null ? '' : s).replace(/⚠/g, '(!)').replace(/�
   .replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}\u{20E3}]/gu, '')   // emojis e pictogramas somem
   .replace(/[^\x09\x0A\x20-\x7E\xA0-\xFF]/g, '?');                                  // qualquer outro caractere fora do Latin-1 vira ? (acentos do português ficam)
 async function exportarPdf(modo){
+  if (exportando) return; exportando = true;
+  try { await _exportarPdf(modo); } finally { exportando = false; }
+}
+async function _exportarPdf(modo){
   let jsPDF; try { toast('Preparando o PDF…'); jsPDF = await loadJsPDF(); } catch(e) { toast('Para gerar o PDF é preciso internet na primeira vez. Sem internet, use o CSV ou o texto das contagens.'); return; }
   try {
     const D = dadosExport(modo); const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(); const cor = [107, 74, 152];   // roxo Maxipark #6B4A98
     const tabela = (titulo, aoa, opts) => {
       let y = doc.lastAutoTable && doc.lastAutoTable.finalY ? doc.lastAutoTable.finalY + 8 : 24;
-      if (y > H - 40) { doc.addPage(); y = 18; }
+      if (y > H - 40) { doc.addPage(); y = 22; }   // as páginas seguintes recebem a faixa com o logo no fim (loop final)
       doc.setFontSize(12); doc.setTextColor(cor[0], cor[1], cor[2]); doc.text(pdfTxt(titulo), 12, y); doc.setTextColor(0, 0, 0);
       const linhas = aoa.slice(1).map(r => r.map(pdfTxt));
-      doc.autoTable(Object.assign({ head: [aoa[0].map(pdfTxt)], body: linhas.length ? linhas : [['(sem dados)']], startY: y + 3, margin: { left: 12, right: 12 }, styles: { fontSize: 7.5, cellPadding: 1.4, overflow: 'linebreak' }, headStyles: { fillColor: cor, textColor: 255, fontSize: 7.5 }, alternateRowStyles: { fillColor: [244, 243, 252] } }, opts || {}));
+      doc.autoTable(Object.assign({ head: [aoa[0].map(pdfTxt)], body: linhas.length ? linhas : [['(sem dados)']], startY: y + 3, margin: { top: 21, left: 12, right: 12, bottom: 14 }, styles: { fontSize: 7.5, cellPadding: 1.4, overflow: 'linebreak' }, headStyles: { fillColor: cor, textColor: 255, fontSize: 7.5 }, alternateRowStyles: { fillColor: [244, 243, 252] } }, opts || {}));
     };
     // capa / resumo (Helvetica renderiza os acentos do português; pdfTxt só troca símbolos)
-    try { doc.addImage('data:image/png;base64,' + LOGO_B64, 'PNG', W - 12 - 40, 6, 40, 9.2); } catch(e) {}
-    doc.setFontSize(D.atual ? 15 : 18); doc.setTextColor(cor[0], cor[1], cor[2]); doc.text(pdfTxt(D.titulo), 12, 16, { maxWidth: W - 60 }); doc.setTextColor(0, 0, 0);
-    doc.setFontSize(9.5); doc.text(pdfTxt(`Gerado em ${dataLabel(hojeISO())} - ${D.escopo} - Rodada atual do tablet: ${rodadaNome(settings.rodada)} - App v${VERSAO}`), 12, 22, { maxWidth: W - 60 });
-    doc.setFontSize(8.5); doc.setTextColor(155, 28, 28); doc.text(pdfTxt('USO RESTRITO da área de Experiência do Cliente. Com menos de 3 respostas a unidade fica identificável: não divulgar por unidade nem mostrar ao encarregado ou supervisor.'), 12, 29, { maxWidth: W - 24 }); doc.setTextColor(0, 0, 0);
-    doc.lastAutoTable = { finalY: 26 };
+    // capa com o logo em destaque (60 mm) e faixa na cor Maxipark
+    try { doc.addImage('data:image/png;base64,' + LOGO_B64, 'PNG', 12, 7, 60, 13.8); } catch(e) {}
+    doc.setDrawColor(cor[0], cor[1], cor[2]); doc.setLineWidth(1.2); doc.line(12, 24, W - 12, 24);
+    doc.setFontSize(D.atual ? 15 : 18); doc.setTextColor(cor[0], cor[1], cor[2]);
+    const tl = doc.splitTextToSize(pdfTxt(D.titulo), W - 24); const dy = (tl.length - 1) * (D.atual ? 6.1 : 7.3);   // título longo (nome de unidade importado) quebra linha e empurra o resto para baixo
+    doc.text(tl, 12, 33); doc.setTextColor(0, 0, 0);
+    doc.setFontSize(9.5); doc.text(pdfTxt(`Gerado em ${dataLabel(hojeISO())} - ${D.escopo} - Rodada atual do tablet: ${rodadaNome(settings.rodada)} - App v${VERSAO}`), 12, 40 + dy, { maxWidth: W - 24 });
+    doc.setFontSize(8.5); doc.setTextColor(155, 28, 28); doc.text(pdfTxt('USO RESTRITO da área de Experiência do Cliente. Com menos de 3 respostas a unidade fica identificável: não divulgar por unidade nem mostrar ao encarregado ou supervisor.'), 12, 47 + dy, { maxWidth: W - 24 }); doc.setTextColor(0, 0, 0);
+    doc.lastAutoTable = { finalY: 47 + dy };   // a 1ª seção começa 8 mm abaixo do aviso
     tabela('Resumo', [['Indicador', 'Valor', 'Observação']].concat(D.indicadores), { columnStyles: { 0: { cellWidth: 90 }, 1: { cellWidth: 40 } } });
     if (!D.atual) tabela('Ranking das unidades (' + pdfTxt(D.C.ordTxt) + ')', D.ranking);
     tabela(D.atual ? 'Por frase (quantos colaboradores deram cada resposta)' : 'Por frase (todas as respostas do filtro)', D.porFrase, { columnStyles: { 2: { cellWidth: 80 } } });
     if (!D.atual) { tabela('Cobertura: unidades cadastradas x pesquisadas', D.cobertura); tabela('Rodadas', D.rodadasT); }
     tabela('Perguntas, respostas e pesos em uso', D.perguntas, { columnStyles: { 2: { cellWidth: 90 } } });
-    doc.addPage(); doc.lastAutoTable = { finalY: 10 };
+    doc.addPage(); doc.lastAutoTable = { finalY: 14 };
     const nCol = D.respostas[0].length;   // última coluna = aviso por linha
     tabela('Respostas individuais (ordem embaralhada) — 3 = Sim, 2 = meio, 1 = Não, NA = não se aplica — USO RESTRITO', [['Unidade', 'Rodada', 'Data', ...ITENS.map(it => 'B' + it.n), 'eNPS', 'CES', '(!)']].concat(D.respostas.slice(1).map(r => [r[3], r[7], r[6] ? dataLabel(r[6]) : r[5], ...r.slice(8, 8 + ITENS.length + 2), r[nCol - 1] ? '(!)' : ''])), { styles: { fontSize: 7, cellPadding: 1 } });
     tabela('Comentários e respostas abertas (ordem embaralhada) — USO RESTRITO', D.comentarios, { columnStyles: { 0: { cellWidth: 62 }, 4: { cellWidth: 100 }, 5: { cellWidth: 40 } } });
     const total = doc.internal.getNumberOfPages();
-    const rodape = pdfTxt(`${D.titulo} - ${D.escopo} - gerado em ${dataLabel(hojeISO())} - USO RESTRITO da área de Experiência do Cliente`);
-    for (let p = 1; p <= total; p++) { doc.setPage(p); doc.setFontSize(7.5); doc.setTextColor(120, 120, 120); doc.text(rodape, 12, H - 6, { maxWidth: W - 60 }); doc.text(pdfTxt(`página ${p} de ${total}`), W - 12, H - 6, { align: 'right' }); if (p > 1) { try { doc.addImage('data:image/png;base64,' + LOGO_B64, 'PNG', W - 12 - 30, 4, 30, 6.9); } catch(e) {} } }   // logo em todas as páginas
+    const rodape = pdfTxt(`${D.titulo}${D.atual ? '' : ' - ' + D.escopo} - gerado em ${dataLabel(hojeISO())} - USO RESTRITO da área de Experiência do Cliente`);   // no modo 'atual' o título já traz unidade e rodada
+    const tituloFaixa = doc.splitTextToSize(pdfTxt(D.titulo), W - 72)[0];   // uma linha só, sem invadir o logo (termina em x = 52 mm)
+    for (let p = 1; p <= total; p++) { doc.setPage(p); doc.setFontSize(7.5); doc.setTextColor(120, 120, 120); const lr = doc.splitTextToSize(rodape, W - 60); doc.text(lr, 12, H - 6 - 3.04 * (lr.length - 1)); doc.text(pdfTxt(`página ${p} de ${total}`), W - 12, H - 6, { align: 'right' }); if (p > 1) { try { doc.addImage('data:image/png;base64,' + LOGO_B64, 'PNG', 12, 5, 40, 9.2); doc.setDrawColor(cor[0], cor[1], cor[2]); doc.setLineWidth(0.8); doc.line(12, 16.5, W - 12, 16.5); doc.setFontSize(8); doc.setTextColor(cor[0], cor[1], cor[2]); doc.text(tituloFaixa, W - 12, 12, { align: 'right' }); } catch(e) {} } }   // logo em destaque + faixa em todas as páginas; rodapé longo cresce para cima, nunca sai da página
     const blob = doc.output('blob');
     const ok = await shareOrDownload(D.nome + '.pdf', blob, 'application/pdf');
     if (ok) { toast('PDF gerado.'); if (D.atual) { markExported(); if (state.screen === 'admin') render(); } }
