@@ -26,10 +26,10 @@
   body{overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   textarea,input,pre{-webkit-user-select:text;user-select:text}
   #app{min-height:100vh;display:flex;flex-direction:column}
-  .top{background:var(--teal);color:#fff;padding:calc(12px + env(safe-area-inset-top,0px)) 20px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .top .brand{font-weight:700;font-size:17px}
-  .top .step{font-size:15px;opacity:.92;text-align:right}
-  .progress{height:6px;background:rgba(255,255,255,.25)}
+  .top{background:#fff;color:var(--teal-dark);border-bottom:1px solid var(--line);padding:calc(12px + env(safe-area-inset-top,0px)) 20px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .top .brand{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;color:var(--muted)}
+  .top .step{font-size:15px;text-align:right;color:var(--teal-dark);font-weight:600}
+  .progress{height:6px;background:var(--teal-soft)}
   .progress > div{height:100%;background:var(--sel);transition:width .25s}
   .wrap{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px 16px calc(70px + env(safe-area-inset-bottom,0px))}
   .card{width:100%;max-width:820px;background:var(--card);border-radius:var(--radius);padding:22px 22px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
@@ -90,9 +90,9 @@
   .pinpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:320px;margin:12px auto}
   .pinpad button{min-height:62px;font-size:26px;border-radius:14px;border:2px solid var(--line);background:#fff;cursor:pointer;color:var(--text)}
   .pinpad button.ok{background:var(--teal);border-color:var(--teal);color:#fff;font-size:20px;font-weight:700}
-  .pinshow{text-align:center;font-size:34px;letter-spacing:12px;min-height:48px;margin:6px 0}
-  .pininput{display:block;max-width:320px;margin:8px auto 0;text-align:center;font-size:20px;letter-spacing:6px}
-  .pininput::placeholder{letter-spacing:0;font-size:15px}
+  /* campo único do PIN: mostra os pontos (sem type=password, para o navegador não oferecer "salvar senha") e aceita o teclado do tablet ou físico */
+  .pininput{display:block;max-width:320px;margin:8px auto 6px;text-align:center;font-size:30px;letter-spacing:12px;min-height:60px;-webkit-text-security:disc}
+  .pininput::placeholder{letter-spacing:0;font-size:15px;-webkit-text-security:none}
   .thanks{text-align:center;padding:36px 10px}
   .thanks .check{width:96px;height:96px;border-radius:50%;background:var(--ok);color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:12px 18px;border-radius:12px;font-size:16px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;z-index:9}
@@ -116,11 +116,7 @@
   .pergunta{border:1px solid var(--line);border-radius:12px;padding:10px 14px 14px;margin:10px 0;background:#FAFBFB}
   .pergunta label{font-size:14px;margin:8px 0 4px} .pergunta input,.pergunta textarea,.pergunta select{font-size:16px;padding:8px 10px} .pergunta textarea{min-height:0}
   /* identidade Maxipark: barra branca com o logo, barra de progresso violeta → índigo */
-  .top{background:#fff;color:var(--teal-dark);border-bottom:1px solid var(--line)}
-  .brand{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;color:var(--muted)}
   .brand .logo{height:30px;width:auto;display:block}
-  .step{color:var(--teal-dark);font-weight:600}
-  .progress{background:var(--teal-soft)}
   .progress div{background:linear-gradient(90deg,var(--accent),var(--teal))}
   .thanks .check{background:linear-gradient(135deg,var(--accent),var(--teal))}
   @media (max-width:560px){ .brand span{display:none} .brand .logo{height:26px} }
@@ -138,6 +134,7 @@
 <div id="toast" class="toast"></div>
 <input type="file" id="file-unidades" accept=".csv,.txt,.xlsx,.xls" style="display:none">
 <input type="file" id="file-hist" accept=".csv,.txt" multiple style="display:none">
+<input type="file" id="file-pergs" accept=".json,application/json" style="display:none">
 <script>
 'use strict';
 /* =====================================================================
@@ -146,7 +143,7 @@
    Escala de 3 respostas por frase (Sim / resposta do meio / Não) + "Não se aplica" onde faz sentido.
    Valores gravados: 3 = Sim, 2 = resposta do meio, 1 = Não, 'NA' = não se aplica.
    ===================================================================== */
-const VERSAO = '1.6';
+const VERSAO = '1.6.1';
 // Logo Maxipark (PNG do site oficial, reduzido), embutido para funcionar sem internet
 const LOGO_B64 = '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';
 const ITENS_PADRAO = [
@@ -331,7 +328,7 @@ function armIdle(){
   if (inSurvey()) idleTimer = setTimeout(() => { if (inSurvey()) discardAndHome(); }, IDLE_MS);
 }
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function toast(msg){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2800); }
+function toast(msg){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), Math.min(9000, 2500 + msg.length * 35)); }   // mensagens longas ficam mais tempo
 function mesLabel(m){ if(!m) return ''; const [y, mo] = m.split('-'); return mo + '/' + y; }
 function validMes(m){ return /^\d{4}-(0[1-9]|1[0-2])$/.test(m || ''); }
 // Data da coleta: preenchida automaticamente (dia/mês/ano de hoje); o mês de referência deriva dela. A mesma data vale para todos os
@@ -343,8 +340,10 @@ function startThanks(){ go('thanks'); clearTimeout(thanksTimer); thanksTimer = s
 
 /* ---------------- telas ---------------- */
 function render(){
+  const foco = document.activeElement && /^(pin|newpin)-input$/.test(document.activeElement.id) ? document.activeElement.id : '';
   const views = { setup:viewSetup, setpin:viewSetPin, welcome:viewWelcome, q:viewQuestion, enps:viewEnps, ces:viewCes, open:viewOpen, thanks:viewThanks, pin:viewPin, admin:viewAdmin, settings:viewSettings, text:viewText, saveerror:viewSaveError, confirm:viewConfirm, unidades:viewUnidades, colar:viewColar, consolidado:viewConsolidado, perguntas:viewPerguntas };
   document.getElementById('app').innerHTML = (views[state.screen] || viewSetup)();
+  if (foco) { const el = document.getElementById(foco); if (el && !el.disabled) { el.focus({ preventScroll: true }); try { el.setSelectionRange(el.value.length, el.value.length); } catch(e) {} } }   // mantém o teclado aberto após cada tecla
 }
 function header(step, pct){
   return `<div class="top"><div class="brand"><img class="logo" src="data:image/png;base64,${LOGO_B64}" alt="Maxipark"><span>Pesquisa com a equipe</span></div><div class="step">${esc(step || '')}</div></div>
@@ -420,8 +419,7 @@ function viewSetPin(){
   return header(zerar ? 'Senha de zerar' : 'Definir PIN', 0) + `<div class="wrap"><div class="card" style="max-width:520px">
     <h2 style="text-align:center">${repeat ? (zerar ? 'Digite a senha de novo para confirmar' : 'Digite o PIN de novo para confirmar') : (zerar ? 'Nova senha para zerar o histórico' : (settings.pin ? 'Novo PIN do avaliador' : 'Crie o PIN do avaliador'))}</h2>
     <p class="small muted" style="text-align:center">${repeat ? 'Repita os mesmos números e toque em OK.' : '4 a 8 números. Não use 1234, 0000 ou datas fáceis. Digite e toque em <b>OK</b>.'}${zerar ? ' Esta senha só serve para apagar todo o histórico do tablet; é diferente do PIN do avaliador.' : ''}</p>
-    <input type="password" id="newpin-input" class="pininput" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="toque aqui para usar o teclado" value="${esc(state.newPin)}">
-    <div class="pinshow">${dots || '&nbsp;'}</div>
+    <input type="text" id="newpin-input" class="pininput" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" enterkeyhint="done" placeholder="toque nos números ou digite aqui" value="${esc(state.newPin)}">
     <div class="pinpad">${keys.map(k => `<button class="${k === 'OK' ? 'ok' : ''}" data-action="newpinkey" data-k="${k}">${k}</button>`).join('')}</div>
     <div class="row"><button class="btn link block" data-action="cancelsetpin">Cancelar</button></div>
   </div></div>`;
@@ -536,11 +534,10 @@ function viewPin(){
   const keys = ['1','2','3','4','5','6','7','8','9','←','0','OK'];
   return header('Área do avaliador', 0) + `<div class="wrap"><div class="card" style="max-width:520px">
     <h2 style="text-align:center">${state.pinTarget === 'zerar' ? 'Confirmação final: digite a senha de zerar' : 'Digite o PIN do avaliador'}</h2>
-    <input type="password" id="pin-input" class="pininput" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="one-time-code" placeholder="toque aqui para usar o teclado" value="${esc(state.pin)}">
+    <input type="text" id="pin-input" class="pininput" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" enterkeyhint="done" placeholder="toque nos números ou digite aqui" value="${esc(state.pin)}" ${locked ? 'disabled' : ''}>
     ${state.pinTarget === 'zerar' ? '<div class="bad">A senha de zerar é diferente do PIN do avaliador (troca em Configurações). Ao confirmar, todas as respostas, recusas, rodadas e importadas deste tablet são apagadas. Isso não tem volta.</div>' : ''}
     ${current ? '<div class="warn">Há uma pesquisa em andamento. Ao entrar, ela será descartada sem gravar.</div>' : ''}
     ${locked ? `<div class="bad">Muitas tentativas erradas. Aguarde ${Math.ceil((settings.lockUntil - Date.now())/1000)} s.</div>` : ''}
-    <div class="pinshow">${dots || '&nbsp;'}</div>
     <div class="pinpad">${keys.map(k => `<button class="${k === 'OK' ? 'ok' : ''}" data-action="pinkey" data-k="${k}" ${locked ? 'disabled' : ''}>${k}</button>`).join('')}</div>
     <div class="row"><button class="btn link block" data-action="cancelpin">Cancelar</button></div>
   </div></div>`;
@@ -592,12 +589,13 @@ function tallyText(t){
   if (!t.nResp) { L.push('Ainda não há respostas desta unidade nesta rodada.'); return L.join('\n'); }
   if (t.identificavel) L.push(`ATENÇÃO: só ${t.nResp} resposta${t.nResp > 1 ? 's' : ''} — as contagens abaixo são as respostas de ${t.nResp === 1 ? 'uma pessoa' : 'duas pessoas'}. Uso restrito à área de Experiência do Cliente: digitar na ficha, sim; divulgar por unidade ou mostrar ao encarregado, não.`);
   else if (t.poucasDetalhe) L.push(`${t.nResp} respostas: pode digitar na ficha e divulgar Nota B e dimensões; eNPS, CES e comentários só se divulgam por unidade com ${N_DIVULGA_DETALHE} ou mais.`);
+  L.push(`% Sim nas 15 frases: ${t.pctSimGeral == null ? '-' : t.pctSimGeral + '%'}\t% Sim ponderado pelos pesos: ${t.pctSimPond == null ? '-' : t.pctSimPond + '%'}${textosAlterados() ? '\t(perguntas/pesos alterados neste tablet)' : ''}`);
   L.push('Frase\tNão\tResposta do meio (rótulo)\tSim\tNão se aplica\tResponderam (sem N/A)\t% Sim');
   t.items.forEach((it, i) => L.push(`B${i+1}\t${it.c[0]}\t${it.c[1]} (${ITENS[i].opts[1]})\t${it.c[2]}\t${ITENS[i].na ? it.na : '-'}\t${it.n}\t${it.pctSim == null ? '-' : it.pctSim + '%' + (it.poucas ? ' *' : '')}`));
   if (t.items.some(it => it.poucas)) L.push(`(* = menos de ${N_DIVULGA_FRASE} responderam a essa frase; os outros marcaram "Não se aplica" — % frágil, não divulgar por unidade)`);
   L.push('Leitura: 3 = Sim, 2 = resposta do meio, 1 = Não. Em B12 "Não lembro" conta como não elogiado; em B15 "Talvez" não é meio-termo: leia essas duas só pelo % Sim.');
   L.push(`eNPS (0 a 10)\tDetratores 0-6: ${t.enps.det}\tNeutros 7-8: ${t.enps.neu}\tPromotores 9-10: ${t.enps.pro}\tn = ${t.enps.n}\t${t.enpsVal == null ? '' : 'eNPS = ' + t.enpsVal}`);
-  L.push(`CES (escritório)\tNão, foi difícil: ${t.ces.nao}\tMais ou menos: ${t.ces.meio}\tSim, foi fácil: ${t.ces.sim}\tNunca precisei: ${t.ces.np}\t${t.cesFacil == null ? '' : '% fácil = ' + t.cesFacil + '%'}${t.cesPoucas ? ' (menos de ' + N_DIVULGA_DETALHE + ' precisaram do escritório)' : ''}`);
+  L.push(`CES (escritório)\t${CES_OPTS[2]}: ${t.ces.nao}\t${CES_OPTS[1]}: ${t.ces.meio}\t${CES_OPTS[0]}: ${t.ces.sim}\tNunca precisei: ${t.ces.np}\t${t.cesFacil == null ? '' : '% fácil = ' + t.cesFacil + '%'}${t.cesPoucas ? ' (menos de ' + N_DIVULGA_DETALHE + ' precisaram do escritório)' : ''}`);
   if (t.poucasDetalhe) L.push(`(eNPS e CES: não divulgar por unidade com menos de ${N_DIVULGA_DETALHE} respostas)`);
   return L.join('\n');
 }
@@ -629,7 +627,7 @@ function viewAdmin(){
     const detalhe = `<h3>Nota de 0 a 10 e pergunta sobre o escritório</h3><div style="overflow:auto"><table>
         <tr><th class="l">Pergunta</th><th>Detratores 0-6</th><th>Neutros 7-8</th><th>Promotores 9-10</th><th>Responderam</th><th>Resultado</th></tr>
         <tr><td class="l"><b>Recomendaria a Maxipark</b> (0 a 10)</td><td><b>${t.enps.det}</b></td><td><b>${t.enps.neu}</b></td><td><b>${t.enps.pro}</b></td><td><b>${t.enps.n}</b></td><td><b>${t.enpsVal == null ? '—' : (t.enpsVal > 0 ? '+' : '') + t.enpsVal}</b> eNPS</td></tr>
-        <tr><th class="l">Pergunta</th><th>Não, foi difícil</th><th>Mais ou menos</th><th>Sim, foi fácil</th><th>Nunca precisei</th><th>Resultado</th></tr>
+        <tr><th class="l">Pergunta</th><th>${esc(CES_OPTS[2])}</th><th>${esc(CES_OPTS[1])}</th><th>${esc(CES_OPTS[0])}</th><th>Nunca precisei</th><th>Resultado</th></tr>
         <tr><td class="l"><b>Foi fácil resolver com o escritório?</b></td><td><b>${t.ces.nao}</b></td><td><b>${t.ces.meio}</b></td><td><b>${t.ces.sim}</b></td><td><b>${t.ces.np}</b></td><td><b>${t.cesFacil == null ? '—' : t.cesFacil + '% fácil'}</b></td></tr></table></div>
         ${t.poucasDetalhe || t.cesPoucas ? `<p class="legend">${t.poucasDetalhe ? `eNPS e CES por unidade só se divulgam com ${N_DIVULGA_DETALHE} ou mais respostas${t.cesPoucas ? ' (no CES, contam só os que precisaram do escritório)' : ''}` : `CES por unidade só se divulga quando ${N_DIVULGA_DETALHE} ou mais colaboradores precisaram do escritório (aqui: ${t.ces.n}); o eNPS pode ser divulgado`}. Com menos, entra só no agregado da região.</p>` : ''}`;
     tabela = `<div style="overflow:auto"><table>
@@ -725,30 +723,32 @@ function viewPerguntas(){
       <label>Dimensão (grupo da frase)</label><input type="text" id="p-dim-${i}" value="${esc(it.dim)}" maxlength="60">
       <label>Frase</label><textarea id="p-t-${i}" maxlength="240" rows="2">${esc(it.t)}</textarea>
       <div class="filters">
-        <div><label>Resposta 1 (vale 3 = Sim)</label><input type="text" id="p-o0-${i}" value="${esc(it.opts[0])}" maxlength="40"></div>
-        <div><label>Resposta 2 (vale 2 = meio)</label><input type="text" id="p-o1-${i}" value="${esc(it.opts[1])}" maxlength="40"></div>
-        <div><label>Resposta 3 (vale 1 = Não)</label><input type="text" id="p-o2-${i}" value="${esc(it.opts[2])}" maxlength="40"></div>
+        <div><label>Resposta positiva — 1ª opção (grava 3; é a que conta no % Sim)</label><input type="text" id="p-o0-${i}" value="${esc(it.opts[0])}" maxlength="40"></div>
+        <div><label>Resposta do meio — 2ª opção (grava 2)</label><input type="text" id="p-o1-${i}" value="${esc(it.opts[1])}" maxlength="40"></div>
+        <div><label>Resposta negativa — 3ª opção (grava 1)</label><input type="text" id="p-o2-${i}" value="${esc(it.opts[2])}" maxlength="40"></div>
         <div><label>"Não se aplica" (vazio = não mostra)</label><input type="text" id="p-na-${i}" value="${esc(it.na || '')}" maxlength="60" placeholder="ex.: Não se aplica — nunca precisei"></div>
-        <div><label>Peso da frase</label><select id="p-peso-${i}">${[1, 2, 3].map(p => `<option value="${p}" ${p === it.peso ? 'selected' : ''}>${p}${p === 1 ? ' (menor)' : p === 3 ? ' (maior)' : ''}</option>`).join('')}</select></div>
+        <div><label>Peso no "% Sim ponderado"</label><select id="p-peso-${i}">${[1, 2, 3].map(p => `<option value="${p}" ${p === it.peso ? 'selected' : ''}>${p}${p === 1 ? ' (menor)' : p === 3 ? ' (maior)' : ''}</option>`).join('')}</select></div>
       </div>
     </div>`).join('');
   return header('Perguntas, respostas e pesos', 0) + `<div class="wrap"><div class="card" style="max-width:980px">
     <h1>Perguntas, respostas e pesos</h1>
     <p class="small muted">Você pode mudar o texto das 15 frases, os rótulos das 3 respostas, o "Não se aplica" e o peso de cada frase, além da pergunta de 0 a 10, da pergunta do escritório e das duas perguntas abertas. A estrutura não muda: continuam 15 frases (B1…B15) com 3 respostas, gravadas como 3 = Resposta 1, 2 = Resposta 2, 1 = Resposta 3.${textosAlterados() ? ' <b>Há alterações salvas neste tablet.</b>' : ' Textos padrão em uso.'}</p>
-    <div class="warn">Mudar o texto de uma frase <b>não muda as respostas já gravadas</b>: elas continuam valendo para a frase antiga. Para uma pergunta realmente nova, faça a alteração e inicie uma <b>nova rodada</b> no Consolidado. Os pesos valem para o "% Sim ponderado" (tela e relatórios) e podem ser trocados a qualquer hora. As alterações valem só neste tablet — repita nos outros (ou combine a rodada).</div>
+    <div class="warn"><b>A 1ª resposta é sempre a positiva</b> (é ela que conta no % Sim) e a 3ª, a negativa. Mudar o texto de uma frase <b>não muda as respostas já gravadas</b> — e as telas, o Excel e o PDF mostram sempre o texto atual, mesmo para rodadas antigas. Por isso, para uma pergunta realmente nova, altere o texto e <b>inicie uma nova rodada</b> no Consolidado. O <b>peso</b> (1 a 3) é quanto a frase pesa no indicador "% Sim ponderado" (Área do avaliador, Consolidado, Excel e PDF) e pode ser trocado a qualquer hora. As alterações valem só neste tablet: use <i>Baixar perguntas</i> / <i>Importar perguntas</i> para igualar os outros.</div>
     ${rows}
     <h3>Outras perguntas</h3>
     <label>Pergunta da nota de 0 a 10 (eNPS)</label><textarea id="p-enps" maxlength="240" rows="2">${esc(ENPS_Q)}</textarea>
     <label>Pergunta sobre o escritório (CES)</label><textarea id="p-ces" maxlength="300" rows="2">${esc(CES_Q)}</textarea>
     <div class="filters">
-      <div><label>CES — resposta 1 (vale 3 = fácil)</label><input type="text" id="p-ceso0" value="${esc(CES_OPTS[0])}" maxlength="40"></div>
-      <div><label>CES — resposta 2 (vale 2)</label><input type="text" id="p-ceso1" value="${esc(CES_OPTS[1])}" maxlength="40"></div>
-      <div><label>CES — resposta 3 (vale 1 = difícil)</label><input type="text" id="p-ceso2" value="${esc(CES_OPTS[2])}" maxlength="40"></div>
+      <div><label>CES — resposta positiva, 1ª (grava 3 = fácil)</label><input type="text" id="p-ceso0" value="${esc(CES_OPTS[0])}" maxlength="40"></div>
+      <div><label>CES — resposta do meio, 2ª (grava 2)</label><input type="text" id="p-ceso1" value="${esc(CES_OPTS[1])}" maxlength="40"></div>
+      <div><label>CES — resposta negativa, 3ª (grava 1 = difícil)</label><input type="text" id="p-ceso2" value="${esc(CES_OPTS[2])}" maxlength="40"></div>
     </div>
     <label>Pergunta aberta 1</label><textarea id="p-a0" maxlength="240" rows="2">${esc(ABERTAS[0])}</textarea>
     <label>Pergunta aberta 2</label><textarea id="p-a1" maxlength="240" rows="2">${esc(ABERTAS[1])}</textarea>
     <div class="row">
       <button class="btn" data-action="savepergs">Salvar perguntas e pesos</button>
+      <button class="btn light" data-action="exportpergs">${navigator.share ? 'Compartilhar' : 'Baixar'} perguntas (arquivo para os outros tablets)</button>
+      <button class="btn light" data-action="importpergs">Importar perguntas de outro tablet</button>
       <button class="btn light" data-action="resetpergs" ${textosAlterados() ? '' : 'disabled'}>Voltar ao padrão</button>
       <button class="btn ghost" data-action="settings">Cancelar</button>
     </div>
@@ -762,10 +762,22 @@ function lerPerguntas(){   // lê o formulário; devolve {ok, msg, o}
     if (!it.t) return { ok: false, msg: `A frase B${i + 1} está vazia.` };
     if (it.opts.some(x => !x)) return { ok: false, msg: `A frase B${i + 1} precisa das 3 respostas.` };
     if (new Set(it.opts.map(x => x.toLowerCase())).size < 3) return { ok: false, msg: `As 3 respostas da frase B${i + 1} precisam ser diferentes.` };
+    if (NEG_RE.test(it.opts[0]) || POS_RE.test(it.opts[2])) return { ok: false, msg: `B${i + 1}: a 1ª resposta deve ser a positiva (ex.: Sim) e a 3ª a negativa (ex.: Não). A ordem define a nota 3/2/1 e o % Sim.` };
     o.itens.push(it);
   }
   if (!o.enpsQ || !o.cesQ || o.cesOpts.some(x => !x) || o.abertas.some(x => !x)) return { ok: false, msg: 'Preencha todas as perguntas e respostas.' };
+  if (NEG_RE.test(o.cesOpts[0]) || POS_RE.test(o.cesOpts[2])) return { ok: false, msg: 'CES: a 1ª resposta deve ser a positiva ("fácil") e a 3ª a negativa ("difícil").' };
   return { ok: true, o };
+}
+const NEG_RE = /^(n[ãa]o|nunca|dif[ií]cil|ruim|p[ée]ssim[oa])\b/i, POS_RE = /^(sim|f[áa]cil|[óo]tim[oa]|bom|boa)\b/i;   // evita inverter a ordem das respostas sem perceber
+function perguntasAtuais(){ return LS.get('mp_itens', null) || { itens: ITENS.map(it => ({ dim: it.dim, t: it.t, opts: it.opts, na: it.na || '', peso: it.peso })), enpsQ: ENPS_Q, cesQ: CES_Q, cesOpts: CES_OPTS, abertas: ABERTAS }; }
+async function importarPerguntas(file){
+  try {
+    const o = JSON.parse(await file.text()); const p = o && o.app === 'pesquisa-equipe-maxipark' && o.perguntas;
+    if (!p || !Array.isArray(p.itens) || p.itens.length !== ITENS_PADRAO.length) { toast('Este arquivo não é o de perguntas do app (use "Baixar perguntas" no outro tablet).'); return; }
+    if (!LS.set('mp_itens', p)) { toast('Não foi possível gravar neste aparelho.'); return; }
+    aplicarTextos(); toast('Perguntas, respostas e pesos importados.'); go('perguntas');
+  } catch(e) { toast('Não consegui ler o arquivo de perguntas.'); }
 }
 
 function viewText(){
@@ -821,7 +833,7 @@ function rankingTexto(units, compMap){
   return rankingLinhas(units, compMap).map(l => l.join('\t')).join('\n');
 }
 function rankingLinhas(units, compMap){   // cabeçalho + linhas do ranking (usado no copiar, no Excel e no PDF)
-  const L = [['#','Unidade','Nome','Respostas','% Sim','% Sim ponderado','eNPS','% fácil c/ escritório','Aviso'].concat(compMap ? ['% Sim (comparação)','Diferença (pts)'] : [])];
+  const L = [['#','Unidade','Local (bairro)','Respostas','% Sim','% Sim ponderado','eNPS','% fácil c/ escritório','Aviso'].concat(compMap ? ['% Sim (comparação)','Diferença (pts)'] : [])];
   units.forEach((u, i) => { const c = compMap ? compMap[u.unidade] : null; L.push([i+1, u.unidade, (unidadePorCodigo(u.unidade) || {}).nome || '', u.n, u.pctSim == null ? '' : u.pctSim + '%', u.pctSimPond == null ? '' : u.pctSimPond + '%', u.enpsVal == null ? '' : u.enpsVal, u.cesFacil == null ? '' : u.cesFacil + '%', avisoUnidade(u)].concat(compMap ? [c && c.pctSim != null ? c.pctSim + '%' : '', (c && u.pctSim != null && c.pctSim != null) ? (u.pctSim - c.pctSim) : ''] : [])); });
   return L;
 }
@@ -931,9 +943,9 @@ function viewConsolidado(){
     <h3>Juntar tablets e exportar</h3>
     <div class="row">
       <button class="btn light" data-action="importhist">Importar respostas de outro tablet (CSV do app)</button>
-      <button class="btn" data-action="xlsxcons" ${filt.length ? '' : 'disabled'}>Baixar Excel (tudo, filtro atual)</button>
-      <button class="btn" data-action="pdfcons" ${filt.length ? '' : 'disabled'}>Baixar PDF (relatório, filtro atual)</button>
-      <button class="btn light" data-action="csvcons" ${filt.length ? '' : 'disabled'}>Baixar CSV consolidado (filtro atual)</button>
+      <button class="btn" data-action="xlsxcons" ${filt.length ? '' : 'disabled'}>${navigator.share ? 'Compartilhar' : 'Baixar'} Excel (tudo, filtro atual)</button>
+      <button class="btn" data-action="pdfcons" ${filt.length ? '' : 'disabled'}>${navigator.share ? 'Compartilhar' : 'Baixar'} PDF (relatório, filtro atual)</button>
+      <button class="btn light" data-action="csvcons" ${filt.length ? '' : 'disabled'}>${navigator.share ? 'Compartilhar' : 'Baixar'} CSV consolidado (filtro atual)</button>
       <button class="btn light" data-action="copycons" ${units.length ? '' : 'disabled'}>Copiar ranking (para o Excel)</button>
       ${histResponses().length ? '<button class="btn link" data-action="wipehist">Apagar as respostas importadas</button>' : ''}
     </div>
@@ -1117,45 +1129,63 @@ function dadosExport(){   // monta as tabelas (arrays) usadas no Excel e no PDF
   const cf = state.cf || cfDefault(); const C = calcConsolidado(cf);
   const nomeU = c => (unidadePorCodigo(c) || {}).nome || '';
   const g = C.geral, cob = C.cad.length ? Math.round((C.cad.length - C.pendentes.length) / C.cad.length * 100) : 0;
-  const resumo = [['Pesquisa com a equipe Maxipark — Consolidado'], ['Gerado em', dataLabel(hojeISO())], ['Filtros', C.filtroTxt], ['Rodada atual deste tablet', rodadaNome(settings.rodada)], ['Versão do app', VERSAO], [],
-    ['Indicador', 'Valor', 'Observação'],
+  const indicadores = [
     ['Respostas', g.n, g.identificavel ? 'IDENTIFICÁVEL: 1 ou 2 respostas — uso restrito' : ''], ['Unidades com respostas', C.units.length, ''],
     ['% Sim nas 15 frases', fmtPct(g.pctSim), 'indicador principal'], ['% Sim ponderado pelos pesos', fmtPct(g.pctSimPond), 'pesos em Configurações → Perguntas'],
     ['eNPS', fmtEnps(g.enpsVal), g.poucasDetalhe ? 'menos de ' + N_DIVULGA_DETALHE + ' respostas: não divulgar por unidade' : ''], ['% que acham fácil resolver com o escritório', fmtPct(g.cesFacil), g.cesPoucas ? 'menos de ' + N_DIVULGA_DETALHE + ' precisaram do escritório' : ''],
-    ['Unidades cadastradas', C.cad.length, ''], ['Unidades pesquisadas', C.cad.length - C.pendentes.length, cf.rodada ? 'na rodada filtrada' : ''], ['Unidades ainda sem pesquisa', C.pendentes.length, ''], ['Cobertura', cob + '%', ''], [],
+    ['Unidades cadastradas', C.cad.length, ''], ['Unidades pesquisadas', C.cad.length - C.pendentes.length, cf.rodada ? 'na rodada filtrada' : ''], ['Unidades ainda sem pesquisa', C.pendentes.length, ''], ['Cobertura', cob + '%', '']];
+  if (C.pool.legado) indicadores.push(['Respostas de versão antiga (escala 1-5) fora das contas', C.pool.legado, 'não entram neste arquivo']);
+  if (textosAlterados()) indicadores.push(['Perguntas/pesos', 'alterados neste tablet', 'ver aba Perguntas']);
+  const resumo = [['Pesquisa com a equipe Maxipark — Consolidado'], ['Gerado em', dataLabel(hojeISO())], ['Filtros', C.filtroTxt], ['Rodada atual deste tablet', rodadaNome(settings.rodada)], ['Versão do app', VERSAO], [],
+    ['Indicador', 'Valor', 'Observação'], ...indicadores, [],
     ['Uso restrito da área de Experiência do Cliente. Regra de divulgação por unidade: menos de 3 respostas, nada; 3 a 4, Nota B e dimensões; 5 ou mais, tudo.']];
   const ranking = rankingLinhas(C.units, C.compMap);
-  const cobertura = [['Unidade', 'Nome', 'Situação', 'Respostas']].concat(C.cad.map(u => [u.codigo, u.nome || '', C.pesq.has(u.codigo) ? 'pesquisada' : 'pendente', C.nBase[u.codigo] || 0])).concat(C.naoCad.map(c => [c, '(fora da lista de unidades)', 'pesquisada', C.nBase[c] || 0]));
+  const nU = {}; C.filt.forEach(r => { nU[r.unidade] = (nU[r.unidade] || 0) + 1; });
+  const avisoR = r => nU[r.unidade] < N_DIVULGA_FRASE ? `IDENTIFICÁVEL (${nU[r.unidade]} resposta${nU[r.unidade] === 1 ? '' : 's'} na unidade) — uso restrito, não divulgar` : '';
+  const cobertura = [['Unidade', 'Local (bairro)', 'Situação', 'Respostas']].concat(C.cad.map(u => [u.codigo, u.nome || '', C.pesq.has(u.codigo) ? 'pesquisada' : 'pendente', C.nBase[u.codigo] || 0])).concat(C.naoCad.map(c => [c, '(fora da lista de unidades)', 'pesquisada', C.nBase[c] || 0]));
   const porFrase = [['Frase', 'Dimensão', 'Texto', 'Peso', 'Não', 'Resposta do meio', 'Rótulo do meio', 'Sim', 'Não se aplica', 'Responderam', '% Sim', 'Comentários']].concat(g.itens.map((it, i) => ['B' + (i + 1), ITENS[i].dim, ITENS[i].t, ITENS[i].peso, it.c[0], it.c[1], ITENS[i].opts[1], it.c[2], ITENS[i].na ? it.na : '', it.n, it.n ? Math.round(it.c[2] / it.n * 100) + '%' : '', C.obsPorFrase[i].length]));
   const emb = shuffle(C.filt);
-  const respostas = [['versao', 'escala', 'id', 'unidade', 'nome da unidade', 'mes', 'data', 'rodada', ...ITENS.map(it => 'B' + it.n), 'eNPS', 'CES', 'aberta1', 'aberta2', ...ITENS.map(it => 'cB' + it.n), 'cENPS', 'cCES']]
-    .concat(emb.map(r => [r.versao || '1.2', r.escala || 'B5', r.id, r.unidade, nomeU(r.unidade), r.mes || '', r.data || '', rodadaDe(r), ...(r.r || []).map(v => v == null ? '' : v), r.enps == null ? '' : r.enps, r.ces == null ? '' : r.ces, r.a1 || '', r.a2 || '', ...ITENS.map((it, i) => (r.c || [])[i] || ''), r.cEnps || '', r.cCes || '']));
-  const comentarios = [['Onde', 'Unidade', 'Rodada', 'Data', 'Texto']];
-  emb.forEach(r => { const base = [r.unidade, rodadaNome(rodadaDe(r)), r.data ? dataLabel(r.data) : (r.mes || '')];
-    if (r.a1) comentarios.push(['Aberta 1: ' + ABERTAS[0], ...base, r.a1]); if (r.a2) comentarios.push(['Aberta 2: ' + ABERTAS[1], ...base, r.a2]);
-    (r.c || []).forEach((txt, i) => { if (txt && ITENS[i]) comentarios.push(['B' + (i + 1) + ': ' + ITENS[i].t, ...base, txt]); });
-    if (r.cEnps) comentarios.push(['Nota de 0 a 10', ...base, r.cEnps]); if (r.cCes) comentarios.push(['Escritório (CES)', ...base, r.cCes]); });
+  const respostas = [['versao', 'escala', 'id', 'unidade', 'local da unidade', 'mes', 'data', 'rodada', ...ITENS.map(it => 'B' + it.n), 'eNPS', 'CES', 'aberta1', 'aberta2', ...ITENS.map(it => 'cB' + it.n), 'cENPS', 'cCES', 'aviso']]
+    .concat(emb.map(r => [r.versao || '1.2', r.escala || 'B5', r.id, r.unidade, nomeU(r.unidade), r.mes || '', r.data || '', rodadaDe(r), ...(r.r || []).map(v => v == null ? '' : v), r.enps == null ? '' : r.enps, r.ces == null ? '' : r.ces, r.a1 || '', r.a2 || '', ...ITENS.map((it, i) => (r.c || [])[i] || ''), r.cEnps || '', r.cCes || '', avisoR(r)]));
+  const comentarios = [['Onde', 'Unidade', 'Rodada', 'Data', 'Texto', 'Aviso']];
+  emb.forEach(r => { const base = [r.unidade, rodadaNome(rodadaDe(r)), r.data ? dataLabel(r.data) : (r.mes || '')]; const av = avisoR(r);
+    if (r.a1) comentarios.push(['Aberta 1: ' + ABERTAS[0], ...base, r.a1, av]); if (r.a2) comentarios.push(['Aberta 2: ' + ABERTAS[1], ...base, r.a2, av]);
+    (r.c || []).forEach((txt, i) => { if (txt && ITENS[i]) comentarios.push(['B' + (i + 1) + ': ' + ITENS[i].t, ...base, txt, av]); });
+    if (r.cEnps) comentarios.push(['Nota de 0 a 10', ...base, r.cEnps, av]); if (r.cCes) comentarios.push(['Escritório (CES)', ...base, r.cCes, av]); });
   const perguntas = [['Código', 'Dimensão', 'Pergunta / frase', 'Resposta 1 (=3)', 'Resposta 2 (=2)', 'Resposta 3 (=1)', 'Não se aplica', 'Peso']]
     .concat(ITENS.map(it => ['B' + it.n, it.dim, it.t, it.opts[0], it.opts[1], it.opts[2], it.na || '', it.peso]))
     .concat([['eNPS', 'Recomendação', ENPS_Q, '0 a 10 (0-6 detratores, 7-8 neutros, 9-10 promotores)', '', '', '', ''], ['CES', 'Escritório', CES_Q, CES_OPTS[0] + ' (=3)', CES_OPTS[1] + ' (=2)', CES_OPTS[2] + ' (=1)', 'Nunca precisei (NP)', ''], ['Aberta 1', '', ABERTAS[0], 'texto livre', '', '', '', ''], ['Aberta 2', '', ABERTAS[1], 'texto livre', '', '', '', '']]);
   const rodadasT = [['Rodada', 'Início', 'Fim', 'Respostas', 'Unidades']].concat(C.rl.map(r => { const l = C.todas.filter(x => rodadaDe(x) === r.id); return [r.nome + (r.id === settings.rodada ? ' (atual)' : ''), r.inicio ? dataLabel(r.inicio) : '', r.fim ? dataLabel(r.fim) : (r.id === settings.rodada ? 'em andamento' : ''), l.length, new Set(l.map(x => x.unidade)).size]; }));
   const legenda = [['Campo', 'Significado'], ['B1…B15', '3 = Resposta 1 (Sim), 2 = Resposta 2 (meio), 1 = Resposta 3 (Não), NA = não se aplica'], ['eNPS', 'nota de 0 a 10; eNPS = % promotores (9-10) − % detratores (0-6)'], ['CES', '3 = fácil, 2 = mais ou menos, 1 = difícil, NP = nunca precisei; % fácil = 3 ÷ (1+2+3)'], ['% Sim', 'Sim ÷ (Não + meio + Sim), sem os "Não se aplica"'], ['% Sim ponderado', 'mesma conta com o peso de cada frase'], ['escala', 'B3 = 3 respostas por frase (v1.3+); B5 = versão antiga, 1 a 5 (fora das contas)'], ['rodada', 'R1, R2… definida em cada tablet'], ['cB1…cB15, cENPS, cCES', 'comentário escrito na página da pergunta'], ['Anonimato', 'menos de 3 respostas identifica quem respondeu: uso restrito; eNPS/CES/comentários só se divulgam por unidade com 5+']];
-  return { C, cf, resumo, ranking, cobertura, porFrase, respostas, comentarios, perguntas, rodadasT, legenda, nome: `consolidado_${cf.rodada || 'todas'}_${cf.unidade || 'unidades'}_${hojeISO()}` };
+  return { C, cf, indicadores, resumo, ranking, cobertura, porFrase, respostas, comentarios, perguntas, rodadasT, legenda, nome: nomeExport(cf) };
+}
+function nomeExport(cf){   // nome do arquivo diz rodada, unidade e período filtrados
+  const slug = s => String(s || '').replace(/[^\w.-]+/g, '_');
+  const periodo = cf.ano ? cf.ano + (cf.mes ? '-' + cf.mes : '') + (cf.dia ? '-' + cf.dia : '') : 'todas-datas';
+  return `consolidado_${cf.rodada || 'todas-rodadas'}_${cf.unidade ? slug(cf.unidade) : 'todas-unidades'}_${periodo}_${hojeISO()}`;
 }
 async function exportarExcel(){
   let XLSX; try { toast('Preparando o Excel…'); XLSX = await loadSheetJS(); } catch(e) { toast('Para gerar o Excel é preciso internet na primeira vez. Sem internet, use o CSV.'); return; }
   try {
     const D = dadosExport(); const wb = XLSX.utils.book_new();
-    const add = (nome, aoa, larguras) => { const ws = XLSX.utils.aoa_to_sheet(aoa); if (larguras) ws['!cols'] = larguras.map(w => ({ wch: w })); XLSX.utils.book_append_sheet(wb, ws, nome); };
+    const add = (nome, aoa, larguras) => {
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      Object.keys(ws).forEach(a => { const c = ws[a]; if (a[0] !== '!' && c && c.t === 's' && /^-?\d+%$/.test(c.v)) { c.t = 'n'; c.v = parseInt(c.v, 10); c.z = '0"%"'; } });   // '86%' vira número 86 exibido como 86%: dá para ordenar e fazer média
+      if (larguras) ws['!cols'] = larguras.map(w => ({ wch: w }));
+      XLSX.utils.book_append_sheet(wb, ws, nome);
+    };
     add('Resumo', D.resumo, [40, 18, 60]); add('Ranking', D.ranking, [4, 14, 22, 10, 8, 12, 8, 14, 44, 14, 12]); add('Cobertura', D.cobertura, [14, 22, 12, 10]);
-    add('Por frase', D.porFrase, [7, 26, 60, 6, 6, 12, 16, 6, 12, 11, 8, 11]); add('Respostas', D.respostas, [7, 7, 14, 12, 18, 9, 11, 8].concat(ITENS.map(() => 5), [6, 6, 30, 30], ITENS.map(() => 20), [20, 20]));
-    add('Comentários', D.comentarios, [50, 12, 12, 12, 80]); add('Perguntas', D.perguntas, [9, 26, 70, 22, 22, 22, 30, 6]); add('Rodadas', D.rodadasT, [22, 12, 14, 10, 10]); add('Legenda', D.legenda, [24, 90]);
+    add('Por frase', D.porFrase, [7, 26, 60, 6, 6, 12, 16, 6, 12, 11, 8, 11]); add('Respostas', D.respostas, [7, 7, 14, 12, 18, 9, 11, 8].concat(ITENS.map(() => 5), [6, 6, 30, 30], ITENS.map(() => 20), [20, 20, 40]));
+    add('Comentários', D.comentarios, [50, 12, 12, 12, 80, 40]); add('Perguntas', D.perguntas, [9, 26, 70, 22, 22, 22, 30, 6]); add('Rodadas', D.rodadasT, [22, 12, 14, 10, 10]); add('Legenda', D.legenda, [24, 90]);
     const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
     const ok = await shareOrDownload(D.nome + '.xlsx', new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     if (ok) toast('Excel gerado.');
-  } catch(e) { toast('Não consegui gerar o Excel: ' + (e && e.message ? e.message : e)); }
+  } catch(e) { console.error(e); toast('Não consegui gerar o Excel. Tente de novo; se continuar, use o CSV.'); }
 }
-const pdfTxt = s => String(s == null ? '' : s).replace(/⚠/g, '(!)').replace(/—/g, '-').replace(/–/g, '-').replace(/·/g, '-').replace(/●/g, '*').replace(/→/g, '->').replace(/…/g, '...').replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/×/g, 'x').replace(/÷/g, '/').replace(/−/g, '-');
+// A fonte padrão do jsPDF (Helvetica) só tem Latin-1: símbolos e emojis (comuns nos comentários) viram texto ilegível — trocamos ou removemos
+const pdfTxt = s => String(s == null ? '' : s).replace(/⚠/g, '(!)').replace(/—/g, '-').replace(/–/g, '-').replace(/·/g, '-').replace(/●/g, '*').replace(/→/g, '->').replace(/←/g, '<-').replace(/…/g, '...').replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/×/g, 'x').replace(/÷/g, '/').replace(/−/g, '-').replace(/✓/g, 'v').replace(/⚙/g, '')
+  .replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}\u{20E3}]/gu, '')   // emojis e pictogramas somem
+  .replace(/[^\x09\x0A\x20-\x7E\xA0-\xFF]/g, '?');                                  // qualquer outro caractere fora do Latin-1 vira ? (acentos do português ficam)
 async function exportarPdf(){
   let jsPDF; try { toast('Preparando o PDF…'); jsPDF = await loadJsPDF(); } catch(e) { toast('Para gerar o PDF é preciso internet na primeira vez. Sem internet, use o CSV ou o texto das contagens.'); return; }
   try {
@@ -1168,26 +1198,29 @@ async function exportarPdf(){
       const linhas = aoa.slice(1).map(r => r.map(pdfTxt));
       doc.autoTable(Object.assign({ head: [aoa[0].map(pdfTxt)], body: linhas.length ? linhas : [['(sem dados)']], startY: y + 3, margin: { left: 12, right: 12 }, styles: { fontSize: 7.5, cellPadding: 1.4, overflow: 'linebreak' }, headStyles: { fillColor: cor, textColor: 255, fontSize: 7.5 }, alternateRowStyles: { fillColor: [244, 243, 252] } }, opts || {}));
     };
-    // capa / resumo
+    // capa / resumo (Helvetica renderiza os acentos do português; pdfTxt só troca símbolos)
+    try { doc.addImage('data:image/png;base64,' + LOGO_B64, 'PNG', W - 12 - 40, 6, 40, 9.2); } catch(e) {}
     doc.setFontSize(18); doc.setTextColor(cor[0], cor[1], cor[2]); doc.text('Pesquisa com a equipe Maxipark - Consolidado', 12, 16); doc.setTextColor(0, 0, 0);
-    doc.setFontSize(9.5); doc.text(pdfTxt(`Gerado em ${dataLabel(hojeISO())} - Filtros: ${D.C.filtroTxt} - Rodada atual do tablet: ${rodadaNome(settings.rodada)} - App v${VERSAO}`), 12, 22, { maxWidth: W - 24 });
-    doc.setFontSize(8.5); doc.setTextColor(155, 28, 28); doc.text('USO RESTRITO da area de Experiencia do Cliente. Com menos de 3 respostas a unidade fica identificavel: nao divulgar por unidade nem mostrar ao encarregado ou supervisor.', 12, 29, { maxWidth: W - 24 }); doc.setTextColor(0, 0, 0);
+    doc.setFontSize(9.5); doc.text(pdfTxt(`Gerado em ${dataLabel(hojeISO())} - Filtros: ${D.C.filtroTxt} - Rodada atual do tablet: ${rodadaNome(settings.rodada)} - App v${VERSAO}`), 12, 22, { maxWidth: W - 60 });
+    doc.setFontSize(8.5); doc.setTextColor(155, 28, 28); doc.text(pdfTxt('USO RESTRITO da área de Experiência do Cliente. Com menos de 3 respostas a unidade fica identificável: não divulgar por unidade nem mostrar ao encarregado ou supervisor.'), 12, 29, { maxWidth: W - 24 }); doc.setTextColor(0, 0, 0);
     doc.lastAutoTable = { finalY: 26 };
-    tabela('Resumo', [['Indicador', 'Valor', 'Observacao']].concat(D.resumo.slice(7, 18).filter(r => r.length === 3)), { columnStyles: { 0: { cellWidth: 90 }, 1: { cellWidth: 40 } } });
+    tabela('Resumo', [['Indicador', 'Valor', 'Observação']].concat(D.indicadores), { columnStyles: { 0: { cellWidth: 90 }, 1: { cellWidth: 40 } } });
     tabela('Ranking das unidades (' + pdfTxt(D.C.ordTxt) + ')', D.ranking);
     tabela('Por frase (todas as respostas do filtro)', D.porFrase, { columnStyles: { 2: { cellWidth: 80 } } });
     tabela('Cobertura: unidades cadastradas x pesquisadas', D.cobertura);
     tabela('Rodadas', D.rodadasT);
     tabela('Perguntas, respostas e pesos em uso', D.perguntas, { columnStyles: { 2: { cellWidth: 90 } } });
     doc.addPage(); doc.lastAutoTable = { finalY: 10 };
-    tabela('Respostas individuais (ordem embaralhada) - 3 = Sim, 2 = meio, 1 = Nao, NA = nao se aplica', [['Unidade', 'Rodada', 'Data', ...ITENS.map(it => 'B' + it.n), 'eNPS', 'CES']].concat(D.respostas.slice(1).map(r => [r[3], r[7], r[6] ? dataLabel(r[6]) : r[5], ...r.slice(8, 8 + ITENS.length + 2)])), { styles: { fontSize: 7, cellPadding: 1 } });
-    tabela('Comentarios e respostas abertas (ordem embaralhada)', D.comentarios, { columnStyles: { 0: { cellWidth: 70 }, 4: { cellWidth: 120 } } });
+    const nCol = D.respostas[0].length;   // última coluna = aviso por linha
+    tabela('Respostas individuais (ordem embaralhada) — 3 = Sim, 2 = meio, 1 = Não, NA = não se aplica — USO RESTRITO', [['Unidade', 'Rodada', 'Data', ...ITENS.map(it => 'B' + it.n), 'eNPS', 'CES', '(!)']].concat(D.respostas.slice(1).map(r => [r[3], r[7], r[6] ? dataLabel(r[6]) : r[5], ...r.slice(8, 8 + ITENS.length + 2), r[nCol - 1] ? '(!)' : ''])), { styles: { fontSize: 7, cellPadding: 1 } });
+    tabela('Comentários e respostas abertas (ordem embaralhada) — USO RESTRITO', D.comentarios, { columnStyles: { 0: { cellWidth: 62 }, 4: { cellWidth: 100 }, 5: { cellWidth: 40 } } });
     const total = doc.internal.getNumberOfPages();
-    for (let p = 1; p <= total; p++) { doc.setPage(p); doc.setFontSize(7.5); doc.setTextColor(120, 120, 120); doc.text(`Pesquisa com a equipe Maxipark - Consolidado - ${dataLabel(hojeISO())} - uso restrito - pagina ${p} de ${total}`, 12, H - 6); }
+    const rodape = pdfTxt(`Pesquisa com a equipe Maxipark - Consolidado - ${D.C.filtroTxt} - gerado em ${dataLabel(hojeISO())} - USO RESTRITO da área de Experiência do Cliente`);
+    for (let p = 1; p <= total; p++) { doc.setPage(p); doc.setFontSize(7.5); doc.setTextColor(120, 120, 120); doc.text(rodape, 12, H - 6, { maxWidth: W - 60 }); doc.text(pdfTxt(`página ${p} de ${total}`), W - 12, H - 6, { align: 'right' }); }
     const blob = doc.output('blob');
     const ok = await shareOrDownload(D.nome + '.pdf', blob, 'application/pdf');
     if (ok) toast('PDF gerado.');
-  } catch(e) { toast('Não consegui gerar o PDF: ' + (e && e.message ? e.message : e)); }
+  } catch(e) { console.error(e); toast('Não consegui gerar o PDF. Tente de novo; se continuar, use o CSV ou o texto das contagens.'); }
 }
 async function exportCsv(){
   const ok = await shareOrDownload(`pesquisa_${settings.unidade}_${settings.rodada}_${settings.data || settings.mes}.csv`, csvText(currentResponses()));
@@ -1268,10 +1301,11 @@ function handle(action, el){
     case 'pin': state.pin = ''; state.pinTarget = el.getAttribute('data-target') || 'admin'; state.pinFin = el.getAttribute('data-fin') === '1'; go('pin'); break;
     case 'cancelpin': current = null; go(homeScreen()); break;
     case 'pinkey': {
-      if (Date.now() < (settings.lockUntil || 0)) return;
+      if (Date.now() < (settings.lockUntil || 0)) { toast(`Muitas tentativas. Aguarde ${Math.ceil((settings.lockUntil - Date.now()) / 1000)} s.`); return; }
       const k = el.getAttribute('data-k');
       if (k === '←') state.pin = state.pin.slice(0, -1);
       else if (k === 'OK') {
+        if (!state.pin) { toast(state.pinTarget === 'zerar' ? 'Digite a senha de zerar e toque em OK.' : 'Digite o PIN e toque em OK.'); return; }
         const alvo = state.pinTarget === 'zerar' ? (settings.senhaZerar || SENHA_ZERAR_PADRAO) : settings.pin;
         if (state.pin === alvo) { state.pin = ''; settings.pinFails = 0; saveSettings(); const had = !!current; current = null; if (state.pinTarget === 'zerar') { zerarHistorico(); state.cf = null; toast('Histórico zerado. Tablet pronto para começar do zero.'); go('setup'); return; } go(state.pinTarget, { fin: state.pinFin, notice: had ? 'Uma pesquisa em andamento foi descartada sem gravar.' : '' }); }
         else {
@@ -1292,6 +1326,8 @@ function handle(action, el){
     case 'resetpergs': askConfirm('Voltar às perguntas, respostas e pesos padrão do app? As respostas já gravadas não mudam.', () => { localStorage.removeItem('mp_itens'); aplicarTextos(); toast('Padrão restaurado.'); go('perguntas'); }); break;
     case 'xlsxcons': exportarExcel(); break;
     case 'pdfcons': exportarPdf(); break;
+    case 'exportpergs': shareOrDownload(`perguntas_pesquisa_maxipark_${hojeISO()}.json`, JSON.stringify({ app: 'pesquisa-equipe-maxipark', versao: VERSAO, perguntas: perguntasAtuais() }, null, 1), 'application/json'); break;
+    case 'importpergs': document.getElementById('file-pergs').click(); break;
     case 'cfordem': if (state.cf) { state.cf.ordem = el.getAttribute('data-v') || 'melhores'; render(); } break;
     case 'novarodada': {
       const atual = rodadaNome(settings.rodada), n = allResponses().filter(r => rodadaDe(r) === settings.rodada).length;
@@ -1302,7 +1338,7 @@ function handle(action, el){
       break;
     }
     case 'importhist': document.getElementById('file-hist').click(); break;
-    case 'csvcons': { const cf = state.cf || cfDefault(); const lst = filtrarPool(poolConsolidado().lista, cf, false); shareOrDownload(`consolidado_${cf.rodada || 'todas'}_${hojeISO()}.csv`, csvText(lst)); break; }
+    case 'csvcons': { const cf = state.cf || cfDefault(); const lst = filtrarPool(poolConsolidado().lista, cf, false); shareOrDownload(nomeExport(cf) + '.csv', csvText(lst)); break; }
     case 'copycons': {
       const cf = state.cf || cfDefault(); const pool = poolConsolidado().lista; const filt = filtrarPool(pool, cf, false); const units = porUnidade(filt);
       let compMap = null; if (cf.comp) { compMap = {}; porUnidade(pool.filter(r => rodadaDe(r) === cf.comp && (!cf.unidade || r.unidade === cf.unidade))).forEach(u => { compMap[u.unidade] = u; }); }
@@ -1407,7 +1443,7 @@ document.addEventListener('keydown', e => {
   if (state.screen !== 'pin' && state.screen !== 'setpin') return;
   const action = state.screen === 'pin' ? 'pinkey' : 'newpinkey';
   const noCampo = e.target && (e.target.id === 'pin-input' || e.target.id === 'newpin-input');
-  if (e.key === 'Enter') { e.preventDefault(); handle(action, stubKey('OK')); return; }
+  if (e.key === 'Enter') { if (e.target && e.target.tagName === 'BUTTON') return; e.preventDefault(); handle(action, stubKey('OK')); return; }   // Enter num botão (ex.: Cancelar) segue o botão
   if (noCampo) return;   // dígitos digitados no campo entram pelo evento 'input'
   if (/^[0-9]$/.test(e.key)) { e.preventDefault(); handle(action, stubKey(e.key)); }
   else if (e.key === 'Backspace') { e.preventDefault(); handle(action, stubKey('←')); }
@@ -1416,7 +1452,6 @@ document.addEventListener('input', e => {
   if (e.target && (e.target.id === 'pin-input' || e.target.id === 'newpin-input')) {
     const v = e.target.value.replace(/\D/g, '').slice(0, 8); e.target.value = v;
     if (e.target.id === 'pin-input') state.pin = v; else state.newPin = v;
-    const d = document.querySelector('.pinshow'); if (d) d.innerHTML = '●'.repeat(v.length) || '&nbsp;';
     return;
   }
   if (e.target && e.target.id === 'f-obs') { captureObs(); return; }   // comentário da página: guarda enquanto digita, sem redesenhar
@@ -1428,6 +1463,7 @@ document.addEventListener('input', e => {
 });
 document.getElementById('file-unidades').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f) importFile(f); e.target.value = ''; });
 document.getElementById('file-hist').addEventListener('change', e => { const fs = e.target.files ? [...e.target.files] : []; if (fs.length) importHist(fs); e.target.value = ''; });
+document.getElementById('file-pergs').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f) importarPerguntas(f); e.target.value = ''; });
 document.addEventListener('change', e => {   // filtros do Consolidado
   const el = e.target && e.target.closest ? e.target.closest('[data-cf]') : null;
   if (!el || !state.cf || state.screen !== 'consolidado') return;
