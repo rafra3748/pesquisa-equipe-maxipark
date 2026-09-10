@@ -1,0 +1,16 @@
+{
+  "name": "Pesquisa com clientes Maxipark",
+  "short_name": "Clientes Maxipark",
+  "description": "Pesquisa de experiência do cliente final nos estacionamentos Maxipark (tablet da unidade, modo quiosque).",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F5F3F9",
+  "theme_color": "#6B4A98",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "../icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "../icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Pesquisa com a equipe Maxipark",
+  "short_name": "Pesquisa Equipe",
+  "description": "Pesquisa anônima com os colaboradores Maxipark por unidade (Parte B da ficha de Experiência do Cliente Interno).",
+  "lang": "pt-BR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F5F3F9",
+  "theme_color": "#6B4A98",
+  "icons": [
+    { "src": "../icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "../icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

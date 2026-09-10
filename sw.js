@@ -1,7 +1,7 @@
 // Service worker: o app abre sem internet e recebe atualizações quando houver rede.
-const VERSAO = '1.6.4';
+const VERSAO = '1.7.0';
 const CACHE = 'pesquisa-maxipark-' + VERSAO;
-const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './equipe/', './equipe/index.html', './equipe/manifest.webmanifest', './cliente/', './cliente/index.html', './cliente/manifest.webmanifest', './cliente/qr.html'];   // inclui a pesquisa com clientes (pasta cliente/)
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
